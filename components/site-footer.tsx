@@ -10,27 +10,24 @@ export function SiteFooter() {
           <p className="text-center text-sm leading-loose md:text-left">
             Built by{" "}
             <a
-              href={siteConfig.links.twitter}
+              href={siteConfig.links.linkedin}
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
             >
-              franmoretti_
+              Jeremias Rodriguez
+            </a>
+            . Based on Francisco Moretti&apos;s site
+            <a
+              href={siteConfig.links.fran_github}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium underline underline-offset-4"
+            >
+              Site
             </a>
           </p>
         </div>
-        <p className="text-center text-sm md:text-left">
-          The source code is available on{" "}
-          <a
-            href={siteConfig.links.github}
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium underline underline-offset-4"
-          >
-            GitHub
-          </a>
-          .
-        </p>
       </div>
     </footer>
   )

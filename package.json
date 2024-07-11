@@ -7,9 +7,9 @@
     "url": "https://github.com/franciscomoretti/"
   },
   "scripts": {
-    "dev": "pnpm run sync --watch & next dev",
+    "dev": "npm run sync --watch & next dev",
     "turbo": "next dev --turbo",
-    "build": "pnpm run sync && next build",
+    "build": "npm run sync && next build",
     "start": "next start",
     "lint": "next lint",
     "preview": "next build && next start",
