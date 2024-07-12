@@ -54,16 +54,16 @@ export default async function IndexPage() {
               Visit the blog
             </Link>
             <Link
-              href="https://github.com/FranciscoMoretti/"
+              href="https://github.com/jere1886/"
               className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
             >
               Github
             </Link>
           </div>
         </div>
-        <div className="relative mx-16 flex size-36 shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-primary to-blue-200 shadow-lg ring-4 ring-primary/80">
+        <div className="size-36 relative mx-16 flex shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-primary to-blue-200 shadow-lg ring-4 ring-primary/80">
           <Image
-            src="/profile_picture.jpg"
+            src="/profile_picture.png"
             alt={`${siteConfig.name}'s Picture`}
             className="w-ful aspect-square h-full"
             width={460}
@@ -139,7 +139,7 @@ export default async function IndexPage() {
             rel="noreferrer"
             className="flex"
           >
-            <div className="flex size-10 items-center justify-center space-x-2 rounded-md border border-muted bg-muted">
+            <div className="size-10 flex items-center justify-center space-x-2 rounded-md border border-muted bg-muted">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"

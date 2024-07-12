@@ -11,6 +11,8 @@ export const defaultConfig: SiteConfig = {
   links: {
     twitter: "",
     github: "",
+    linkedin: "",
+    fran_github: "",
   },
   twitter: {
     handle: "",

@@ -28,6 +28,8 @@ type SiteConfig = {
   links: {
     twitter: string
     github: string
+    linkedin: string
+    fran_github: strings
   }
   twitter: {
     handle: string

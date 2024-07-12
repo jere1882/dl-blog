@@ -11,7 +11,7 @@
     "turbo": "next dev --turbo",
     "build": "npm run sync && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --fix",
     "preview": "next build && next start",
     "format": "prettier --write .",
     "postinstall": "prisma generate",
