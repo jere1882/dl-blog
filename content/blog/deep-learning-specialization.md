@@ -1,12 +1,9 @@
 ---
-tags:
-  - Deep
-  - Learning
-  - Basics
+tag: Deep Learning Basics
 aliases: 
 publish: true
 slug: deep-learning-specialization
-title: Review and Summary of Deep Learning Specialization from DeepLearning.ai
+title: Review and Summary of Deep Learning Specialization from DeepLearning
 description: Notes, assignments and review of the course
 date: 2024-07-09
 image: /thumbnails/coursera_dl_specialization.png
@@ -128,14 +125,14 @@ Non-linearities are crucial to represent complex functions, otherwise the entire
 ![[Pasted image 20240717164234.png]]
 
 Here's a FCN with two layers (the input layer doesn't count). The notation is defined as follows:
-* **z^\[i\]\_j**: The output of the jth neuron at the ith layer.
-* **a^\[i\]\_j**:  Activation function applied to the previous value
-* **w^\[i\]\_j**:  weight to connect neurons in layer {i-1} to neuron j in layer i
-* **b^\[i\]\_j**:  bias used by neuron j at layer i
+* `**z^\[i\]\_j**`: The output of the jth neuron at the ith layer.
+* `**a^\[i\]\_j**`:  Activation function applied to the previous value
+* `**w^\[i\]\_j**`:  weight to connect neurons in layer `{i-1}` to neuron `j` in layer `i`
+* `**b^\[i\]\_j**`:  bias used by neuron j at layer i
 These values are stacked together to form matrixes that allow for efficient vectorization:
- * **a^\[i\]** , **z^\[i\]** all activations from layer i
- * **W^\[i\]**: Weights that connect layer {i-1} to layer {i}
- * **b^\[i\]**: all biases of neurons at layer i
+ * `**a^\[i\]**` , `**z^\[i\]**` all activations from layer i
+ * `**W^\[i\]**`: Weights that connect layer `{i-1}` to layer `{i}`
+ * `**b^\[i\]**`: all biases of neurons at layer i
  
 Thus we can rewrite the equations in vectorized form, where the (i) superscript means sample number `i`. We can stack all samples together to vectorize this as well.
 
@@ -273,7 +270,75 @@ Hyperparameters are often optimized by trying a few combinations of them and che
 
 I cannot recommend this video and its sequel more:  https://www.youtube.com/watch?v=Ilg3gGewQ5U.
 
-## Course 2:  Improving Deep Neural Networks: Hyperparameter Tuning, Regularization
+## Course 2 - Improving Deep Neural Networks: Hyperparameter tuning, Regularization and Optimization
 
 ### Week 1: Practical Aspects of Deep Learning
+
+#### Train / Validation / Test set
+
+In machine learning, we usually iterate through the loop:
+
+`Idea -> Code -> Experiment -> Repeat`
+
+During the process of defining the hyperparameters of a model, it is recommended that the available data is split into three sets:
+
+| Data partition             | Purpose                                       | Size       |
+| -------------------------- | --------------------------------------------- | ---------- |
+| Training set               | Optimizing model parameters                   | 60 to 98 % |
+| Validation set AKA dev set | Optimizing model hyperparameters              | 20 to 1%   |
+| Test set                   | Provide an unbiased estimation of performance | 20 to 1%   |
+If size of the dataset is greater than 1M we may use 98/1/1 or even 99.5/0.25/0.25
+
+* Train and validation set must come from the same distribution
+* The dev set is used to try out trained models with different hyperparameters, in order to define what is the best hyperparameter configuration
+* It is ok to only have validation set without testing set if you don't need an unbiased estimation of performance. People call the validation set "test set" in this setup (although it is misleading).
+#### Bias and Variance
+
+![[Pasted image 20240725143318.png]]
+* A model that underfits has high bias
+	* e.g. training error doesn't go down near the optimal classifier error
+* A model that overfits has high variance
+	* big gap between training and validation error.
+* A good model strikes a good balance between bias an variance
+	* training and validation error closer to the optimal classifier
+
+A basic recipe for Machine Learning is:
+
+1. If your algorithm has high bias
+	1. Make your NN larger (more hidden units or layers) - This never hurts. Still I advise starting smaller.
+	2. Try out different models
+	3. Train for longer
+	4. Use a different optimization algorithm
+2. If your algorithm has high variance
+	1. Add more data
+	2. Regularization
+	3. A different model
+
+Historical note: In traditional ML we usually talk about the **bias/variance tradeoff**, but in the deep learning world we can usually try to improve either without making the other worse.
+
+#### Regularization
+
+Regularization techniques reduce overfitting and therefore reduce variance. 
+
+We can apply regularization to the **parameters** of the model by penalising large weights in the cost function. In order words, we try to keep the model from becoming "too complex".
+
+The cost function looks like this when we add regularization, where lambda is the regularization hyperparameter:
+
+`J(w,b) = (1/m) * Sum(L(y(i),y'(i))) + (lambda/2m) * Sum((||W[l]||)`
+
+We can use either L1 or L2 norm:
+* L1 makes the weights sparse, potentially making for a smaller and more efficient model.
+* L2 is much more popular.
+
+
+
+
+
+
+
+
+
+
+
+
 
