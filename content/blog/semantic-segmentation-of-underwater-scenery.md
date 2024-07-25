@@ -6,288 +6,179 @@ aliases:
 publish: true
 slug: semantic-segmentation-of-underwater-scenery
 title: Semantic Segmentation of Underwater Scenery
-description: (...)
-date: 2024-07-11
-image: /thumbnails/semantic-segmentation.gif
+description: Application of ViT and other architectures to a novel semantic segmentation task.
+date: 2024-07-24
+image: /thumbnails/underwater_segmentation.png
 ---
-## Overview
+## Introduction
 
-In this post, I will introduce a specific computer vision task called **semantic segmentation** and a toolbox for training and evaluating semantic segmentation models called **MMSegmentation**.
+Embarking on the journey to become a proficient machine learning engineer requires more than just theoretical knowledge; it demands hands-on experience with real-world challenges. Over the past four months, I have undertaken a comprehensive project entirely on my own, which I am thrilled to present in this blog post.
 
-Using the benchmark dataset **Cityscapes**, I will provide a step-by-step guide on how to train and evaluate your own semantic segmentation model. Additionally, I will demonstrate how to use a trained model to make predictions with my own **original dataset** of street-view images from Rosario, Argentina.
+The focus of this project is **semantic segmentation of underwater scenery**, which involves the delineation of various semantic elements within diving photographs, such as fish, corals, vegetation, rocks, divers, and wrecks. 
 
-## Semantic Segmentation 101
+Inspired by the 2020 paper "[Semantic Segmentation of Underwater Imagery](https://arxiv.org/pdf/2004.01241)," I began by meticulously cleaning and correcting the publicly available dataset from this research. Recognising the need for a more robust and diverse dataset, I extended it with new images from my own diving trips, investing significant effort to manually annotate them in detail. I published this [enhanced dataset](https://www.kaggle.com/datasets/jeremiasrodriguez/segmentation-of-underwater-scenery-extended) at Kaggle.
 
-**Semantic Segmentation** is a computer vision task that consists of categorizing each pixel of an input image into one of a finite set of classes:
+To tackle the task of underwater semantic segmentation, I employed both classical architectures used by the original paper and cutting-edge visual transformer architectures. Over the course of this project, I trained six different large models, and I am pleased to have produced models that surpass the benchmark results established by the original paper. Don't miss the demo videos at the end of the post!
 
-![[20240525232715.png]]
+Join me as I delve into the details of this project.
+## Dataset and Task
 
-This sample belongs to [Cityscapes](https://www.cityscapes-dataset.com/), one of the most popular benchmark datasets for semantic segmentation.  This dataset contains about 25k street-view pictures of European cities, along with pixel-level classification for 29 classes such as `road`, `bike`, `sidewalk` and `sky`.
+In essence, the task involves assigning a class to each pixel in an input image. 
 
-Semantic segmentation is extremely useful to help computer systems understand and reason about their environment in a global way. It provides granular information on the *semantics* of an image. Popular applications include:
+![[Pasted image 20240716181748.png]]
 
-**Semantic Scene Understanding:** This is valuable for intelligent robots and autonomous vehicles, which need to understand visual scenes in order to make sensible decisions (e.g., navigating in complex environments).
+The eight classes defined in the original paper, which I have adhered to, are:
 
-![Alt Text](driving.gif)
-*Source: Robot Learning Lab, University of Freiburg*
+![[Pasted image 20240715154933.png]]
 
-**Healthcare**: In medical diagnostics, semantic segmentation is revolutionizing patient care by providing precise measurements and analyses of medical imagery..
+The underwater nature of these images introduces a host of unique challenges:
 
-![[Pasted image 20240525233152.png]]
-*Early detection of brain tumours -  [Source](https://github.com/naldeborgh7575/brain_segmentation)*
+1. **Variable Visibility**: Water composition and weather conditions significantly impact visibility. Depth also plays a critical role, as colors, especially reds, fade the deeper you go.
 
-**Aerial image processing:** Applicable to a wide variety of tasks such as surveillance, agriculture monitoring, urbane planning, forest management, etc.
+![[Pasted image 20240715171157.png]]
+*Demonstration of color degradation at different depths - [Source]([https://youtu.be/AAJjdA6b4Ts](https://youtu.be/AAJjdA6b4Ts))*
 
-![[Pasted image 20240525233402.png]]
-*Segmentation of satellite imagery - [Source](https://www.semanticscholar.org/paper/Deep-Fusion-of-Imaging-Modalities-for-Semantic-of-Sundelius/59cbe15b43e6ca172fce40786be68340f50be541)*
+2. **Diverse Natural Landscapes**: Aquatic environments vary dramatically by geographic location. A good model must learn high-level concepts, such as the general appearance of fish, as it is impractical to provide training samples for all existing species.
 
-## Solving Semantic Segmentation
+![[Pasted image 20240715171445.png]]
+*This chart showcases common species in French Polynesia, from [Franko Maps](https://frankosmaps.com/products/tahiti-fish-id).* Notice the wide variety of shapes, colors and patterns.
 
-Typically, this problem is tackled using supervised learning, where a machine learning model is trained on a dataset of images annotated at the pixel level. This task is inherently more challenging than image classification, which aims to predict a single label for an entire image.
+3. **Complex Scenery**: Underwater landscapes can be difficult to interpret even for humans. Many animal species have evolved to blend seamlessly with their surroundings, making it challenging to accurately identify and delineate its shape. Classes such as `reefs and invertebrates` can't often be distinguished from `sea-floor and rocks`, as many corals often look just like rocks and the sea-floor is often covered in dead coral. 
 
-State-of-the-art semantic segmentation models require a substantial amount of annotated data, which is more expensive to acquire compared to the labels needed for image classification or even object detection. 
+> 💡 **Why is this task relevant?** Semantic understanding of underwater scenery is crucial for autonomous underwater robots. By comprehending their surroundings, these robots can navigate more effectively, identify and monitor marine life, map underwater environments, and carry out complex tasks such as inspecting underwater structures or assisting in search and rescue operations. This advanced understanding enhances their ability to perform autonomously with higher precision and safety in diverse and challenging underwater conditions.
 
-I compare popular segmentation architectures, including UNet, PSPNet and DeepLab, in [this separate post](undefined_yet).
+In order to solve this task, we cast this problem as a supervised learning semantic segmentation task. The authors of the original paper published a dataset of approximately 1600 labelled images, which I have corrected and extended using photographs of my own diving trips.
 
-![[Pasted image 20240526030407.png]]
-*Pyramid Scene Parsing Network (PSPNet) - Source: [Original paper](https://arxiv.org/abs/1612.01105)*
+Let's look at a few of the new images that I introduced to the dataset, and discuss the challenges they pose in the semantic segmentation task:
 
-In this post, I will introduce MMSegmentation as a convenient and reliable way to train these models, using Cityscapes as the running example.
-## MMsegmentation 
+![[clownfish2.png]]
+*A cute anemonefish hiding in an anemone. A good model should be able to understand that the fish belongs to the `fish` class whereas the anemone is an `invertebrate`.*
 
-[Mmsegmentation](https://mmsegmentation.readthedocs.io/en/main/) is an extraordinarily well documented and high-quality toolbox that greatly simplifies training and evaluating semantic segmentation models. It provides:
-* High-quality libraries, so you don't need to reimplement basic procedures.
-* The most popular architectures already implemented and ready to use.
-* Flexibility to be used with any dataset, custom architecture, metric or loss function.
-* PyTorch-based implementation.
-* Well documented and open source
+![[Diodon hystrix(porcupinefish)2 1.png]]
+*A porcupinefish hiding in the shadows, easily overlooked.*
 
-Mmsegmentation is part of [OpenMMLAB](https://github.com/open-mmlab), a broader toolkit that provides support for virtually all mainstream computer vision tasks.
+![[razor_coral2.png]]
+*Certain species of corals can be easily confused with vegetation, such as the famous "lettuce coral"*
 
-![[Pasted image 20240526040427.png]]
+![[Sixbar wrasse2.png]]
+*A complex underwater scene involving `aquatic plants`, `fish`, `sea floor`, `reefs` and `bodywater` classes. A good model has the challenge to understand the many actors involved in this scene.*
 
-## Setting up MMSegmentation
+![[Pasted image 20240715172954.png]]
+*A clever octopus, blending in with the coral in the background.*
 
-Let’s jump straight into the task of training a semantic segmentation model using one of the Cityscapes datasets. As with any ML project, the first step is to use **conda** to create an isolated environment where we can safely have our own package installations:
+![[sea_turtle3.png]]
+*A sea turtle at 30 meters depth. The loss of color at great depths is very evident in this picture. A good model should be able to handle color degradation.*
 
-```bash
-conda create --name semseg_first_experiment python=3.8 -y
-conda activate semseg_first_experiment
-```
+In order to enhance the pre-existing dataset, I did the following:
 
-The next step is to install MMsegmentation. Check the [official installation guide]([https://mmsegmentation.readthedocs.io/en/main/get_started.html](https://mmsegmentation.readthedocs.io/en/main/get_started.html)) for the most up-to-date steps, which as of today and assuming you have local GPUs available are:
+1. Identified 86 masks in the original training set that needed corrections, and re-annotated them from scratch.
+2. Selected 166 images from my diving trips to French Polynesia and the Red Sea and manually annotated their segmentation masks.
 
-```text
-conda install pytorch torchvision -c pytorch
-pip install -U openmim
-mim install mmengine
-mim install "mmcv==2.1.0"
-git clone -b main https://github.com/open-mmlab/mmsegmentation.git
-cd mmsegmentation
-pip install -v -e .
-```
+The resulting dataset has exactly 1801 annotated images, which I published at [Kaggle](https://www.kaggle.com/datasets/jeremiasrodriguez/segmentation-of-underwater-scenery-extended). Annotating data was a very humbling experience for me, since I used to underestimate how time consuming and complex it can be. I wrote a separate [blogpost tutorial](annotating-your-own-semantic-segmentation-dataset) explaining how you can annotate your own dataset, as well as a few insights and tricks.
+## Experimental setup
 
-At this point, the MMSegmentation repo is cloned and ready to go. The size of the codebase may seem a little daunting at first, but you only need to be aware of a few crucial files to start training basic models. Here I summarise them:
+I had two goals in mind when I undertook this project. Firstly, reproducing the results from the original paper. Secondly, trying to improve their results by using my new extended dataset and leveraging cutting-edge architectures like visual transformers.
 
-* `mmsegmentation/data`: This is where all datasets should live, including the input images and the target segmentation masks. By default, it's empty, so you must take care to download and move the data you want to use.
-* `mmsegmentation/tools/dataset_converters`: Standalone scripts that are used to convert the data into the appropriate format for training.
+I therefore selected three standard architectures:
+* [DeepLabv3+](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/deeplabv3plus)
+* [PSPNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/pspnet)
+* [UperNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/upernet)
+As well as two vision transformer architectures:
+* [(Regular) ViT](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/vit/README.md)
+* [Swin ViT](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/swin/README.md)
 
-> 💡 **Tip:**  Input images are expected to be RGB images in `jpg` or `png` format, whereas target segmentation masks should be single-channel images, with classes encoded as ascending integer values.
- 
-* `mmsegmentation/tools/dist_train.sh` : A convenient script to train a model on multiple GPUs.
-* `mmsegmentation/tools/dist_test.sh` : A convenient script to test a model on multiple GPUs.
-* `mmsegmentation/mmseg/models`: This is where the actual PyTorch models are defined.
-* `mmsegmentation/mmseg/datasets`: Dataset class definitions for all supported datasets, defining the target classes, evaluation metrics, path suffixes, etc.
-* `mmesgmentation/configs`: All config files should go here, governing the settings and parameters for any given machine experiment.
-* `mmsegmentation/work_dirs`: By default, training stats, model checkpoints, and visualizations are stored here.
-## Training Cityscapes
+Which I trained on both the original dataset, as well as in my enhanced version. Training took a few days for each model using 4 GPUs and 160k iterations, and was therefore quite time consuming. 
 
-First, the training and validation Cityscapes data must be downloaded. To do so, the owners of the dataset require users to make an account at [https://www.cityscapes-dataset.com/](https://www.cityscapes-dataset.com/). Then, the data can be downloaded as follows:
+I leveraged the toolbox [MMSegmentation](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/vit/README.md) (checkout my tutorial on [this blogpost](mmsegmentation-tutorial)!), which already provides high quality implementations of the architectures I mentioned. Check the implementation details on my GitHub repo, since I had to make a few adjustments to the code to support the new task. Pre-trained weights (from ImageNet) were used for all models.
 
-```bash
-wget --keep-session-cookies --save-cookies=cookies.txt --post-data 'username=YOUR_EMAIL&password=YOUR_PASSWORD&submit=Login' https://www.cityscapes-dataset.com/login/; history -d $((HISTCMD-1))
-wget --load-cookies cookies.txt --content-disposition https://www.cityscapes-dataset.com/file-handling/?packageID=1
-wget --load-cookies cookies.txt --content-disposition https://www.cityscapes-dataset.com/file-handling/?packageID=3
-```
+| Model       | Backbone       | Crop size  | Number of trainable parameters |
+| ----------- | -------------- | ---------- | ------------------------------ |
+| DeepLab v3+ | ResNet50       | 512 x 1024 |                                |
+| PSPNet      | ResNet50       | 512 x 1024 |                                |
+| UperNet     | ResNet101      | 512 x 512  |                                |
+| Swin ViT    | not applicable | 512x512    |                                |
+| ViT         | not applicable | 512x512    |                                |
 
-Replace `YOUR_EMAIL` and `YOUR_PASSWORD` with your newly created credentials. The downloaded files must be unzipped and moved to `mmsegmentation/mmseg/datasets/cityscapes`.
-
-The next step is to [preprocess](https://mmsegmentation.readthedocs.io/en/0.x/dataset_prepare.html#dataset-preparation) the raw data, transforming the segmentation masks to the appropriate format that MMsegmentation expects. There is a handy script already provided in the repo:
-
-```bash
-python tools/convert_datasets/cityscapes.py data/cityscapes --nproc 8
-```
-
-MMsegmentation has already defined the `Dataset`, evaluation metrics and different flavors of config files for Cityscapes.
-
-* `mmsegmentation/mmseg/datasets/cityscapes.py`:  Defines file suffixes and visualization palette.
-* `mmsegmentation/configs/_base_/datasets/cityscapes.py` : Base config file of the dataset, specifying:
-	* Train and validation pipelines. Here is where different preprocessing steps such as resizing, cropping and data augmentation are specified. 
-	* The paths from which the data will be loaded.
-	* The `batch_size`, which will affect how much memory your GPUs will require.
-* `mmsegmentation/configs/pspnet/pspnet_r101-d8_4xb2-80k_cityscapes-512x1024.py`: One of the many provided config files, which I picked for this tutorial. This one specifies:
-	* Model : `PSPNet`
-	* Depth: 101 layers
-	* Number of iterations: 80k 
-	* Network input size: 512 x 1024
-	* Default optimizer `SGD`, default learning rate policy
-	* Many more settings
+The original paper reports results on two similar architectures (DeepLabv3 and PSPNet), which I will use as a baseline to compare the performance of my model.
 
-Training can now be started as follows:
+| Model     | Backbone    | Resolution | Number of parameters |
+| --------- | ----------- | ---------- | -------------------- |
+| DeepLabv3 | unspecified | 320x320    | 41.254 M             |
+| PSPNet    | MobileNet   | 384x384    | 63.967 M             |
+| SUIM-Net  | VGG         | 320x256    | 12.219 M             |
+*From table III of the SUIM paper. SUIM-Net is an original architecture proposed by the authors, which achieved the best results on their paper.*
+## Experiment results
 
-```bash
-./tools/dist_train.sh configs/pspnet/pspnet_r101-d8_4xb2-80k_cityscapes-512x1024.py 4
-```
+### Results of the original paper (Baseline)
 
-Here, `4` is the number of GPUs in my case (set this to the number of GPUs you have available for training, which may be just `1`).
+Recall the list of classes defined by the original authors:
+![[Pasted image 20240715154933.png]]
+The authors reported results **only** for classes HD, WR, FV, RI and RO. I imagine they did this because (1) PF is quite under-represented in the dataset and performance is terrible on it and (2) class SR is visually almost indistinguishable from class RI.
 
-## Analizing Training and Validation Results
+The following table summarises the results reported the original paper:
 
-Training may take a few days depending on your hardware. MMsegmentation will periodically print the iteration number and the training loss. As your model learns from the training examples, you will see the training `loss` value go down:
+| Model      | HD    | WR    | FV    | RI    | RO    |
+| ---------- | ----- | ----- | ----- | ----- | ----- |
+| PSPNet     | 75.76 | 86.82 | 74.67 | 85.16 | 72.66 |
+| DeepLab v3 | 80.78 | 85.17 | 79.62 | 83.96 | 66.03 |
+| SUIMNet    | 85.09 | 89.90 | 83.78 | 89.51 | 72.49 |
+*IoU of five classes, as reported in table II of the original paper.*
 
-```bash
-2024/05/13 22:58:17 - mmengine - INFO - Iter(train) [   50/40000]  lr: 9.9891e-03  eta: 16:31:08  time: 0.8793  data_time: 0.0053  memory: 10445  loss: 2.1633  decode.loss_ce: 1.4961  decode.acc_seg: 41.6312  aux.loss_ce: 0.6672  aux.acc_seg: 47.5072
-2024/05/13 22:59:01 - mmengine - INFO - Iter(train) [  100/40000]  lr: 9.9779e-03  eta: 13:05:37  time: 0.8761  data_time: 0.0055  memory: 6112  loss: 2.1990  decode.loss_ce: 1.5059  decode.acc_seg: 41.6787  aux.loss_ce: 0.6930  aux.acc_seg: 46.6241
-2024/05/13 22:59:45 - mmengine - INFO - Iter(train) [  150/40000]  lr: 9.9668e-03  eta: 11:56:17  time: 0.8740  data_time: 0.0062  memory: 6112  loss: 1.9273  decode.loss_ce: 1.3541  decode.acc_seg: 82.7501  aux.loss_ce: 0.5732  aux.acc_seg: 70.7805
-```
+### Replication of the results of the original paper
 
-> 💡 **Tip:**  When training on your own GPUs, use [**tmux**](https://github.com/tmux/tmux/wiki) to run the training script in a detached terminal so that it keeps running in the background and it doesn't get accidentally interrupted. This is vital if you're remotely accessing your GPU machine.
+I trained two of these models using the exact same dataset that they used, in order to replicate their results. I decided to report stats on all eight classes, although only the first five columns allow for numerical comparison with the paper results:
 
-Validation stats will be calculated and printed every `4000` iterations, and a checkpoint of the model weights will be saved in `mmsegmentation/work_dirs`. The validation loss will give an insight into the generalization capabilities of the model over unseen data. 
+| Model      | HD    | WR    | FV    | RI    | RO    | SR    | VG    | BG    | mIoU  |
+| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| PSPNet     | 85.39 | 73.13 | 75.08 | 73.11 | 73.32 | 67.62 | 12.11 | 88.87 | 68.59 |
+| DeepLabv3+ | 86.33 | 69.48 | 76.79 | 72.46 | 81.91 | 65.68 | 12.06 | 88.68 | 69.17 |
+| UperNet    | 86.18 | 72.2  | 77.53 | 70.35 | 81.88 | 66.39 | 6.73  | 88.61 | 68.73 |
 
-For this particular example, after 80k iterations, the training loss has gone down significantly, which indicates that the model has been able to learn from the training data:
+ 💡 **Interpretation of results:** If we make a pairwise comparison between the original paper results and my own replication, looks like my models are significantly better at segmenting HD, RO and FV ; whereas their models do better in the under-represented class WR, and in the umbrella class RI. I believe the divergence is due to the fact that they seem to have merged classes RI and SR for training as well as different model parameter choices. 
+### New architectures and extra data
 
-```bash
-07/07 14:04:20 - mmengine - INFO - Iter(train) [80000/80000]  lr: 1.0000e-04  eta: 0:00:00  time: 1.2293  data_time: 0.0081  memory: 9595  loss: 0.1310  decode.loss_ce: 0.0888  decode.acc_seg: 96
-.7349  aux.loss_ce: 0.0421  aux.acc_seg: 96.3267
-```
-> 💡 **Tip:**  If your training loss does not go down, then the model is not learning at all! As a safety check, I always first train my models using a handful of samples from the training set both as the training and validation set. Your model should be able to easily memorize these samples, otherwise there is something wrong.
+In my last set of experiments, I attempted to surpass the results presented so far by:
 
-Validation stats look like this after 80k iterations:
+1. Adding 181 extra images to the training dataset, collected and annotated by myself.
+2. Trying vision-transformer based architectures, which have proven very successful in many computer vision tasks in recent years.
 
-```bash
-07/07 14:05:41 - mmengine - INFO - 
-+---------------+-------+-------+
-|     Class     |  IoU  |  Acc  |
-+---------------+-------+-------+
-|      road     |  98.3 | 99.03 |
-|    sidewalk   | 85.86 | 92.77 |
-|    building   | 93.04 | 96.81 |
-|      wall     | 51.61 | 56.01 |
-|     fence     | 62.39 |  71.6 |
-|      pole     | 67.72 | 81.96 |
-| traffic light | 74.38 | 86.64 |
-|  traffic sign | 81.14 | 88.77 |
-|   vegetation  | 92.82 | 96.77 |
-|    terrain    | 63.53 | 71.44 |
-|      sky      | 94.98 | 98.18 |
-|     person    | 83.66 | 93.46 |
-|     rider     | 65.28 | 78.07 |
-|      car      | 95.49 | 98.23 |
-|     truck     | 80.36 |  84.3 |
-|      bus      | 83.65 | 93.12 |
-|     train     | 58.12 | 59.03 |
-|   motorcycle  | 69.27 | 77.07 |
-|    bicycle    | 79.32 | 89.94 |
-+---------------+-------+-------+
-07/07 14:05:41 - mmengine - INFO - Iter(val) [125/125]    aAcc: 96.3100  mIoU: 77.9400  mAcc: 84.9100  data_time: 0.0072  time: 0.6070
-```
+The results are summarised in the following table:
 
-Intersection over Union (IoU) is a standard metric for semantic segmentation, which describes how much the predicted segmented regions of each class overlap with its ground truth. We can see, for example, that this model is quite good at predicting `road` whereas it struggles a little more to predict `train` or `wall`. This is not surprising, as the latter two are rare and underrepresented in the training data. Often, the solution is to add more labeled data to the training set to reduce the imbalance.
+| Model       | HD    | WR    | FV    | RI    | RO    | SR    | VG    | BG    | mIoU  |
+| ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| PSPNet      | 85.28 | 74.8  | 76.34 | 74.49 | 81.35 | 68.24 | 8.77  | 88.96 | 69.78 |
+| DeepLab v3+ | 86.06 | 72.55 | 75.18 | 71.28 | 77.93 | 65.23 | 13.35 | 88.2  | 69.72 |
+| UperNet     | 85.85 | 70.39 | 78.9  | 73.36 | 84.57 | 65.41 | 10.5  | 88.53 | 69.69 |
+| Swin ViT    | 84.47 | 71.2  | 85.46 | 72.35 | 86.27 | 67.2  | 9.63  | 88.56 | 71.14 |
 
-To monitor and visualize training stats, I like to use [TensorBoard](https://mmsegmentation.readthedocs.io/en/main/user_guides/visualization.html), which will make handy plots such as:
+**TL;DR:** The extra data gives all models a boost of ~1 point of mIoU. Moreover, the SWIN ViT is able to surpass all CNN-based architectures by an extra ~1.5 mIoU.
 
-![[content/assets/tensorboard.png]]
-*The smoothed loss value as a function of the number of iterations*
 
-![[val_iou.png]]
-*The validation performance (avg. IoU) as a function of the number of iterations*
+![[Pasted image 20240719061154.png]]
+*Training loss of Swin ViT. The loss function decreases quickly in the first 20k iterations, and gradually plateaus.*
 
-> 💡 **Tip:**  From this plot, we can see that the model may still keep improving if we let it train for more than 80k iterations. Training must be allowed to go on until improvement stagnates.
+## Demo of the best model: Inference over diving videos
 
-I also like to save the model predictions as images during validation to see what the network is predicting and how that changes over time. To do this, you should modify your scheduler. For this example, set the following default hook in `mmsegmentation/configs/_base_/schedules/schedule_80k.py`.
+To showcase the performance of the best model and also their limitationes, I hand picked a couple of clips from my last diving vacation and used the best trained model to perform inferences over each frame.
 
-```python
-    visualization=dict(type='SegVisualizationHook', draw=True, interval=1))
-```
+Let's have a look at the results: 
 
-This will save images in your `mmsegmentation/work_dirs` . For example, let's see what our model was predicting early in training:
+<iframe width="916" height="389" src="https://www.youtube.com/embed/EOsqx5n4w60" title="Semantic segmentation of Underwater Scenery - Playful dolphin demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+*A playful dolphin during one of my dives in Rangiroa - The segmentation is quite decent taking into account that there is just a single dolphin in the entire training dataset. The model manages to identify the dolphin as "fish and vertebrate" when the camera captures its entire body, but it struggles to differentiate it from the diver when the dolphin is partially occluded.*
 
-![[Pasted image 20240708022408.png]]
-*4000 iterations. left: ground truth - right: model prediction*
+<iframe width="916" height="389" src="https://www.youtube.com/embed/2MQDcxpr5B8" title="Sharks and Rays in Bora Bora - Semantic Segmentation demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+*A snorkelling session in Bora Bora, showcasing a huge school of black-tip sharks, stingrays, as well as humans snorkelling (me!) and smaller fish. This hectic scene poses a challenge for the model, which is trained in less populated scenarios and hasn't seen any humans snorkelling, only divers. Yet, the segmentations are quite resonable, showing great generalization power to unseen scenarios. Notice the sea floor segmentation often flickering between `reef` and `sea-floor and rocks` classes.*
 
-![[Pasted image 20240528065915.png]]
-*40k iterations. left: ground truth - right: model prediction*
+## Conclusion and Future Work
 
-Notice that the segmentation after 40k iterations is clearly better than the prediction after only 4k iterations.
+In this project, I tackled the task of underwater semantic segmentation. I began by replicating the results of the 2020 paper "[Semantic Segmentation of Underwater Imagery](https://arxiv.org/pdf/2004.01241)," successfully training three CNN-based models that achieved IoU values comparable to those reported by the paper.
 
-> :memo: **Note:** Most models, `PSPNet` included, load backbone pretrained weights by default. This means that they will try to leverage pre-trained weights that have been learnt from larger datasets such as ImageNet. If you wish to disable the use of pretrained models, you may do so by setting the key `pretrained=None` in your `model` in your config file.
+I then extended the public dataset by adding 181 original images and annotations. Training the same models on the extended dataset resulted in an increase of about 1 point in mIoU. Additionally, I trained a modern SWIN ViT architecture, which was developed after the original paper was written. Using ViT led to an increase of 1.5 points in mIoU.
 
-## Evaluating Your Trained Model on Custom Datasets
+Overall, the results are encouraging and the segmentations are reasonable, as demonstrated in the demo videos. It is important to note that the dataset used is quite small by modern deep learning standards, containing only 2000 samples. Despite this, the trained models are able to produce sensible segmentations, which would be bound to get better if more annotated data was made available.
 
-After finishing training, you will find all the checkpoints of your model saved during validation as `.pth` files in the corresponding subfolder at `mmsegmentation/working_dirs`. These `.pth` files store the state dictionary of a model, which includes all the weights and biases. The config file of a model along with its state dictionary can be used to make inferences on new data.
+One challenge encountered was distinguishing between `Sea floor and Rocks` and `Reefs and Invertebrates`, with the models often oscillating between these classes. The authors of the original paper seemed to have merged these classes under the hood, and my experiments could benefit from a similar approach, as they are often indistinguishable and mislead the training process.
 
-To demonstrate this, I have compiled a [small test set](link-to-kaggle) of images from my hometown Rosario (Argentina). I was curious to see whether the trained model would generalize well to images from South America, given that the training data comes exclusively from European cities.
+The models also struggled to produce precise boundaries for divers and fish that blend with their surroundings. This may be due to imprecise annotations in the dataset and the small size of the training dataset in general.
 
-In order to evaluate the model on a custom test set, there are two options. 
-
-1. If you have labels for your test data and you want to get statistics on the model performance, you may use `./tools/dist_test.sh` as follows:
-	* Move the test set to the appropriate data subfolder, such as `/mmsegmentation/data/cityscapes/custom_test_set
-	* Set the path of the test dataset in the dataset config file `mmsegmentation/_base_/datasets/cityscapes.py`, under the ` test_dataloader` key
-	* Run `./tools/dist_test.sh {config file} {checkpoint} {num-gpus} --show-dir {output-visualization-folder}`
-2. If you have a set of images on which you want to perform segmentation using a trained model, and you simply want to make inferences, `MMSegInferencer` provides a convenient interface:
-
-```python
-from mmseg.apis import MMSegInferencer
-
-config_path = "work_dirs/pspnet_r101-d8_4xb2-80k_cityscapes-512x1024/pspnet_r101-d8_4xb2-80k_cityscapes-512x1024.py"
-checkpoint_path = "work_dirs/pspnet_r101-d8_4xb2-80k_cityscapes-512x1024/iter_80000.pth"
-image_folder = "data/cityscapes/argentina_test_set"
-
-# Load model into memory
-inferencer = MMSegInferencer(model=config_path, weights=checkpoint_path)
-
-# Make inferences
-inferencer(image_folder, out_dir='outputs', img_out_dir='vis', pred_out_dir='pred')
-```
-
-I opted for option (2) to generate predictions on the test set of images that I compiled from my hometown. I was pleasantly surprised to find that the trained segmentor makes sensible predictions in this unfamiliar setting, given that I devoted very little time to tuning the model. Let's go over a handful of predictions:
-
-![[Pasted image 20240707215948.png]]
-*The model managed to understand this complex scene quite accurately.*
-
-![[Pasted image 20240707215926.png]]
-*The model managed to understand this scene quite accurately*.
-
-![[Pasted image 20240707220056.png]]
-*The model managed to understand this scene quite accurately*.
-
-![[Pasted image 20240707220127.png]]
-*Notice how the model inaccurately predicts part of the bike lane as "sidewalk" and part of the sky as "buildings". The untidy aerial hanging wires in the sky do confuse the model, something that is not likely seen in many European cities.* 
-
-![[Pasted image 20240707220337.png]]
-*Accurate prediction. I'm particularly impressed by the precise detection of vegetation.*
-
-![[Pasted image 20240707220402.png]]
-*This instance is quite a failure. The road and sidewalk in front of "Teatro El Circulo" are partially classified as `building`, and the left side of the road is considered to be `sidewalk`. The materials, textures and colors of this scene are relatively uniform, which may play a role in misleading the model. Notice the ghost `person` predictions on the left, another funny artifact.*
-
-![[13.png]]
-*The input image of the last prediction.*
-
-![[Pasted image 20240707220714.png]]
-*This prediction exemplifies the often puzzling back-box nature of neural networks. Overall, this scene is well segmented, except for the sky, which for some reason has been predicted as being `motorcycle` and `bicycle` classes. It is usually not possible to get an explanation from the trained model of what prompted it to make such far-fetched choices for the sky area.*
-## Conclusion
-
-In this post, I introduced the task of **semantic segmentation** and highlighted its diverse applications across various domains. I presented **MMSegmentation**, an advanced toolbox designed for training segmentation models.
-
-I outlined the steps to set up the MMSegmentation repository and demonstrated a complete training schedule using the Cityscapes dataset as an example. The training process spanned two days and resulted in achieving a mean Intersection over Union (mIoU) of `77.94` using a `PSPNet` with a reduced schedule of only 80k iterations. Visualizations and metrics showcased the model's capability to approximate the segmentation task.
-
-Furthermore, I explained how to perform inference with a trained model and introduced an original test set from my hometown. This test set posed a challenge due to its data distribution differing somewhat from the training set. Despite this, the segmentations obtained were robust and sensible.
-
-This post serves as an introduction to the concepts and framework utilized in my ongoing project, **semantic segmentation for underwater scenery**. Feel free to explore it further!
-
-![[Pasted image 20240708041516.png]]
-*Pictures I took during my diving trip in Rangiroa, French Polynesia*
-
-![[Pasted image 20240708041540.png]]
-*Segmentation mask of the underwater scenery dataset I developed*
+To sum up, I am proud of the models' ability to identify varying species of fish and human divers, which are two of the most interesting and interactive classes for potential applications. I enjoyed refining my computer vision skills, and I hope the public dataset continues to grow.

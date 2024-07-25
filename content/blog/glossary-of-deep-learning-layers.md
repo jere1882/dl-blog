@@ -137,12 +137,17 @@ Activation layers introduce non-linearity into the network, enabling it to learn
 
 In Pytorch, convolutional layers do not apply activation function by default. One has to manually add activation layers (`nn.ReLU` / `nn.Sigmoid` / `nn.Tanh`) typically applied after each convolutional layer and fully connected layer. They are not applied after pooling layers.
 
-| **Use Case**               | **Activation Function** | **When to Use**                                                   | **Why**                                                                 | **Drawbacks**                                                                                 |
-|----------------------------|-------------------------|------------------------------------------------------------------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
-| General Use                | ReLU                    | Default choice for hidden layers in most neural networks          | Efficient computation, mitigates vanishing gradient problem, works well in practice         | Can lead to dead neurons (neurons may stop learning)                                         |
-| Binary Classification      | Sigmoid                 | Output layer for binary classification tasks                      | Outputs values between 0 and 1, interpretable as probabilities                             | Can cause vanishing gradients, computationally expensive                                    |
-| Multi-class Classification | Softmax                 | Output layer for multi-class classification tasks                 | Outputs a probability distribution over classes, with probabilities summing to 1           | Not suitable for hidden layers                                                               |
-| Zero-centered Data         | Tanh                    | Hidden layers when zero-centered outputs are desired              | Output ranges from -1 to 1, helping in centering the data                                  | Can cause vanishing gradients, computationally expensive                                    |
+| **Use Case**               | **Activation Function** | **When to Use**                                          | **Why**                                                                             | **Drawbacks**                                            |
+| -------------------------- | ----------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| General Use                | ReLU                    | Default choice for hidden layers in most neural networks | Efficient computation, mitigates vanishing gradient problem, works well in practice | Can lead to dead neurons (neurons may stop learning)     |
+| Binary Classification      | Sigmoid                 | Output layer for binary classification tasks             | Outputs values between 0 and 1, interpretable as probabilities                      | Can cause vanishing gradients, computationally expensive |
+| Multi-class Classification | Softmax                 | Output layer for multi-class classification tasks        | Outputs a probability distribution over classes, with probabilities summing to 1    | Not suitable for hidden layers                           |
+| Zero-centered Data         | Tanh                    | Hidden layers when zero-centered outputs are desired     | Output ranges from -1 to 1, helping in centering the data                           | Can cause vanishing gradients, computationally expensive |
+
+> 💡 **Benefits of ReLU**: You will notice that most models choose ReLU as their activation function. This is due to many benefits:
+> - Its gradient is either 0 or 1, which helps maintaining stronger gradients during backpropagation, allowing for faster and more effective training
+> - It outputs either 0 for negative values, creating sparsity in the activations, which can improve network performance and reduce computation
+> - Other activation functions involve exponential calculations, which are computationally expensive.
 
 > 💡 **Insight:** Without activation functions, the entire neural network would collapse into a single linear function, making it unable to learn from data with non-linear patterns.
 

@@ -1,14 +1,15 @@
 ---
-tag: Computer Vision
+tags:
+  - Computer
+  - Vision
 aliases: 
-publish: true
+publish: false
 slug: a-review-of-semantic-segmentation-architectures
-title: A review of Semantic Segmentation architectures using MMSegmentation
-description: This article provides a concise introduction to the task of semantic segmentation and demonstrates how to address it using MMSegmentation, a state-of-the-art toolkit.
+title: A review of Semantic Segmentation architectures
+description: In this post I explore the most popular model architectures used to tackle semantic segmentation
 date: 2024-06-01
 image: /thumbnails/pick_architecure.jpeg
 ---
-
 ## Introduction
 
 In my previous [post](link), I introduced the task of semantic segmentation along with introductory experiments on the benchmark dataset Cityscapes.
@@ -19,18 +20,19 @@ To make this post more interesting, I decided to train and validate all the arch
 
 The following table provides an overview of the architectures that will be developed in this post:
 
-| **Architecture**                           | **Year** | **Main Innovation**                                                    | **Reference Paper**                         |
-| ------------------------------------------ | -------- | ---------------------------------------------------------------------- | ------------------------------------------- |
-| **FCN (Fully Convolutional Networks)**     | 2015     | First architecture to use fully convolutional layers for segmentation. | Long, Shelhamer, and Darrell, CVPR 2015     |
-| **U-Net**                                  | 2015     | Symmetric encoder-decoder structure with skip connections.             | Ronneberger, Fischer, and Brox, MICCAI 2015 |
-| **DeepLab v1**                             | 2015     | Introduced atrous convolutions to control resolution.                  | Chen et al., ICLR 2015                      |
-| **PSPNet (Pyramid Scene Parsing Network)** | 2017     | Pyramid pooling module to capture global context.                      | Zhao et al., CVPR 2017                      |
-| **DeepLab v2**                             | 2017     | Atrous Spatial Pyramid Pooling (ASPP) for multi-scale context.         | Chen et al., PAMI 2018                      |
-| **DeepLab v3**                             | 2017     | Enhanced ASPP with global pooling and wider range of dilations.        | Chen et al., arXiv 2017                     |
-| **DeepLab v3+**                            | 2018     | Added decoder module to DeepLab v3 for better boundary refinement.     | Chen et al., ECCV 2018                      |
-| **SegFormer**                              | 2021     | Transformer-based architecture for segmentation.                       | Xie et al., NeurIPS 2021                    |
-| **Swin Transformer**                       | 2021     | Hierarchical Transformer with shifted windows for efficient modeling.  | Liu et al., ICCV 2021                       |
-| SEGNET ADD                                 |          |                                                                        |                                             |
+| **Architecture**                           | **Year** | **Main Innovation**                                                                                                    | **Reference Paper**                         |
+| ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| **FCN (Fully Convolutional Networks)**     | 2015     | First architecture to use fully convolutional layers for segmentation.                                                 | Long, Shelhamer, and Darrell, CVPR 2015     |
+| **U-Net**                                  | 2015     | Symmetric encoder-decoder structure with skip connections.                                                             | Ronneberger, Fischer, and Brox, MICCAI 2015 |
+| **SegNet**                                 | 2015     | Efficient skip connections that only share pooling indexes.                                                            | Badrinarayanan et al., 2015                 |
+| **DeepLab v1**                             | 2015     | Introduced atrous convolutions to control resolution.                                                                  | Chen et al., ICLR 2015                      |
+| **PSPNet (Pyramid Scene Parsing Network)** | 2017     | Pyramid pooling module to capture global context.                                                                      | Zhao et al., CVPR 2017                      |
+| **DeepLab v2**                             | 2017     | Atrous Spatial Pyramid Pooling (ASPP) for multi-scale context.                                                         | Chen et al., PAMI 2018                      |
+| **DeepLab v3**                             | 2017     | Enhanced ASPP with global pooling and wider range of dilations.                                                        | Chen et al., arXiv 2017                     |
+| **DeepLab v3+**                            | 2018     | Added decoder module to DeepLab v3 for better boundary refinement.                                                     | Chen et al., ECCV 2018                      |
+| **ViT**                                    | 2020     | Applied transformers to computer vision tasks. This is not actually used for semantic segmentation but paved the road. | Dosovitskiy et al., 2020                    |
+| **SegFormer**                              | 2021     | Transformer-based architecture for segmentation.                                                                       | Xie et al., NeurIPS 2021                    |
+| **Swin Transformer**                       | 2021     | Hierarchical Transformer with shifted windows for efficient modeling.                                                  | Liu et al., ICCV 2021                       |
 
 ## The Encoder-Decoder 
 
@@ -101,7 +103,7 @@ The crucial innovation here is the introduction of **skip connections** from the
 
 ![[Pasted image 20240607060140.png]]
 
-In the paper, the author describe how the encoder part is quite standard:
+In the paper, the authors describe how the encoder part is quite standard:
 
 *The encoder network in SegNet is topologically identical to the convolutional layers in VGG16. We remove the fully connected layers of VGG16 which makes the SegNet encoder network significantly smaller and easier to train than many other recent architectures*
 
@@ -120,3 +122,60 @@ The decoder progressively upsamples the image in a peculiar way. It makes use of
 
 ## PSPNet
 
+Original paper: "Pyramid Scene Parsing Network" by Hengshuang Zhao, Jianping Shi, Xiaojuan Qi, Xiaogang Wang, and Jiaya Jia. - 2017
+
+The core innovation of PSPNet is the Pyramid Pooling Module. This module is designed to capture contextual information at multiple scales. It achieves this by applying pooling operations at several grid scales, such as 1x1, 2x2, 3x3, and 6x6. These pooled features are then upsampled to the original size and concatenated together to form a robust global feature representation.
+
+![[Pasted image 20240720043714.png]]
+
+The first step in a PSPNet is the CNN block, quoting the paper:
+
+*Given an input image, we use a pretrained ResNet model with the dilated network strategy to extract the feature map. The final feature map size is 1/8 of the input image*
+
+Then, the novel Pyramid Pooling Module comes in:
+
+*The pyramid pooling module fuses features under four different pyramid scales. The coarsest level highlighted in red is global pooling to generate a single bin output. The following pyramid level separates the feature map into different sub-regions and forms pooled representation for different locations. The output of different levels in the pyramid pooling module contains the feature map with varied sizes. To maintain the weight of global feature, we use 1×1 convolution layer after each pyramid level to reduce the dimension of context representation to 1/N of the original one if the level size of pyramid is N. Then we directly upsample the low-dimension feature maps to get the same size feature as the original feature map via bilinear interpolation. Finally, different levels of features are concatenated as the final pyramid pooling global feature. 
+
+Finally, a convolution layer is used to generate the final prediction map in (d).
+
+The key innovation is pooling at different scales,which is essential for capturing features that vary in size and context within an image. E.g. 1x1 pooling captures global context by summarizing the entire feature map into a single representation ; whereas larger-scale pooling (e.g.2x2, 3x3, 6x6) captures local context at different granularities.
+
+✅ Pyramid Pooling Module is great at understanding global context of the scene, which is crucial for accurate segmentation. Achieves SOTA results on several benchmark datasets.
+❌ Can be slower and more resource-intensive compared to architectures like SegNet, U-Net, or FCN. The implementation is also more complex.
+
+## DeepLab
+
+This is actually a family of architectures designed and open-sourced by Google. Each version enhances the previous one, here's an overview:
+
+- DeepLab v1: Introduced **Atrous (aka Dilated) convolution** as well as **CRF Post-Processing.** CRF was like a beautification step applied at the end, not affecting the loss and not trained – dropped in v3.
+- Deeplab v2: Introduced enhanced use of atrous convolutions by the **Atrous Spatial Pyramid Pooling (ASPP)** + stronger backbone like ResNet.
+- DeepLab v3: Furter improved the ASPP + batch normalization + deeper backbones
+- DeepLab v3+
+
+Perhaps the central innovation of v1 was the introduction of **atrous (aka dilated) convolutions** instead of pooling layers.
+* Atrous convolution inserts spaces (or zeros) between the filter weights, effectively "dilating" the filter. As a consequence, the convolution has a larger receptive field, skipping values in between.
+* Unlike pooling or strided convolutions, atrous convolution does not inherently change the spatial dimensions
+* They are very useful for semantic segmentation, where maintaining spatial dimensions and fine details is crucial. Thus, they offer a simple and powerful alternative to deconvolutions. You don't reduce the spatial resolution in the first place, so you don't need to upsample it.
+
+
+![[Pasted image 20240720045947.png]]
+*Atrous convolutions*
+
+![[Pasted image 20240720050524.png]]
+*How atrous convolutions are comparable to pooling+regular convolution*
+
+The **Atrous Spatial Pyramid Pooling (ASPP)** introduced in v2 has a resemblance to PSPNet's Pyramid Pooling Module. It applies multiple dilated convolutions with different dilation rates, capturing multi-scale context by probing the incoming feature map with filters at multiple sampling rates. This enables the network to capture both local and global context effectively.
+
+![[Pasted image 20240720050124.png]]
+
+The next version, v3, further improves the architecture by:
+- Enhancing the ASPP with image-level global features and more dilation rates
+- Removing the CRF post-processing
+- Using a deeper backbone and batch normalization
+- Introducing the **atrous depth-wise separable convolution**, which basically increases computational efficiency. It's basically a depth-wise convolution followed by a point-wise (1x1) convolution.
+
+Finally, v3+ incorporates a decoder module to refine the segmentation results, particularly object boundaries:
+* The encoder remains similar to v3: A backbone (e.g. ResNet) followed by the ASPP module.
+* The newly added decoder refines the segmentation output by upsampling and concatenation with corresponding low-level features from earlier layers of the encoder (like the skip connections of the U-Net)
+
+![[Pasted image 20240720051926.png]]

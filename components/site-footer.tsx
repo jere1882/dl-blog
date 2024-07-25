@@ -17,7 +17,7 @@ export function SiteFooter() {
             >
               Jeremias Rodriguez
             </a>
-            . Based on Francisco Moretti&apos;s site
+            . Based on Francisco Moretti&apos;s
             <a
               href={siteConfig.links.fran_github}
               target="_blank"
