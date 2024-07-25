@@ -2,7 +2,7 @@
 
 An personal site where I share my own ML projects.
 
-Based on Francisco Moretti's [website ](https://www.franciscomoretti.com/)
+Based on Francisco Moretti's [website](https://www.franciscomoretti.com/)
 
 > **Warning**
 > This app is a work in progress

@@ -66,8 +66,8 @@ export default async function IndexPage() {
             src="/profile_picture.png"
             alt={`${siteConfig.name}'s Picture`}
             className="w-ful aspect-square h-full"
-            width={460}
-            height={460}
+            width={250}
+            height={250}
           />
         </div>
       </section>
