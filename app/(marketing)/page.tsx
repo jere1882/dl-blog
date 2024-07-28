@@ -54,7 +54,7 @@ export default async function IndexPage() {
               Visit the blog
             </Link>
             <Link
-              href="https://github.com/jere1886/"
+              href="https://github.com/jere1882/"
               className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
             >
               Github
