@@ -320,25 +320,513 @@ Historical note: In traditional ML we usually talk about the **bias/variance tra
 
 Regularization techniques reduce overfitting and therefore reduce variance. 
 
-We can apply regularization to the **parameters** of the model by penalising large weights in the cost function. In order words, we try to keep the model from becoming "too complex".
+##### Weight Decay
+
+We can apply regularization to the **parameters** of the model by penalising large weights in the cost function. In order words, we try to keep the model from becoming "too complex". This is sometimes called **weight decay**.
 
 The cost function looks like this when we add regularization, where lambda is the regularization hyperparameter:
 
 `J(w,b) = (1/m) * Sum(L(y(i),y'(i))) + (lambda/2m) * Sum((||W[l]||)`
 
-We can use either L1 or L2 norm:
-* L1 makes the weights sparse, potentially making for a smaller and more efficient model.
-* L2 is much more popular.
+We can use either L1 (Aka Lasso) or L2 (aka Ridge) norm:
+* L1 encourages sparsity in `w`, potentially making for a smaller and more efficient model. It is preferred when you think some features are irrelevant.
+		`||W|| = Sum(|w[i,j]|)`
+* L2 is much more popular. It encourages smaller but non-zero weights.
+
+		`||W||^2 = Sum(|w[i,j]|^2)
 
 
+Notice that the gradient of L2 is proportional to `2 * lambda* w_i` , meaning that larger weighs experience a proportionally large force pulling them towards zero. This proportionality results in a more uniform shrinkage across all weights. Large weights are reduced significantly, but small weights are reduced less. This uniform shrinkage does not typically result in exact zeros but rather smaller weights overall.
+
+On the other hand, the gradient of L1 is a constant value (lambda or -lambda), except at zero where it's undefined. This constant force encourages weights to move towards zero by a fixed amount, regardless of their size. As a result, small weights can be reduced to exactly zero, creating sparsity.
+
+So, if we have a new `J` with L2 norm, the new backpropagation update is:
+
+`dw[l] = (old backprop value) + lambda/m * w[l]`
+
+Thus the new update step is:
+```
+w[l] = w[l] - learning_rate * dw[l]
+     = w[l] - learning_rate * ((old backprop value) + lambda/m * w[l])
+     = w[l] - learning_rate * (from back propagation) - (learning_rate*lambda/m) * w[l]
+```
+
+The new term shrinks `w[l]` proportionally to `w[l]`  itself and to the lambda parameter, pulling it towards zero. This is, this penalizes large weights and effectively limits the freedom in your model.
+
+How does weight decay helps?
+* Large weights can make the model respond with high sensitivity to the input features. This sensitivity allows the model to fit the training data very closely, including noise. In other words, it makes it easy to **memorize** instead of learn. It also results in more complex decision boundaries.
+* Smaller weights constrain the model, reducing its sensitivity to individual input features. This results in a smoother, more general decision boundary that captures the underlying patterns of the data rather than the noise.
+
+Imagine fitting a polynomial to data points:
+
+![[Pasted image 20240725185046.png]]
+##### Dropout
+
+The dropout regularization eliminates some neurons (along with all their incoming and outgoing edges) on each iteration based on a probability.
+
+The usual implementation is called **Inverted Dropout**:
+
+```
+keep_prob = 0.8   # 0 <= keep_prob <= 1
+l = 3  # this code is only for layer 3
+# the generated number that are less than 0.8 will be dropped. 80% stay, 20% dropped
+d3 = np.random.rand(a[l].shape[0], a[l].shape[1]) < keep_prob
+
+a3 = np.multiply(a3,d3)   # keep only the values in d3
+
+# increase a3 to not reduce the expected value of output
+# (ensures that the expected value of a3 remains the same) - to solve the scaling problem
+a3 = a3 / keep_prob    
+```
+
+To ensure that the scale of the output remains the same, the outputs of the remaining neurons are scaled up. This scaling factor compensates for the dropped neurons, keeping the expected value of the outputs constant.
+
+During inference, dropout is not applied, and the entire network is used. No scaling is needed because the dropout is not active.
+
+Dropout can have different `keep_prob` per layer.
+
+Why does it work?
+* Can't rely on any one feature, so have to spread out weights. Otherwise neurons can become overly reliant on specific other neurons, leading to a fragile model.
+* By randomly dropping out neurons during training, dropout forces the network to learn more robust and independent features.
+* Since neurons cannot rely on specific other neurons, they must learn redundant representations of features. This redundancy makes the model more robust to changes in the input data.
+* It works very well on CV tasks, empirically.
+##### Data augmentation
+
+Often used in CV data, it involves flipping, rotating, distorting the images. This makes the model able to generalize better to slight changes.
+##### Early stopping
+
+In this technique we plot the training set and the dev set cost together for each iteration. At some iteration the dev set cost will stop decreasing and will start increasing. We pick the point where the validation set is lowest.
+
+##### **Model Ensembles**
+
+- Train multiple independent models.
+- At test time average their results.
+
+While ensembling is commonly associated with traditional machine learning methods like decision trees and support vector machines, it is also a powerful technique in deep learning.
+
+#### Normalizing the inputs
+
+ If you normalize your inputs this will speed up the training process a lot. Substract the mean of the training set from each input and divide by the variance of the train set.
+
+These steps should be applied to training, dev, and testing sets (but using mean and variance of the train set).
+
+ If we don't normalize the inputs our cost function will be deep and its shape will be inconsistent (elongated) then optimizing it will take a long time.
+
+![[Pasted image 20240725190901.png]]
+
+Normalized inputs allow for a larger learning rate and optimization will thus be faster.
+
+#### Vanishing / Exploding gradients
+
+The Vanishing / Exploding gradients occurs when your derivatives become very small or very big, especially in very deep networks. It will take a long time for gradient descent to learn anything, if able to learn at all.
+
+Definition:
+* In neural networks, the learning process involves adjusting the weights using gradient descent, which relies on the gradients (partial derivatives) of the loss function with respect to the weights.
+* When gradients are very small, the updates to the weights become minuscule. This means that the weights change very slowly, and the network learns at a very slow pace, potentially getting stuck and not learning effectively.
+* When gradients are very large, the updates to the weights become very large as well. This can cause the weights to grow uncontrollably, leading to numerical instability and making the network unable to converge.
+
+Causes:
+* Functions like the sigmoid or tanh compress a wide range of input values into a small range (0 to 1 for sigmoid, -1 to 1 for tanh). When many layers use these functions, the gradients get multiplied several times, causing them to shrink exponentially and approach zero.
+* Improper initialization can exacerbate the vanishing gradient problem. If initial weights are too small, the gradients can vanish even faster. If weights are too big, gradients can explode.
+* Deep networks. The more layers there are, the more times the gradients are multiplied, increasing the likelihood of them becoming extremely small.
 
 
+Solutions:
+
+**(1) Smart initialization of weights**. Xavier (Glorot) set the initial gradients so that they are in a reasonable range.
+
+Xavier initialization achieves this balance by setting the initial weights according to the size of the previous layer. Specifically, it uses a distribution with a variance that is inversely proportional to the number of input neurons in the layer.
+
+![[Pasted image 20240725191655.png]]
+
+Pytorch uses a similar approach by default for linear and convolutional layers.
+
+![[Pasted image 20240725191803.png]]
+
+**Others:**
+- Batch normalization
+- Gradient clipping
+- Residual networks
+- Auxiliary heads
+![[Pasted image 20240725191925.png]]
+*Skip connections*
+
+![[Pasted image 20240725191944.png]]
+*Auxiliary heads*
+
+#### Gradient checking
+
+This seems only relevant if you're implementing your own architecture and optimization code. Not the most common situation of a ML practitioner.
+
+It involves approximating the derivatives of the weights of a specific sample, and checking that your algorithm is calculating them correctly.
+
+### Week 2 - Optimization algorithms
+
+#### Mini-batch gradient descent
+
+Instead of calculating the gradient over the entire dataset (which could be HUGE and potentially intractable), we can calculate the gradient over a small sample of the training dataset to approximate the gradient, and make more frequent updates to the weights.
+
+* **Batch gradient descent**: Calculate the gradient over the entire dataset (what we have done so far)
+* **Mini-batch gradient descent**: Run gradient descent on mini batches. Works much faster in large datasets.
+
+![[Pasted image 20240727142119.png]]
+*MBGD has ups and downs, but the updates are much more frequent.*
+
+Definitions:
+* **Iteration**: Each process of calculating the gradients and updating the weights. In MBGD, it means going through a mini batch and updating the weiths.
+* **Epoch**: Going over each sample in the entire training dataset. In MBGD it'd involve many iterations.
+
+The mini batches could be either:
+* Randomly sampled with replacement on each iteration. These samples can overlap with elements from previous iterations because sampling is done with replacement (Stochastic Mini-Batch Gradient Descent). SGD often refers to having batch size just 1.
+* Calculated by slitting the dataset into non-overlapping mini-batches (Deterministic Mini-Batch Gradient Descent)
+
+| Method                      | batch size     | Pros                                                                      | cons                                                                                            |
+| --------------------------- | -------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| batch gradient descent      | m              | accurate steps                                                            | takes too link per iteration, maybe intractabe                                                  |
+| mini batch gradient descent | `>=1` ; `<= m` | faster learning bc you have vectorization and more regular weight updates | may not converge, requires tuning LR properly - need to tune mini batch size hyperparameter     |
+| Stochastic gradient descent | usually 1      |                                                                           | very noisy gradient requiring small learning rate ; may diverge ; loses vectorization advantage |
+mini bach size:
+* `m<2000` => use batch gradient descent
+* `m<2000` => use a power of 2 as batch size e.g. 64, depending on your GPU memory
+
+#### Exponentially weighted averages
+
+This is a mathematical concept, forget about NN now.  
+
+Exponential weighted averages (EWAs), also known as exponential moving averages (EMAs), are used to smooth out data series to highlight trends by giving more weight to recent observations while exponentially decreasing the weights of older observations.
+
+The idea behind exponential weighted averages is to apply weights that decay exponentially. More recent data points have higher weights, and the weights decrease exponentially as the data points get older.
+
+The exponential average `v(t)` at time `t` of series `theta` is given by:
+
+```
+    v(t) = beta * v_{t-1} + (1-beta) * theta_t 
+```
+
+`beta` is the smoothing factor, and `(1-beta)` controls the rate at which the influence of past observations decays.
+
+![[Pasted image 20240727143945.png]]
+*Example of a time series and its EWAs*
+
+The average starts at `v(0)=0` which gives a bias and shifts the average at the beginning, making it inaccurate. We can correct this bias by using the following equation:
+
+```
+    v(t) = (beta * v(t-1) + (1-beta) * theta(t)) / (1 - beta^t)
+```
+
+As t becomes larger the `(1 - beta^t)` becomes `1`
+
+#### Momentum
+
+Let's now use this mathematical tool in mini batch gradient descent. We can smooth out the gradients obtained by mini-batch gradient descent using a EWA, reducing oscillations in gradient descent and making it faster by following a smoother path towards minima.
+
+Best `beta` hyperparameter average for our use case is between 0.9 and 0.98 which will average between 10 and 50 last entries. 
+
+The update rule then becomes:
+
+```
+vdW = 0, vdb = 0
+on iteration t:
+
+	compute dw, db on current mini-batch                
+			
+	vdW = beta * vdW + (1 - beta) * dW
+	vdb = beta * vdb + (1 - beta) * db
+	
+	W = W - learning_rate * vdW
+	b = b - learning_rate * vdb
+```
+
+So instead of updating via the last weight, we use the EWA, which is smoother and pushes towards keeping the tendency of previous updates.
+### RMSprop
+
+Root Mean Square Prop, is another technique to speed up gradient descent. It keeps a rolling average of the square gradients:
+
+![[Pasted image 20240727150150.png]]
+
+This square average is used to normalize the learning rate on each weight update:
+![[Pasted image 20240727150354.png]]
+In pseudocode:
+
+```
+sdW = 0, sdb = 0
+on iteration t:
+	# can be mini-batch or batch gradient descent
+	compute dw, db on current mini-batch
+	
+	sdW = (beta * sdW) + (1 - beta) * dW^2  # squaring is element-wise
+	sdb = (beta * sdb) + (1 - beta) * db^2  # squaring is element-wise
+	W = W - learning_rate * dW / sqrt(sdW)
+	b = B - learning_rate * db / sqrt(sdb)
+```
+
+The benefit is that the learning rate becomes **adaptive**, adapting it to each **parameter** update individually based on gradient history. 
+
+Let's break this down, because it can be confusing. The goal is to normalize the gradients of **each parameter** to ensure stable and consistent updates, so we are multiplying each gradient component by a custom factor that achieves this. The factor itself is  `1/ [ sqrt( E(g^2)_t ) ^ 2 ]` . This can be puzzling. 
+
+We keep an average of the square of the weights, which captures the magnitude of the gradients without being affected by their sign.  This captures the average magnitude of (each component of) the gradient over time, regardless of direction (positive or negative).
+
+The parameter update is scaled by the learning rate divided by the **square root** of this running average.
+* The square root is meant to cancel out the squares in the average, providing an estimate of the absolute value of each parameter.
+* This normalization ( `1/ [ sqrt( E(g^2)_t ) ^ 2 ]`) makes parameters with consistently **high** gradients to be **scaled down**, while lower gradients are **scaled up**. 
+* Scaling down big gradients and scaling up small gradients is good because:
+	* Large gradients tend to **overshoot** the optimal value, leading to instability, especially in high dimensions.
+	* **Controlled updates** make steps towards the minimum more stable, preventing bouncing.
+	* **RMSprop** scales the leraning rate so that it's based on the *history* of the gradients.  As optimization goes on, gradients should become smaller because you have learnt a lot. RMSProp will then help the updates not to be excessively small, allowing continued progress towards convergence. Also if you had a single iteration with huge magnitude for a weight that historically has had small magnitude, we don't let this noise nudge the parameters excessively.
+	* **Gradient explosion** is mitigated by scaling down very large gradients, maintaining stability
+	* Large updates can lead to overfitting, which are tempered by RMSProp.
+
+#### Adam optimization algorithm
+
+Adaptative Moment Estimation (Adam) works very well in NN, and it's just the combination of momentum and RMSProp together.
+
+```
+vdW = 0, vdW = 0
+sdW = 0, sdb = 0
+on iteration t:
+	# can be mini-batch or batch gradient descent
+	compute dw, db on current mini-batch                
+			
+	vdW = (beta1 * vdW) + (1 - beta1) * dW     # momentum
+	vdb = (beta1 * vdb) + (1 - beta1) * db     # momentum
+			
+	sdW = (beta2 * sdW) + (1 - beta2) * dW^2   # RMSprop
+	sdb = (beta2 * sdb) + (1 - beta2) * db^2   # RMSprop
+			
+	vdW = vdW / (1 - beta1^t)      # fixing bias
+	vdb = vdb / (1 - beta1^t)      # fixing bias
+			
+	sdW = sdW / (1 - beta2^t)      # fixing bias
+	sdb = sdb / (1 - beta2^t)      # fixing bias
+					
+	W = W - learning_rate * vdW / (sqrt(sdW) + epsilon)
+	b = B - learning_rate * vdb / (sqrt(sdb) + epsilon)
+```
 
 
+The hyperparameters of adam are:
+* The learning rate
+* `beta1` : The momentum parameter, usually set to 0.9
+* `beta2` : The RMSprop parameter, usually set to 0.999
+* `epsilon`: Usually set to `10^-8`
+
+#### Learning rate decay
+
+During optimization, often we make the learning rate decay with iterations rather than keep it fixed. This helps make steps (and oscillations) near the optimum smaller, fostering convergence.
+
+The learning rate can be made to decay following many policies, such as:
+
+`learning_rate = learning_rate_0 / (1 + decay_rate * epoch_num)`
+
+where `decay_rate` is a hyperparameter
+
+- In the early stages of training, larger learning rates help in exploring the parameter space quickly.
+- As training progresses, smaller learning rates help in refining the parameter values, leading to more precise convergence.
+
+#### Local optima in deep learning
+
+In high-dimensional spaces, getting stuck in a bad local optimum is rare. Instead, you're more likely to encounter saddle points, which aren't problematic. For a point to be a local optimum, it must be optimal in every dimension, which is highly unlikely.
+
+A plateau is a region where the gradient is near zero for an extended period. Techniques like momentum or RMSprop help overcome these regions by adapting the learning process and making progress despite the flat gradients.
+
+### Week 3: Hyperparameter Tuning, Batch Normalization and Programming Frameworks
+#### Tuning hyperparameters
+
+Andrew Ng says this is the "importance" of each hyperparameter when it comes to tuning:
+1. Learning rate.
+2. Momentum beta.
+3. Mini-batch size.
+4. No. of hidden units.
+5. No. of layers.
+6. Learning rate decay.
+7. Regularization lambda.
+8. Activation functions.
+9. Adam `beta1`, `beta2` & `epsilon`.
+
+Usually we try random values, we cannot use a grid of values because it's intractable.
+
+It's beneficial to search parameters in an appropriate scale, if the range of search is `[a,b]` use a logarithmic scale.
+
+e.g. a parameters goes from 0.0000001 to 1 and we want to try out 5 hyperparameter choices, here are the resulting values:
+
+Linear (not recommended) are equally spaced:
+
+`[0.0000001, 0.2500001, 0.5000001, 0.7500001, 1]`
+
+Logarithmic scale:
+
+ `[0.0000001, 0.001, 0.01, 0.1, 1]`
+ 
+In the logarithmic scale, the values are spaced exponentially, providing a more balanced exploration across a wide range.
+
+#### Hyperparameter tuning in practice
+
+There are two approaches:
+
+- **Panda Approach:** Many inexpensive trials to broadly explore the hyperparameter space.
+- **Caviar Approach:** Fewer, more expensive trials to deeply explore and optimize within a smaller region of the hyperparameter space.
+
+#### Normalizing activations
+
+**Batch normalization** is about normalizing the activations `A[l]` (or simetimes the values before the activation, `Z[L]`). In practice ,`Z[l]` is done much more often.
+
+Given the pre-activations for a batch of `m` training samples:
+
+`Z[l] = [z(1), ..., z(m)]`
+
+We compute the mean and variance across the training samples:
+
+```
+mean = 1/m * sum(z[i])
+variance = 1/m * sum((z[i] - mean)^2)
+```
+
+Then normalize the data before applying the activation, driving the inputs to a zero mean, variance one distribution.
+
+```
+Z_norm[i] = (z[i] - mean) / np.sqrt(variance + epsilon)
+```
+
+Additionally, two learnable parameters (not hyperparameters) `gamma` and `beta` transform the inputs to a different distribution:
+
+`Z_batch_norm[i] = gamma * Z_norm[i] + beta`
+
+The following schema summarizes the transformations:
+![[Pasted image 20240727202324.png]]
+
+WHY is batch normalization useful?
+* The distribution of inputs to each layer can change as the parameters of the previous layers change. This is called internal covariate shift. Batch normalization ensures that the inputs to each layer are stable, within the same range. This **stabilizes training** and keeps **gradients stable and consistent**.
+* This stability allows for larger learning rates, resulting in faster optimization.
+
+My intuition:
+
+*Without batch normalization, the inputs to a given layer can vary widely across iterations. For example, in one iteration, the inputs to layer L could be in the range `[0,100]`, and in another iteration, they might be in the range `[−1,0]`. This variation can occur because the parameters of the preceding layers are continuously updated during training, changing the distribution of their outputs (which are the inputs to layer L).*
+
+*These irregular and fluctuating input ranges make the optimization process more challenging. The model has to constantly adapt to the changing distribution of inputs, which can slow down learning and make it harder to converge to an optimal solution. It's akin to chasing a moving target during optimization. The parameters of the network need to adjust not only to learn the underlying patterns in the data but also to accommodate the changing scales of inputs at each layer.*
+
+WHY do we add the step with beta and alpha instead of just normalizing to 0-1 and leave it there? Wouldn't that ensure already a stability in the inputs to the next layer?
+
+*Without `\gamma` and `\beta`, normalization would constrain the outputs of each layer to a fixed distribution (zero mean and unit variance). This can limit the network's capacity to represent complex functions. By allowing the network to scale and shift the normalized outputs, `\gamma` and `\beta` provide flexibility. The network can learn the optimal mean and variance for each layer's activations during training.*
+
+*If the optimal is indeed to keep the zero mean one variance representation, it will learn `alpha=1` and `beta=0` (identity transformation)*
+
+*Example: Neural Network with and without gamma and beta*
+
+*Imagine a simple neural network trying to learn a function where the desired output for a certain layer's neurons should be in a specific range, say `[0, 10]`.*
+
+*Without gamma and beta, after normalization, the output of each neuron will have mean 0 and variance 1. Thus, the outputs will be centered around 0 and most values falling within `[-1,1]`. The outputs are constrained to be in this tight range,this constraint would make it very difficult for the subsequent layers to adjust and learn the correct transformation towards `[0,10]`. A  ReLu for example will push all negative values towards 0, losing half of the output range.*
+
+*With `gamma` and `beta`, we can learn `gamma=5` `beta=5` and the range of the values is not adjusted to `[0,10]`, aligning better with the desired output distribution.*
+
+What size does the mean, variance, gamma and beta have?
+
+*Say we are in layer `l`  and we have batch size `m`.*
+
+*`Z[l] = [z(1), ..., z(m)]`*
+
+*If layer `l` has `k` neurons, then each `z_i` has shape `(k,1)`*
+
+*The mean and variance are calculated component-wise, so they have the same shape:  `(k,1)`.*
+
+*The scaling and shifting parameters `gamma` and `beta` are also specific for each component, so they are each of shape `(k,1)`*
+
+*TL; DR: Everything is done component-wise.*
+
+At test time, batch norm layer uses a mean and variance computed during train; likely a weighted average across mini-batches.
+
+#### Softmax Regression
+
+So far, we've only been dealing with binary classification. This means that the last layer has been a sigmoid and the loss has been binary cross entropy loss. 
+
+NN are, of course, much more flexible. We can use different types of layers in the last layer in order to return the appropriate data format, coupled with appropriate losses.
+
+| **Task**                                                | **Last Layer Activation**      | **Loss Function**                | **Description**                                                                          |
+| ------------------------------------------------------- | ------------------------------ | -------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Binary Classification**                               | Sigmoid                        | Binary Cross Entropy             | Single neuron outputting probability for two classes.                                    |
+| **Multi-Class Classification (one-hot encoded labels)** | Softmax                        | Categorical Cross Entropy        | Output layer size equal to number of classes, outputs probabilities.                     |
+| **Multi-Class Classification (sparse labels)**          | Softmax                        | Sparse Categorical Cross Entropy | Output layer size equal to number of classes, outputs probabilities, labels as integers. |
+| **Multi-Label Classification**                          | Sigmoid                        | Binary Cross Entropy             | Multiple neurons, each outputting probability for independent classes.                   |
+| **Regression (one target)**                             | None/Linear                    | Mean Squared Error (MSE)         | Single neuron outputting a continuous value.                                             |
+| **Regression (multiple targets)**                       | None/Linear                    | Mean Squared Error (MSE)         | Multiple neurons, each outputting a continuous value for different targets.              |
+
+The **Softmax** is used for multi class classification. If we have four classes for example, we may have four neurons in the last layer and encode the classes as `[0 0 0 1], [0 0 1 0], [0 1 0 0], [1 0 0 0]`.
+
+If C is the number of classes, each of the C values in the output layer will contain a probability of the example belonging to each class. The last layer will have a Softmax activation instead of sigmoid, which does the following:
+
+![[Pasted image 20240727230405.png]]
+
+Example:
+
+1. `z=[2.0,1.0,0.1]`
+2. `e^z = [7.38 , 2.71, 1.10]` ; `sum(e^z) = 12.21`
+3. `softmax(z) = [0.65, 0.24, 0.09]`
+
+So we basically turned a vector of pre-activations into a vector of probabilities that add up to 1.
+
+The categorical loss function now is:
+
+![[Pasted image 20240727230716.png]]
+Notice that `\hat(y_i)` is going to be in `[0,1]`; thus its logarithm will be between `[-inf,0]`.
+
+For each sample, only the correct class term `y_k * log(yhat_k)` is going to add to the loss, the rest of the `y_i` will be zero. If the model is predicting a low probability to the correct class, the log is going to be a large negative number, and the `-1` multiplier will make it be a large loss. Vice versa.
+
+![[Pasted image 20240727230959.png]]
+
+Using the new loss, we need to readjust a few derivatives:
+
+`dz[L] = Y_hat - Y`
+
+The derivative of softmax is:
+
+`Y_hat * (1 - Y_hat)`
+
+#### Existing frameworks
+
+Deep learning is not about implementing everything from scratch, but about reusing leading existing frameworks.
+
+| Framework     | Programming Language     | Focus                                               | Deployment          | Key Features                                        | Use Cases/Tasks                                                                             |
+| ------------- | ------------------------ | --------------------------------------------------- | ------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Caffe/Caffe2  | C++                      | Image/video processing                              | Production          | Modular architecture, speed, image/video focus      | Image classification, object detection, image segmentation                                  |
+| CNTK          | C++/Python               | Speech recognition, image recognition, NLP          | Production          | Computational network toolkit, distributed training | Speech recognition, image recognition, NLP, recommendation systems                          |
+| DL4j          | Java                     | JVM ecosystem, distributed computing                | Production          | JVM integration, distributed computing              | Natural language processing, time series analysis, anomaly detection                        |
+| Keras         | Python                   | Rapid prototyping, high-level API                   | Production          | High-level API, easy to use, modularity             | Image recognition, text generation, neural style transfer                                   |
+| Lasagne       | Python                   | Theano-based, modular                               | Research            | Theano-based, modular, flexibility                  | Research, prototyping, building custom architectures                                        |
+| MXNet         | C++/Python/R/Julia/Scala | Scalability, flexibility, speed                     | Production          | Scalability, hybrid programming, speed              | Image classification, object detection, natural language processing, recommendation systems |
+| PaddlePaddle  | C++/Python               | Chinese-dominant, industrial applications           | Production          | Industrial applications, speed, scalability         | Computer vision, natural language processing, recommendation systems, ad optimization       |
+| TensorFlow    | Python/C++               | Large-scale machine learning, distributed computing | Production          | Flexibility, scalability, community support         | Image recognition, natural language processing, speech recognition, time series analysis    |
+| Theano        | Python                   | Deep learning research, optimization                | Research            | Symbolic computation, GPU optimization              | Research, prototyping, low-level optimizations                                              |
+| Torch/PyTorch | Lua/Python               | Flexibility, speed, dynamic computation graph       | Research/Production | Dynamic computation graph, speed, flexibility       | Computer vision, natural language processing, reinforcement learning                        |
+
+#### TensorFlow
+
+The course develops a few concepts of TensorFlow. Here is a sample snippet doing optimization, checkout the programming assignment for more coding examples:
+
+```python
+import numpy as np
+import tensorflow as tf
 
 
+coefficients = np.array([[1.], [-10.], [25.]])
 
+x = tf.placeholder(tf.float32, [3, 1])
+w = tf.Variable(0, dtype=tf.float32)                 # Creating a variable w
+cost = x[0][0]*w**2 + x[1][0]*w + x[2][0]
 
+train = tf.train.GradientDescentOptimizer(0.01).minimize(cost)
 
+init = tf.global_variables_initializer()
+session = tf.Session()
+session.run(init)
+session.run(w)    # Runs the definition of w, if you print this it will print zero
+session.run(train, feed_dict={x: coefficients})
 
+print("W after one iteration:", session.run(w))
 
+for i in range(1000):
+	session.run(train, feed_dict={x: coefficients})
+
+print("W after 1000 iterations:", session.run(w))
+```
+
+* The backward pass is automatically done, you only specify the forward pass.
+* A placeholder is a variable that may be assigned a value.
