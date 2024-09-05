@@ -129,6 +129,7 @@ A few implications of using pooling are:
 
 > 💡 **Insight:** In a convolutional network, the deeper we go, the larger the receptive field (relative to the input) to which each hidden node is sensitive. Pooling layers expedite this process by reducing spatial resolution, allowing the convolution kernels to cover a larger effective area.
 
+Note: Global Average/Max Pooling is a type of layer often used to reduce the data from each channel to a single value. It's simply using a filter size = (W,H)
 ## Activation Layers
 
 Activation layers introduce non-linearity into the network, enabling it to learn complex patterns. Without activation functions, the network would essentially behave like a linear regression model, regardless of its depth. Here are some of the most commonly used activation functions in deep learning:
