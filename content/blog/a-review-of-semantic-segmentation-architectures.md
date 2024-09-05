@@ -179,3 +179,9 @@ Finally, v3+ incorporates a decoder module to refine the segmentation results, p
 * The newly added decoder refines the segmentation output by upsampling and concatenation with corresponding low-level features from earlier layers of the encoder (like the skip connections of the U-Net)
 
 ![[Pasted image 20240720051926.png]]
+
+## Vision Transformers
+
+The Vision Transformer architecture (ViT) was introduced in the paper "[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)" in 2020. I dive deep into this architecture (and its successors for image inputs) into this post.
+
+(...)

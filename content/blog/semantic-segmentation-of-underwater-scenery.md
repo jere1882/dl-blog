@@ -74,12 +74,12 @@ I had two goals in mind when I undertook this project. Firstly, reproducing the 
 
 I therefore selected three CNN architectures as well as a vision transformer architecture for my experiments:
 
-| Model                                                                                      | Backbone       | Crop size  |
-| ------------------------------------------------------------------------------------------ | -------------- | ---------- |
-| [DeepLabv3+](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/deeplabv3plus) | ResNet50       | 512 x 1024 |
-| [PSPNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/pspnet)            | ResNet50       | 512 x 1024 |
-| [UperNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/upernet)          | ResNet101      | 512 x 512  |
-| [Swin ViT](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/swin/README.md)  | not applicable | 512x512    |
+| Model                                                                                      | Backbone       | Crop size  | Number of parameters |
+| ------------------------------------------------------------------------------------------ | -------------- | ---------- | -------------------- |
+| [DeepLabv3+](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/deeplabv3plus) | ResNet50       | 512 x 1024 | 43.581 M             |
+| [PSPNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/pspnet)            | ResNet50       | 512 x 1024 | 48.967 M             |
+| [UperNet](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/upernet)          | ResNet101      | 512 x 512  | 85.398 M             |
+| [Swin ViT](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/swin/README.md)  | not applicable | 512 x 512  | up to 195.520 M      |
 *Architectures that I used in this project*
 
 I leveraged the toolbox [MMSegmentation](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/vit/README.md) (check out my tutorial on [this blogpost](mmsegmentation-tutorial)!), which already provides high quality implementations of the architectures I mentioned. Adjusting the codebase for the underwater segmentation task only required a few additions to the code, which are available in my Github. Pre-trained weights (from ImageNet) were used for all models.
@@ -150,7 +150,7 @@ First, I tried increasing the size of the model. More complex models were able o
 
 | Depth at each stage | Number of heads | Number of channels in decode head | window size | embedding dimension | number of parameters | mIoU  |
 | ------------------- | --------------- | --------------------------------- | ----------- | ------------------- | -------------------- | ----- |
-| 2, 2, 6, 2          | 3, 6, 12, 24    | 96, 192, 384, 768                 | 7           | 96                  | 27.520 M             |       |
+| 2, 2, 6, 2          | 3, 6, 12, 24    | 96, 192, 384, 768                 | 7           | 96                  | 27.520 M             | 70.5  |
 | 2, 2, 18, 2         | 4, 8, 16, 32    | 128, 256, 512, 1024               | 12          | 128                 | 86.880 M             | 71.14 |
 | 2, 2, 18, 2         | 6, 12, 24, 48   | 192, 384, 768, 1536               | 7           | 224                 | 195.201 M            | 71.79 |
 | 2, 2, 18, 2         | 6, 12, 24, 48   | 192, 384, 768, 1536               | 12          | 224                 | 195.520 M            | 73.17 |

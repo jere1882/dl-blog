@@ -7,5 +7,3 @@ description: Personal projects and tutorials, with a focus on semantic segmentat
 date: 2024-05-23
 image:
 ---
-
-## What is Computer Vision?
