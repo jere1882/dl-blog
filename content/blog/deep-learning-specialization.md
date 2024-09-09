@@ -1510,9 +1510,9 @@ Architectures to solve this issue are:
 * Regular image classification, with a softmax and K output neurons. Troublesome, it has to be retrained if the K people change, etc.
 * Learning a **similarity function**:
 
-*d(img1, img2) : Degree of difference between images*
-* *d(img1,img2) <= t    then "same"*
-* *d(img1,img2) > t    then "different"*
+*`d(img1, img2)` : Degree of difference between images*
+* *`d(img1,img2) <= t`    then "same"*
+* *`d(img1,img2) > t`    then "different"*
 
 This can be achieved by a **siamese network**, where a single network is trained to produce an embedding of the objects (faces in this case), and then the embeddings are used to compute the difference:
 
