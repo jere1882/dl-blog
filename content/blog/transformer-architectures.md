@@ -2,7 +2,7 @@
 tags:
   - Transformers
 aliases: 
-publish: false
+publish: true
 slug: a-comprehensive-introduction-to-transformers
 title: A comprehensive introduction to transformers
 description: Notes and a comprehensive summary of basic concepts in the field of transformers
@@ -254,32 +254,22 @@ GPT, despite not having a separate encoder component like the original Transform
 *I need to see a picture of the architecture to better understand it. It's unclear, are prompts and the sequence generated so far encoded and integrated? when and how*
 
 ## Subsequent versions
-Subsequent versions of these models continued to be released:
 
-| Model                                  | Year | Key innovations                                                                                                                                                                                                                            |
-| -------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GPT-2                                  | 2019 | Scale: Increase model size significantly (1.5 billion parameters) This resulted in improved performance in a range of tasks, particularly in **zero-shot learning** tasks where it had not been pretrained at all. *Ask for an example* |
-| GPT-3                                  | 2020 | Scale: Expanded to 175 billion parameters, making it the largest LLM at its release. Impressive performance with minimal task-specific tuning (**few-show learning**)                                                                   |
-| RoBERTa                                | 2019 | Improve BERT by using larger mini-batches, longer training times and removing NSP task.                                                                                                                                                    |
-| ALBERT                                 | 2019 | Reduced model size using techniques like factorized embedding parameterization and cross-layer parameter sharing.  Similar performance to BERT with fewer parameters.                                                                   |
-| T5 (Text-to-text transfer transformer) | 2020 | Reformulated all NLP tasks as a text-to-text problem.  Pretrained using a denoising autoencoder objective, where parts of the input text are masked and the model learns to reconstruct the original text.                              |
-| DistilBERT                             | 2019 | Created a smaller, faster version of BERT through knowledge distillation, retaining most of the performance with fewer parameters.                                                                                                         |
-|                                        |      |                                                                                                                                                                                                                                            |
-*MANY OF THESE ARE OLD AND IRRELEVANT. I NEED to update my notes.*
+| Architecture | Year | Key Features                                                                                        |
+| ------------ | ---- | --------------------------------------------------------------------------------------------------- |
+| GPT-2        | 2019 | Larger model size, improved generation capabilities                                                 |
+| T5           | 2019 | Text-to-text transfer transformer, unified framework for various tasks                              |
+| XLNet        | 2019 | Permutation language modeling, addressing limitations of BERT                                       |
+| RoBERTa      | 2019 | Robustly optimized BERT pretraining, improved performance                                           |
+| ALBERT       | 2019 | Lightweight BERT, reduced model size while maintaining performance                                  |
+| ELECTRA      | 2020 | Efficient pre-training, discriminator-generator framework                                           |
+| DeBERTa      | 2020 | Disentangled attention mechanisms, improved long-range dependencies                                 |
+| GPT-3        | 2020 | Massive model size, exceptional generation and understanding capabilities                           |
+| LLaMA        | 2023 | Efficient large language model, designed for lower computational costs                              |
+| PaLM 2       | 2023 | More powerful and versatile version of PaLM, improved capabilities in various tasks                 |
+| BLOOM        | 2023 | Large and diverse language model, developed by a consortium                                         |
+| LaMDA        | 2023 | Foundational language model, impressive capabilities in understanding and generating human language |
 
-# Transformers applied at other tasks
-
-all these architectures are basically text-to-text, right?
-how do you use transformers for other tasks?
+**Note:** This is not an exhaustive list, and the field of transformer architectures continues to evolve rapidly. Newer models and variations are constantly being developed.
 
 
-transformers are extremely generic - The basic transformer is a set-to-set model. So long as your data is a set of units, you can apply a transformer. Anything else you
-know about your data (like local structure) you can add by means of position 
-embeddings
-## Text classification
-So far we have only talked about mapping input sequences of text to output sequences of text. The architecture can be easily used for other tasks, e.g. output a single classification value for the entire input sequence (sentiment analysis) by applying global average pooling to the final output sequence + a softmax.
-
-![[Pasted image 20240807185704.png]]
-## Vision transformers
-
-The Vision Transformer architecture (ViT) was introduced in the paper "[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)" in 2020. I dive deep into this architecture (and its successors for image inputs) in this post.

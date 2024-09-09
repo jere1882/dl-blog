@@ -10,7 +10,7 @@ image: /thumbnails/coursera_dl_specialization.png
 ---
 ## Introduction
 
-My current employee gave me the chance to take the Deep Learning Specialization from DeepLearn.ai via Coursera. Even though this is quite a basic level course, I decided to give it a try and take the chance to revise my foundations.
+My current employer gave me the chance to take the Deep Learning Specialization from DeepLearn.ai via Coursera. Even though this is quite a basic level course, I decided to give it a try and take the chance to revise my foundations.
 
 There is quite a lot of undeserved praise online for this course. It lacked depth, there were no structured course notes (just videos), and the above all author kept embarking on lengthy "intuitive" explanations aimed at people who did not take a proper calculus course.
 
@@ -1495,3 +1495,113 @@ To increase spatial resolution we use **transposed convolutions**:
 The U-Net architecture makes extensive use of skip connections, convolutions, pooling to downsample and transposed convolutions to upsample:
 
 ![[Pasted image 20240830214839.png]]Notice how the skip connections concatenate channels instead of adding like other skip connections we've seen.
+
+### Week 5 - Special Applications
+
+#### Face Recognition
+
+**Face Verification**:  Given an input image and a name/ID, output whether the input image is the claimed person or not.  1:1
+**Face Recognition**: Given a database of K persons, and given an input image, output the ID of the image if it's one of the K persons, else "not recognised". K:1
+**One-shot learning**: Learn from just one example to recognise the person again. More generally:
+
+*One-shot learning refers to a model's ability to learn information about a task from only one or a very small number of training examples. Unlike traditional models, which require a large amount of labeled data to achieve high accuracy, one-shot learning aims to generalize from minimal examples, making it particularly useful in cases where gathering large datasets is impractical.*
+
+Architectures to solve this issue are:
+* Regular image classification, with a softmax and K output neurons. Troublesome, it has to be retrained if the K people change, etc.
+* Learning a **similarity function**:
+
+*d(img1, img2) : Degree of difference between images*
+* *d(img1,img2) <= t    then "same"*
+* *d(img1,img2) > t    then "different"*
+
+This can be achieved by a **siamese network**, where a single network is trained to produce an embedding of the objects (faces in this case), and then the embeddings are used to compute the difference:
+
+![[Pasted image 20240907232021.png]]
+The optimization of this network is achieved via the **triplet loss**, which aims at getting embeddings that are very distant for different persons and close for the same person.
+
+We pick an anchor image on the dataset, and then a positive image (another sample of the same object) and a negative image (another sample of a different object). Then, for this triplet, we optimize, we define the loss as:
+
+![[Pasted image 20240907232353.png]]
+* The alpha is going to encourage the embeddings to not predict something trivial like all embeddings are 0. 
+* The max is a way to encode that the left side is >= 0
+* During training, we pick triplets that are "hard", for instance negative images that are somewhat similar to the anchor image rather than random sampling.
+* At inference time we just run the siamese network on two inputs, often one of the output vectors is precomputed, thus forming a baseline against which the other output vector is compared.
+
+A more general case is where the output vector from the twin network is passed through additional network layers implementing non-linear distance metrics:
+
+![[Pasted image 20240908030554.png]]
+#### Neural Style Transfer
+
+##### What are Deep Networks learning?
+This section build intuitions necessary to understand neural style transfer better. It basically showcases images from the paper "Visualizing and Understanding Convolutional Networks" by Zeiler et al.
+
+Let's thing of a regular convolutional architecture for image classification such as this one:
+
+![[Pasted image 20240908031132.png]]
+The paper provides a way to understand and visualize what is it that each feature map is learning on each layer, one channel at a time.
+
+For example, let's think about layer 1. The feature map has 96 channels. We can (randomly) pick 9 of those channels, and for each of those channes identify the 9 input patches (from the training images) that maximize the activation of such channel.
+
+The activation of a channel would be the average or the max or the sum of the activations across all spatial locatins.
+
+In the context of training ImageNet, this is what we would come up with:
+
+![[Pasted image 20240908031536.png]]
+Layer 1: The first filter (channel) seems to detect diagonal edges. In general, earlier layer detect low level features.
+
+The paper provides a method to trace back the activations of each layer to see what patches on the training dataset are activating those feature maps most.
+
+![[Pasted image 20240908031756.png]]
+Layer 2 (left) starts to detect more complex patterns and shapes, while layer 3 already increase abstraction further.
+![[Pasted image 20240908031933.png]]
+Layers 4 and 5.
+
+The paper is very interesting and provides several visualizations and insights into the CNN black box. It's fascinating.
+
+##### Neural Style Transfer
+
+![[Pasted image 20240908030649.png]]
+
+Neural Style Transfer (NST) is a fascinating technique in deep learning that combines the style of one image with the content of another to create a new, blended image. This is done by using a convolutional neural network (CNN), typically a pre-trained model like VGG-19.
+
+- **Content Image**: This is the image you want to preserve in terms of structure and layout.
+- **Style Image**: This is the image from which you want to extract the artistic style, like the brush strokes or color palette.
+- **Generated Image**: The final image combines the content of the first image with the style of the second.
+
+The cost function to train this network will be:
+
+`J(G) = alpha * J_content(C,G) + beta * J_style(C,G)`
+
+G will be randomly initialized, although it's often initialized as the content image and noise is applied on top of it, to quicken convergence.
+
+Then, it will be updated using gradient descent and `J(G)`
+
+`G := G - dL/dG J(G)`
+
+The **content cost function** This measures how similar the output image is to the content image by comparing the feature representations at higher layers of the CNN.
+
+* We will pick a hidden layer `l` in the VGG to compute the content cost. You will usually get the most visually pleasing results if you choose a layer from somewhere in the middle of the network--neither too shallow nor too deep. This ensures that the network detects both higher-level and lower-level features.
+* We'll try to ensure that the activations at layer `l` are similar when C is the input of the VGG to when G is the input of the VGG. If so, both images have similar content:
+
+`J_content(C,G) = 1/2  || a^[l](C) - a^[l](G) ||^2`
+
+The **style cost function** is a bit more complex. 
+* We will pick a layer `l` on the VGG to measure style. We will define style as **correlation** between activations across channels
+
+![[Pasted image 20240908033219.png]]
+
+This is, if channels 2 and 4 activations are correlated in the style image S ; we want channel 2 and channel 4 activations to also be correlated in the generated image G.
+
+To this purpose, we will calculate a style matrix `G`:
+
+![[Pasted image 20240908033500.png]]
+`G^[l]` is going to measure the correlation for each pair of channels in layer `l` ; it's the Gram matrix. We can thus try to enforce correlation across channels between the style input S and the generated output G by trying to make the Gram matrixes match:
+
+![[Pasted image 20240908033709.png]]
+
+And actually, as shown in the last equation, for the style cost we calculate the style loss across several layers, not just one as we did for content.
+
+*Why is style defined as correlation between channels? because it captures patterns of textures and color distributions that go beyond just spatial structure. The key idea is that **style** is more about how different features (edges, textures, and patterns) relate to each other across the entire image rather than where exactly they are located.*
+
+*If we were to define style purely on a pixel-by-pixel basis, we'd lose the abstract patterns that make up style. Instead, using correlations between feature maps lets the model ignore the exact placement of objects (which is more related to content) and focus on more global, perceptual qualities like texture and color schemes.*
+
