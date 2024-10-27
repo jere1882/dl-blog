@@ -3,7 +3,7 @@ tags:
   - Computer
   - Vision
 aliases: 
-publish: false
+publish: true
 slug: a-review-of-semantic-segmentation-architectures
 title: A review of Semantic Segmentation architectures
 description: In this post I explore the most popular model architectures used to tackle semantic segmentation
@@ -12,11 +12,9 @@ image: /thumbnails/pick_architecure.jpeg
 ---
 ## Introduction
 
-In my previous [post](link), I introduced the task of semantic segmentation along with introductory experiments on the benchmark dataset Cityscapes.
+In my previous [post](blog/mmsegmentation-tutorial), I introduced the task of semantic segmentation along with introductory experiments on the benchmark dataset Cityscapes.
 
 This post will dig deeper into the different architectural choices for semantic segmentation, describing their building blocks, advantages and shortcomings.
-
-To make this post more interesting, I decided to train and validate all the architectures here described on a relatively new dataset, so that we can see actual performance stats for a particular instance: XXXXXX-Medical-Dataset.
 
 The following table provides an overview of the architectures that will be developed in this post:
 
@@ -182,6 +180,90 @@ Finally, v3+ incorporates a decoder module to refine the segmentation results, p
 
 ## Vision Transformers
 
-The Vision Transformer architecture (ViT) was introduced in the paper "[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)" in 2020. I dive deep into this architecture (and its successors for image inputs) into this post.
+The Vision Transformer architecture (ViT) was introduced in the paper "[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)" in 2020. I dive deeper into the transformer architecture (and its successors for image inputs) in [this](blog/transformer-architectures) post.
 
-(...)
+Recall the original transformer architecture, designed for natural language processing:
+
+![[Pasted image 20240928223011.png]]
+
+Originally designed for NLP, it works like this:
+* An input piece of text would get tokenized, then each token embedded into dense vectors and positional information added. An extra token that does not correspond to any of the inputs, the `[CLS]` token, is also added. This forms the input to the Encoder (left side).
+* The encoder applies multiple layers (e.g. 6) of multi-head self-attention plus a feed-forward net with normalization and residual connections. The output of the encoder is a sequence of vectors representing the contextualized embeddings of the input tokens. 
+* Depending on the task at hand, the decoder may take as input just the output corresponding to the `[CLS]` token, which has contextual information of all the entire input. Alternatively, it may take the average of all the token representations ; or even the entire set of contextualized vectors.
+The decoder is very task-dependant, e.g.:
+* **Classification head for sentiment analysis:** The decoder takes the pooled output (e.g., the representation of the `[CLS]` token or the mean of all token representations) from the encoder. - This pooled representation is passed through one or more fully connected layers with an activation function (e.g., ReLU).  The final layer typically uses a softmax activation to output probabilities for sentiment classes (e.g., positive, negative, neutral).
+* **Standard decoder for machine translation:** The decoder receives the final output of the encoder (contextualized vectors) and typically the previously generated tokens (in the case of autoregressive models). This is the architecture described in the image above, where the decoder takes its own output to generate even more outputs.
+
+ViT explore how to reuse this architecture for images. The solution is quite elegant: let's find a way to encode images as sequences of embeddings, and the rest of the architecture can be reused without any modification.
+
+![[Pasted image 20240928225150.png]]
+The image is split into small patches. Each patch is flattened, encoded into an embedding of the desired size, and positional embedding is added to preserve structural information. Ingenious!
+
+Again, depending on the actual task at hand, the decoder is going to be different. For image classification, the special `[CLS]` token can be added to the sequence, or the representation from a specific patch (often the first one) is used for the final classification task. This specific contexctualized output from the encoder can be passed through a fully connected layer with softmax activation to predict the class labels.
+
+For semantic segmentation, the topic of this post, it is a little more tricky, and the following sections will present vision transformer architectures that decode the encoded input into an output segmentation.
+## SEgmentation TRansformer
+
+SETR uses the encoder exactly as described in the previous section, and proposes three different decoders to obtain the final segmentation:
+
+a) **SETR Naive**: This approach simply reshapes the sequence of embeddings (from the encoder) back into a 2D feature map and then applies bilinear upsampling to match the original input image resolution. The upsampling is quite coarse and might not capture fine details required for pixel-level segmentation.
+b) **SETR-PUP (Progressive Upsampling Decoder)**: In this approach, the patch embeddings are progressively upsampled in stages using transposed convolutions. Each stage doubles the resolution of the feature map until it reaches the original resolution. Allows for smoother and more refined upsampling, improving the ability to capture finer details in the segmentation map.
+c) **SETR-MLA (Multi-Level Aggregation Decoder)**: This decoder aggregates features from multiple layers of the Transformer encoder. It captures hierarchical information from different depths of the encoder, combining features of varying granularity. The combined features are then upsampled to the final resolution.
+
+![[Pasted image 20240929023037.png]]
+One key issue with ViT is the loss of spatial information every time that an image patch gets flattened and embedded into a 1D vector: we lose the intra-patch spatial structure.
+## Swin Transformer
+
+Hierarchical Vision Transformer using **S**hifted **Win**dows was proposed as a general purpose backbone for computer vision tasks such as image classification and dense prediction (e.g. semantic segmentation). Key points:
+
+**Hierarchical Feature Maps (CNN like)**
+
+Unlike ViT, which works on non-overlapping patches, **Swin Transformers build hierarchical feature maps** like a convolutional neural network (CNN). This means that as you go deeper into the network, the spatial resolution of the feature maps becomes smaller while the channel dimension increases (like in CNNs).
+
+This hierarchical structure allows Swin to handle **high-resolution images more efficiently**, which is crucial for tasks like segmentation, where pixel-level details are important *; because we can incorporate skip connections very much like U-Net does.*
+
+**Shifted Window Self Attention**
+
+In the standard Transformer, self-attention is computed globally across all tokens (patches), which can be computationally expensive for large images. Swin introduces the concept of **non-overlapping windows**. Instead of computing attention globally, **self-attention is calculated within each window** (local region) of the image. This reduces the computational complexity because each window is much smaller than the full image.
+
+To capture interactions **across windows**, Swin shifts the windows by a few pixels in subsequent layers, allowing the model to connect information between adjacent windows. This is the **shifted window mechanism**.
+
+Because Swin Transformer only computes self-attention within windows, the **computational cost scales linearly** with image size, compared to the quadratic scaling in standard ViTs.
+
+![[Pasted image 20240929032947.png]]
+
+Swin Transformer acts as a **backbone**—it extracts features from the input image, reducing the spatial dimensions and increasing the number of channels. By the end of the encoder (the Swin Transformer backbone), you have a feature map that’s smaller in spatial size (e.g., `1/16` or `1/32` of the original input) but with more channels (e.g., `768` or `1024` channels).
+
+The key task of the decoder is **upsampling** the downsampled feature maps back to the original resolution. This is often done using techniques like:
+- **Bilinear/Deconvolution (Transposed Convolution)**: Standard upsampling operations that resize the feature map.
+- **Skip Connections**: Like U-Net, the decoder can take feature maps from earlier (higher-resolution) stages of the encoder and combine them with the upsampled features, helping to preserve fine details.
+- Feature Pyramid Network (FPN) takes the **multi-scale feature maps** from different stages of the Swin backbone (e.g., at 1/4, 1/8, 1/16 resolution).
+
+## Segmenter
+
+Segmenter is a **pure transformer model** for segmentation tasks. 
+
+The patches, along with their positional embeddings, are passed through multiple **transformer encoder layers**. These layers apply **self-attention** to capture relationships between patches, resulting in a set of **contextualized patch embeddings** that contain both local and global information.
+
+The key difference between Segmenter and other transformer-based models like ViT lies in its **decoder**, which is specialized for segmentation tasks. 
+
+Segmenter directly predicts **segmentation masks for each patch**. It does this by adding a **mask token** for each class of interest to the patch tokens and learning how to predict the class label for each patch.
+
+![[Pasted image 20240929034749.png]]
+For each patch embedding output from the ViT encoder, Segmenter predicts a **probability distribution over the segmentation classes** (for each pixel within that patch). These probabilities are predicted for every patch at the same resolution they were initially embedded.
+
+Instead of progressively upsampling feature maps as you would in traditional convolutional networks or U-Net, Segmenter directly outputs **per-patch segmentation** predictions.
+
+## Transformers vs CNN approaches
+
+CNN-based models are generally inefficient when processing global image
+context and ultimately result in a sub-optimal segmentation. The reason for
+the sub-optimal segmentation of the convolution-based approaches is that
+convolution is a local operation which poorly accesses the global information
+of the image. But the global information is crucial where the global image
+context usually influences the local patch labeling. But modeling of global
+interaction has a quadratic complexity to the image size because it needs
+to model the interaction between each and every raw pixel of the image.
+
+- **Transformers** excel in global context modeling but are computationally heavy and data-hungry.
+- **CNNs** are efficient and handle local detail well but struggle with global context without added complexity.

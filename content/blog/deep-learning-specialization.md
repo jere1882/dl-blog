@@ -10,11 +10,11 @@ image: /thumbnails/coursera_dl_specialization.png
 ---
 ## Introduction
 
-My current employer gave me the chance to take the Deep Learning Specialization from DeepLearn.ai via Coursera. Even though this is quite a basic level course, I decided to give it a try and take the chance to revise my foundations.
+At work, we enrolled into the Deep Learning Specialization from DeepLearn.ai via Coursera. Even though this is quite a basic level course, I decided to give it a try and take the chance to revise my foundations.
 
-There is quite a lot of undeserved praise online for this course. It lacked depth, there were no structured course notes (just videos), and the above all author kept embarking on lengthy "intuitive" explanations aimed at people who did not take a proper calculus course.
+There is quite a lot of praise online for this course. It lacked depth, there were no structured course notes (just videos), and the above all author kept embarking on lengthy "intuitive" explanations aimed at people who did not take a proper calculus course. That said, I think it's great as a very comprehensive overview of the field.
 
-If you graduated from university, or if you already have some knowledge on neural networks, this course is probably not suitable for you. Nevertheless, even though I did not learn almost anything new, it was a great chance to revisit basic concepts and get a certificate that can be showcased in LinkedIn.
+If you graduated from university, or if you already have knowledge on neural networks, this course is probably too basic for you. Nevertheless, even though I did not learn almost that many new things, it was a great chance to revisit basic concepts and get a certificate that can be showcased in LinkedIn. Moreover, fifth part (sequence data) was quite new to me, never having delved deeper into certain topics.
 
 Below is a summary of the contents developed in the specialisation, based on my notes and takeaways.
 
@@ -1605,3 +1605,838 @@ And actually, as shown in the last equation, for the style cost we calculate the
 
 *If we were to define style purely on a pixel-by-pixel basis, we'd lose the abstract patterns that make up style. Instead, using correlations between feature maps lets the model ignore the exact placement of objects (which is more related to content) and focus on more global, perceptual qualities like texture and color schemes.*
 
+## Course 5: Sequence Models
+
+### Week 1: Recurrent Neural Network Model
+
+#### Basics
+
+Many tasks involve sequential data:
+
+- Speech recognition (**sequence to sequence**):
+    - X: wave sequence
+    - Y: text sequence
+- Music generation (**one to sequence**):
+    - X: nothing or an integer
+    - Y: wave sequence
+- Sentiment classification (**sequence to one**):
+    - X: text sequence
+    - Y: integer rating from one to five
+- DNA sequence analysis (**sequence to sequence**):
+    - X: DNA sequence
+    - Y: DNA Labels
+- Machine translation (**sequence to sequence**):
+    - X: text sequence (in one language)
+    - Y: text sequence (in other language)
+- Video activity recognition (**sequence to one**):
+    - X: video frames
+    - Y: label (activity)
+- Name entity recognition (**sequence to sequence**):
+    - X: text sequence
+    - Y: label sequence
+    - Can be used by seach engines to index different type of words inside a text.
+
+We can address these problems as supervised learning tasks, provided a labeled training dataset X, Y.
+
+Notation:
+
+* `X^(i)<t>`: the item in position t on the input training sequence i.
+* `T_X^(i)`: Length of the input training sequence i.
+* Similar notation for the outputs `y`.
+
+In tasks that involve text, there are different ways to represent words as fixed-length vectors:
+* A predefined corpus of words can be defined (e.g. 10K words), and one-hot encoding can be used to denote each unique word.
+* Special tokens like `<UNK>` to signal unknown word or `<END>` to signal the end of the sequence are also employed.
+
+#### Recurrent Neural Networks
+
+Standard networks (fully connected and CNNs), are unsuitable for sequential data:
+
+* Input and output sequences can have different lengths, but regular networks expect them to have fixed size.
+* Feedforward networks process inputs independently of each other, so they cannot account for any relationships between different time steps in a sequence. This limitation prevents the network from learning patterns that unfold over time or remembering prior context
+* No concept of "order" in the inputs.
+
+Thus, **recurrent neural networks (RNNs)** are introduced. 
+![[Pasted image 20240912192949.png]]
+
+RNNs process input data one time step at a time. At each time step `t`, the RNN takes the current input `x_t`​ and combines it with the **hidden state** `h_{t−1}`​ from the previous time step.
+
+The hidden state `h_t`​ serves as the memory of the network, storing information about past inputs. It is updated at each time step using the formula
+
+![[Pasted image 20240912193426.png]]
+
+The output at each time step `y_t`​ can be computed from the hidden state: 
+
+![[Pasted image 20240912193438.png]]
+
+Where `W_y`​ is the output weight matrix, `c` is the bias, and `g` is an activation function (often softmax or sigmoid).
+
+Note: Andrew uses `a` instead of `h`
+
+Remarks:
+* We have three sets of learnable weights: `W_h`, `W_y` and `W_x` . These will be trained via gradient descent.
+* The same weights are used across all time steps
+* activation function `f` is usually tanh or ReLU and `g` depends on the task, it could be a sigmoid
+
+Dimensions:
+* `d_x`: Input dimension. If we are using one-hot encoding with corpus size 10K, then `d_x = 10000`
+* `d_h`: Hidden state dimension. Size of the hidden state vector `h_t`. This is a hyperparameter.
+* `d_y`: Output dimension (size of the output vector `y_t`, fixed)
+* `W_x` transforms inputs `x_t` to hidden states `h_t`, thus it has shape `(d_h, d_x)`
+* `W_h` transforms the previous state into the current state, thus it's `(d_h, d_h)`
+* `W_y` transforms a hidden state into an output, this it's `(d_y,d_h)`
+
+RNNs allow for:
+* Sequential processing
+* Handling variable-length inputs
+* capturing temporal dependencies
+* take order into account
+#### Backpropagation through time
+
+Backpropagation now is more complicated:
+
+![[Pasted image 20240912194304.png]]
+
+The gradients have to flow back in time. 
+
+![[Pasted image 20240912194350.png]]
+The loss is going to be the addition of the individual loss at each output sequence element. Assuming this is a binary classification task, we could use binary cross entropy loss.
+
+#### Variations in the architecture
+
+The architecture just presented is suitable for a many-to-many sequence problem. Sometimes we'd only need to output a single value for the entire input sequence (sentiment classification) ; or output a sequence based on a single intput element (music generation).
+
+![[Pasted image 20240912194709.png]]
+
+Notice the second many-to-many which has encoder-decoder parts. The encoder encodes the input sequence into one matrix and feed it to the decoder to generate the outputs. Encoder and decoder have different weight matrices.
+![[Pasted image 20240912224557.png]]
+#### Language Model
+
+A **language model** is a model that learns the statistical properties of a language and predicts the probability of a sequence of words (or tokens). More specifically, it assigns probabilities to sequences of words in a way that reflects how likely a sequence is to occur in natural language.
+
+This could be useful in speech recognition, to disambiguate between:
+* *The apple and **pair** salad*  -> low probability
+* *The apple and **pear** salad* -> high(er) probability
+
+How do we build a language model using RNNs?
+* Get a training set: A large corpus of target language text.
+* Tokenize the training set by defining the vocabulary and applying one-hot encoding to each word.
+* Add end of sentence token after each sentence `<EOS>` and unknown token for unknown words `<UNK>`
+* Each sentence becomes a training sample.
+
+Example, given the sentence "Cats average 15 hours of sleep a day `<EOS>`", we use this sample to train as follows:
+
+![[Pasted image 20240912225055.png]]
+Each `y_t` being the probability of the next word.
+
+Once this is trained:
+* In order to **predict the chance of the next word**, we feed the sentence to the RNN and get from `y^<t>` the hot vector that maximizes the probability.
+* In order to **predict the probability of a sentence**, we compute:
+
+`p(y^<1>) * p(y^<2> | y^<1> ) * p(y^<3> | y^<1>, y^<2>) * ...`
+
+Which is just feeding the sentence into the RNN and multiplying the outputs.
+
+#### Sampling novel sequences
+
+After a language model is trained, we can sample new sentences by:
+
+![[Pasted image 20240912225854.png]]
+1. Pass `a^<0> = 0` and `x^<1> = 0` 
+2. Choose a prediction randomly from the distribution `\hat(y)^<1>`. This gives us a random beginning for the sequence.
+3. Pass the last predicted word and the hidden state to the RNN. Get a new prediction (presumably the most probable one from the distribution)
+4. Repeat (3) until the `<EOS>` token is predicted
+
+This model was implemented at word-level, it is possible to implement a character-level language model ; where the vocabulary are single characters.
+
+Pros of character level:
+* No `<UNK>` token, bounded vocabulary, can create any word.
+Cons:
+* Sequences are much longer
+* Thus, they are bad at capturing long-range dependencies.
+* Thus 2, more computationally expensive and harder to train
+
+Remark: The naive RNN is not very good at capturing very long-term dependencies, it quickly forgets what has seen before.
+#### Vanishing and exploding gradients in RNNs
+
+* If sequences are very long, the calculation of the gradients involves many many multiplications. Thus the vanishing gradient problem can arise.
+* Exploding gradients can be easily seen when your weight values become `NaN`. 
+![[Pasted image 20240912230617.png]]
+
+Solve exploding gradients:
+* Apply *gradient clipping*: if your gradient is more than some threshold - re-scale some of your gradient vector so that is not too big. So there are clipped according to some maximum value.
+* Truncated backpropagation: Not to update all the weights in the way back. Not optimal.
+Solve vanishing gradients:
+* Weight initialization
+* Use LSTM/GRU networks (next) 
+
+#### Gated Recurrent Unit (GRU)
+
+More complex version of a RNN that can help solve vanishing gradients and can remember longer dependencies.
+
+Basic RNN:
+![[Pasted image 20240912231259.png]]
+
+GRU:
+![[Pasted image 20240912232434.png]]
+
+**INTUITION**
+Gates are introduced to control what information should be kept, updated or forgotten. The gates help the GRU decide, at each time step, how much of the past information should be passed forward and how much of the current input should be used.
+
+**STEP 1: Compute the value of the gates**
+
+The candidate activation vector is computed using two gates:
+
+* The **reset gate** `r_t` determines how much of the previous hidden state to forget
+* The **update gate** `z_t` determines how much of the candidate activation vector to incorporate into the new hidden state
+
+```
+r_t = sigmoid(W_r * [h_t-1, x_t])  
+z_t = sigmoid(W_z * [h_t-1, x_t])
+```
+
+The gates use two weight matrices learned during training.
+
+**STEP 2: Compute the candidate activation vector h_t'*
+
+GRUs works by computing a **candidate activation vector** that combines information from the input `x_t` and the previous hidden state `h_{t-1}`.
+
+`h_t' = tanh(W_h * [r_t * h_t-1, x_t])`
+
+Where `W_h` is also learned during training. The candidate activation vector combines the previous state (after having been reset by the reset gate) and the new input.
+
+**STEP 3: Compute the new hidden state**
+
+By combining the candidate activation vector with the previous hidden state, weighted by the update gate.
+
+`h_t = (1 - z_t) * h_t-1 + z_t * h_t''
+
+**Why this helps**
+
+- If the update gate is **open** (close to 1), the GRU **keeps most of the previous information**, allowing it to carry forward long-term dependencies.
+- If the update gate is **closed** (close to 0), the GRU **focuses more on new inputs**, allowing it to update the hidden state with new information.
+
+Because the GRU has this selective memory ability, it can maintain relevant information from many time steps ago
+
+#### Long Short Term Memory (LSTM)
+
+Another type of recurrent unit, a little more complex than GRU. A third gate is added, called the **output gate**. This can make LSTM capable or learning more complex patterns, but also more prone to overfitting.
+
+![[Pasted image 20240913013049.png]]
+
+An LSTM unit receives three vectors: 
+* Two vectors from the LSTM itself at the previous instante: the cell state (C) and the hidden state (H)
+* An input vector from the sequence X at time t.
+
+The **three gates** are information selectors: they create selector vectors with values between zero and one, and near these two extremes (because of sigmoid activation fc).
+
+A selector vector is created to be elementwise multiplied by a vector of the same size. Thus, the selector vector eliminates information in certain positions.
+
+All three gates receive as inputs `X_t` and `H_{t-1}`. 
+
+The **forget gate** first decides what information to remove from the cell state.
+
+![[Pasted image 20240913014034.png]]
+
+After removing some information from `C_{t-1}` , we can insert new information. 
+* The **candidate memory** generates a candidate vector: a vector of information that is candidate to be added to the cell state.
+* The **input gate** generates a selector vector that is elementwise multiplied with the candidate vector. The result is added to the cell state vector.
+The resulting cell state vector is passed to the next LSTM unit.
+
+![[Pasted image 20240913015143.png]]
+
+Finally, the **output gate** is used to generate a hidden state for the LSTM from the cell state. 
+
+**HIDDEN STATE VS CELL STATE**
+
+The cell state is essentially the **long term memory** of the LSTM. It flows through the sequence with minimal modifications.
+
+The hidden state represents the **short term, immediate output** of the unit, which is heavily influenced by the current input. 
+
+#### Bidirectional RNN
+
+**Bidirectional RNNs** are a type of recurrent neural network designed to capture information from both past and future contexts by processing the input sequence in both forward and backward directions. This is particularly useful in tasks where the output depends not only on previous inputs but also on future ones.
+
+The two layers operate independently and have their own hidden states at each time step. After processing the sequence in both directions, the hidden states from both directions are combined (usually by concatenation or summation) to form the final output at each time step.
+
+
+![[Pasted image 20240913022622.png]]
+Bidirectional RNNs are ideal for tasks where the entire sequence is available and where both past and future contexts are important. However, if you're dealing with real-time data (like live speech recognition), a **unidirectional RNN** may be more appropriate because it processes data as it arrives without needing to wait for future inputs.
+
+The blocks here can be any RNN block including the basic RNNs, LSTMs, or GRUs.
+#### Deep RNNs
+In some problems its useful to stack some RNN layers to make a deeper network.
+
+![[Pasted image 20240913023147.png]]
+In deep RNN stacking, 3 layers is already considered deep and expensive to train. 
+
+In some cases you might see some feed-forward network layers connected after recurrent cells.
+
+| **Method**       | **Effective Memory Range**  |
+| ---------------- | --------------------------- |
+| **Vanilla RNN**  | ~5 to 10 words              |
+| **GRU**          | ~10 to 20 words             |
+| **LSTM**         | ~20 to 50+ words            |
+| **Transformers** | ~Unlimited (with attention) |
+Practical assignments: Randomly generate dinosaur names. 
+
+This one provides more insight into how RNNs are actually trained.
+1. Let's assume that there is a dataset of dinosaur names
+2. Take each name (which is a sequence of characters) and encode each character into a fixed-length vector
+3. We are going to train a RNN that predicts the probability distribution of the next letter in the name of a dinosaur. 
+4. From each training dinosaur name, we are going to have a bunch of X,y samples. E.g. from "Triceratops" we get the following training samples:
+	1. Input 0 Output T
+	2. Input: T   Output: R
+	3. Input TR  Output I
+	4. (...)
+	5. Input TRICERATOPS Output END TOKEN
+5. We can calculate cross entropy loss of the softmax of the output of the last layer and the one-hot encoding of the correct next letter. E.g. for training sample (3) we assume the ground truth is a probability distribution where letter I has prob 1 and all the rest 0.
+
+After training in many samples, the model learns to distribute these probabilities reasonably.
+
+After we have already trained this mode, at each step the model predicts a probability distribution over characters and we sample from that distribution (instead of picking the most likely character each time). Otherwise, we'd always predict the same names given a starting letter.
+![[Pasted image 20240913140429.png]]
+### Week 2: NLP and Word Embeddings
+
+#### Word Embeddings
+
+So far we have defined a fixed-length vocabulary, an represented words as one-hot sparse vectors that identify the word in the vocabulary.
+
+![[Pasted image 20240923151507.png]]
+
+Weaknesses:
+- High dimensionality
+- Lack of semantic information. This representation does not capture relationship between words. King and queen, related concepts, are represented by entirely different vectors. 
+- No notion of similarity between words which impairs the ability of the model to generalize learned patterns from one word to the other.
+- Mathematically, inner products are always 0 and distances are always the same.
+
+Solution: Learn a **featurized** representation of each of the words. E.g:
+![[Pasted image 20240923151947.png]]
+
+This representation is a **word embedding**, usually the features do not have such straightforward interpretation, but still are meaningful to establish relationships between different words. Modern word embeddings could use 50 to 1000 features to represent each word.
+
+We can try to visualize this using e.g. t-SNE algorithm to reduce features to 2 dimensions, and the expectation is that related concepts are clustered together:
+
+![[Pasted image 20240923152213.png]]
+#### Using word embeddings
+
+Let's consider the task of "named entity recognition" 
+
+![[Pasted image 20240923153243.png]]
+The model should be able to extrapolate from this training sentence and because of the closeness of word embeddings to produce the proper outputs for "Mahmoud Badry is a durian cultivator".
+
+The algorithmos used to learn word embeddings can examine billions of words of unlabeled text and learn the representation from them. It is possible to use learned embeddings from these large corpuses (available for download pretrained) and then fine-tune with a smaller set set of ~100k words.
+
+Properties of word embeddings:
+
+* Lower dimension than one hot encoding, but not sparse
+* Similarities between word embeddings are usually calculated via the **cosine similarity**, which will be large if the verctors are very similar. Euclidian distance could also be used as dissimilarity metric.
+![[Pasted image 20240923153719.png]]
+
+*A note on this: Cosine similarity:* 
+
+***Cosine Similarity** measures the cosine of the angle between two vectors, which means it focuses on the direction or orientation of the vectors, not their magnitude. This is particularly useful when the magnitude of the vectors is not as important as their relative direction. For example, in word embeddings, two words might have different magnitudes (e.g., due to varying frequency in a corpus), but what really matters is how they are related directionally in the embedding space.*
+
+***Euclidean Distance**, on the other hand, measures the absolute distance between two points in the vector space. This can be heavily influenced by the magnitude of the vectors, which might not be desirable when the goal is to assess similarity in terms of direction or semantic meaning rather than size.*
+
+This can be used for e.g. analogy reasoning.
+" man is to woman as king is to _ _ _ _ "
+We can subtract the respective embeddings:
+
+`e_man - e_woman = e_king - e_w` 
+
+Since we know that the distance between king and queen is approximately the distance between man and woman. To solve analogies like this one, we can calculate `argmax_w(e_w, e_king-e_man+e_woman)`.
+
+* The word embedding is usually implemented via an **embedding matrix** (which could be entirely learned). This matrix has one column of each word in the vocabulary  `(embedding_size , vocabulary_size)`
+![[Pasted image 20240923160325.png]]
+You can basically multiply the one hot embedding of a given word by E and obtain its embedding.
+
+* Usually we initialise `E` randomly and then try to learn all the parameters of the matrix. 
+
+#### Word2vec and GloVe
+
+#### CBOW
+Learning algorithms for word embeddings have gone from being more complex to being more simple. Let's follow that order.
+
+Let's consider a model called "bag of words", which is used to learn embeddings. The (self-supervised) task is "next word prediction on a sentence", in other words, a language model. 
+
+![[Pasted image 20240923165405.png]]
+
+In this setting, we have to optimize:
+* E: the embedding matrix
+* The weights and biases of the network itself
+* Notice that this is not a recurrent neural network. We define a fixed window size (6 here). Meaning that the network takes exactly the last 6 words and predicts the next one.
+* This model, built in 2003, produces decent word embeddings.
+* The **context** choice can actually vary:
+	* We can use a window of words before and after (e.g. 4 previous and next words, and predict the missing word in the middle) this is called **continuous bag of words**
+	* Just the last word
+	* **skip gram**: Take a single word as input and try to predict the context words around it. It tries to capture the likelihood of surrounding words given a particular word.
+
+To sum up, the language modeling problem poses a ML problem that allows the model to learn good word embeddings.
+
+##### Skip-gram
+
+Example sentence: "I want a glass of orange juice to go along with my cereal"
+
+1. We define a **context window**, which an integer parameter that determines how many words before and after the target word should be considered. For simplicity, let’s assume a context window size of 2. This means the model will look at 2 words to the left and 2 words to the right of the target word.
+2. Generate (target, context) pairs. The skip-gram will take each word on the sentence as the target in turn, and generate pairs (**target**, context). For instance, for the target "**glass**", it builds the following pairs:
+
+| Context | Target | How far |
+| ------- | ------ | ------- |
+| glass   | orange | -2      |
+| of      | orange | -1      |
+| juice   | orange | +1      |
+3. We train the model as a supervised learning problem where we input the target and try to predict the context.
+
+The network learns to adjust the weights so that, given the input (target word), it can produce outputs that have high similarity to the context words. This is not an easy learning problem because learning within -10/+10 words can become really hard.
+
+If we have a 10k-word vocabulary, the output of the network is a softmax over the 10k words.
+
+![[Pasted image 20240923171423.png]]
+This can be a problem if we have a huge vocabulary like 1M, because it becomes very slow. In this case, we can use a Hierarchical softmax classifier. 
+
+Before: A standard softmax layer is used to calculate the probability distribution over the entire vocabulary, which involves a dot product between the input vector and the weight matrix of size `V×D` (where `V` is the vocabulary size and `D` is the embedding dimension) and then normalizing these using a softmax function.
+
+**Hierarchical softmax classifier:**
+* The vocabulary is organized into a binary tree, where each leaf node represents a word in the vocabulary, and each internal node represents a binary decision (left or right child).
+* The path from the root of the tree to a leaf node defines a unique sequence of binary decisions that can be interpreted as the prediction process for that word.
+* Instead of predicting the probability distribution over all `V` words directly, the model predicts a series of binary decisions at each node in the tree.
+* If the tree is balanced, the number of decisions needed to reach a word is approximately `log_2(V)`
+* During training, instead of updating weights for all `V` words, the model only updates the weights along the path in the binary tree from the root to the target word, making training much faster.
+* The model is trained to predict the correct sequence of binary decisions leading to the target word.
+* The probability of a word is the product of the probabilities of taking the correct path at each internal node leading to that word. The model learns to assign probabilities to these binary decisions during training.
+
+Downsides: 
+* complexity of implementation
+* unbalanced trees
+* less accurate estimates
+* suboptimal for rare words
+
+In practice, the hierarchical softmax classifier doesn't use a balanced tree. Common words are at the top and less common are at the bottom. Why?
+
+1. Computational Efficiency:
+	* Frequent Words: In natural language, a small number of words are used very frequently (e.g., "the," "is," "and"), while the vast majority of words are rare. By placing these frequent words closer to the root of the tree, the model minimizes the number of decisions (or steps) required to predict these words. Since these words appear so often, reducing the computational cost of predicting them can lead to significant overall efficiency gains.
+	* Infrequent Words: Rare words, which occur less often, are placed deeper in the tree. While predicting these words requires more steps, the overall impact on computational efficiency is minimized because these predictions are made less frequently.
+2. Training Efficiency:
+	* Weight Updates: During training, the model updates the weights along the path from the root to the leaf node corresponding to the target word. For frequent words, shorter paths mean fewer weight updates per prediction, which speeds up training. Since frequent words dominate the training data, this leads to faster overall convergence.
+	* Less Frequent Words: Although rare words require more updates per prediction, the fact that they appear less frequently in the training data means this does not significantly slow down the overall training process.
+
+#### Word2vec
+
+Word2Vec is a neural network-based model that learns to represent words in a lower-dimensional space (typically hundreds of dimensions) where words with similar meanings are closer to each other. The key idea behind Word2Vec is to use the context of words to learn these representations.
+
+Word2Vec can be trained using one of the two approaches we just learnt: **Continuous Bag of Words (CBOW)** or **Skip-gram**. Both CBOW and Skip-gram aim to create word embeddings that capture semantic relationships between words, but they do so in slightly different ways. CBOW predicts a single target word from its context, while Skip-gram predicts multiple context words from a single target word. Word2Vec can be trained using **either** the Continuous Bag of Words (CBOW) model **or** the Skip-gram model, but not both simultaneously.
+
+The choice between **CBOW** and **Skip-gram** in Word2Vec often depends on the specific use case, dataset characteristics, and desired outcomes. Here are some general preferences and guidelines:
+
+When to Prefer CBOW:
+
+1. **Larger Corpora**: CBOW is often preferred when you have a large text corpus. It trains faster and can efficiently handle the abundance of context words.
+2. **Frequent Words**: If your focus is on predicting common words, CBOW performs well because it averages the context and effectively captures the surrounding information.
+3. **Training Speed**: If computational efficiency is crucial, CBOW is typically faster to train than Skip-gram.
+
+When to Prefer Skip-gram:
+
+1. **Smaller or Noisy Datasets**: Skip-gram is preferred when dealing with smaller or noisier datasets, as it can learn better representations for rare words.
+2. **Rare Words**: If you want to capture more nuanced relationships and better embeddings for less frequent words, Skip-gram excels because it predicts multiple context words for a single target word.
+3. **Complex Relationships**: Skip-gram is generally better at capturing complex relationships and semantic meanings due to its focus on predicting context from a single word.
+
+#### Negative Sampling
+
+In the original Skip-gram model, the goal is to predict the context words (i.e., words surrounding a target word) for each target word in a sentence. This requires the model to output a probability distribution over the entire vocabulary, which is computationally expensive, especially when dealing with large vocabularies.
+
+Negative sampling is an alternative to the full softmax that significantly reduces the computational complexity. Here's how it works:
+
+ Example:  "I want a glass of orange juice to go along with my cereal"
+
+|Context|Word|target|
+|---|---|---|
+|orange|juice|1|
+|orange|king|0|
+|orange|book|0|
+|orange|the|0|
+|orange|of|0|
+We get positive example by using the same skip-grams technique, with a fixed window that goes around. To generate a negative example, we pick a word randomly from the vocabulary.
+
+We will have a ratio of k negative examples to 1 positive ones in the data we are collecting.
+
+The idea is to train the model to distinguish the true context words (positive samples) from random words (negative samples). Instead of computing a full softmax, the model is trained using a simplified objective function. For a positive pair `(w_t, w_c)` and a set of negative pairs `(w_t, w_n)`, the objective is to maximize:
+
+![[Pasted image 20240924055044.png]]
+where `sigma` is the sigmoid function.
+* The first term maximizes the similarity (dot product) between the target word and its actual context word
+* The second term minimizes the similarity between target and negative samples
+
+The model used in this process is a simple neural network with a single hidden layer (essentially a linear model).
+
+*Why is the dot product used as a metric of similarity?*
+* computationally efficient to calculate
+* plays nicely with the gradient-based optimization techniques
+* The dot product between the target word vector and the context word vector is used to estimate how likely it is that they co-occur. Higher dot products indicate higher similarity, and thus, higher probability.
+
+#### GloVe word vectors
+
+**GloVe (Global Vectors for Word Representation)** is another technique to train word embeddings. This is how I understand it:
+
+First, we construct a **co-occurrence matrix** `X`, where each entry `X_{ij}`​ represents the number of times the word `j` appears in the context of word `i` across the entire corpus. The context is typically defined as the words surrounding the target word within a fixed window size. This is a deterministic process.
+
+Then, we are going to train a very very simple model (not a neural network like before). This model is going to take two words (say the ith and jth words of the vocabulary), and it is going to try to predict `log(X_{ij})`. So the task here is not to predict the missing word, etc ; but to predict the log of the co-occurrence matrix entry. Why the log? Because co-occurrences can vary wildly and a log scale is smoother.
+
+Moreover, the "model" is just going to take the word `i` and a context word `j`, calculate its embeddings `w_i` and `c_j` via two learnable matrixes W and C respectively, and output `w_i^T c_j` (their dot product). 
+
+The cost function optimized via gradient descent is just a squared error with a weighting factor `f(X_ij)` which just makes unfrequent combinations weigh less.
+
+![[Pasted image 20240924155238.png]]
+Notice that we will use two different embedding matrixes, one for the target word and another for the content word. The final embedding for word `i`, having optimized the entire model, is going to be the average of `c_i` and `w_i`.
+
+This word embedding will learn vector representations of words by leveraging global co-occurrence statistics from a corpus. The key idea behind GloVe is to learn word vectors such that the relationships between words in the vector space reflect the statistical relationships between words in the corpus. 
+
+GloVe aims to capture the ratio of co-occurrence probabilities rather than just the raw co-occurrence counts. This is because these ratios provide meaningful information about word relationships.
+
+Why do this?
+- If the dot product of two word embeddings is **large**, it means that the words iii and jjj are **strongly correlated**—i.e., they appear together often in the text.
+- If the dot product is **small**, it indicates that the words don’t co-occur frequently or are less related.
+
+For example, words like "king" and "queen" would have a relatively high dot product because they appear in similar contexts, while "king" and "car" would have a much lower dot product since they rarely co-occur in the same contexts.
+
+#### Notes and examples
+
+- Because word embeddings are very computationally expensive to train, most ML practitioners will load a pre-trained set of embeddings.
+- Embeddings are not usually interpretable e.g. an axis is not going to be "gender"
+
+We can then do e.g. sentiment classification using a recurrent architecture and inputing the embeddings:
+
+![[Pasted image 20240924161235.png]]
+
+Word embeddings can be "biased" e.g. gender, ethnicity. For instance the analogies "father is to doctor as mother is to nurse" are generated.
+
+We could try to reduce gender bias by intervening the embedings... 
+
+"Babysitter and doctor need to be neutral so we project them on non-bias axis with the direction of the bias. The direction of the bias is calculated by averaging the difference between a bunch of pairs of embeddings like (he,she) , (male,female)".
+
+The bottom line:
+
+*When learning word embeddings, we create an artificial tasks (such as estimating `P(target∣context)`). It is okay if we do poorly on this artificial prediction task; the more important by-product of this task is that we learn a useful set of word embeddings.*
+
+#### Week 3: Sequence models and attention mechanism
+
+#### Sequence models
+
+##### Models
+
+Let's dive into the task of translating French to English, as concrete example of many-to-many recurrent task. Here's an example:
+
+![[Pasted image 20240926064915.png]]
+We'll work with a recurrent architecture based on RNN (LSTM or GRU included). The left part is the **encoder** RNN, which takes the input sequence one token at a time. It outputs a vector that encodes the entire input. The right part is the **decoder** RNN (a different RNN with separate weights), which takes the output of the encoder as the context and generates (one token at a time) the translated sentence.
+
+![[Pasted image 20240926065313.png]]
+
+Notice that the output of the decoder on each step is a softmax across the vocabulary in English.  Also instead of starting with an empty/zero context as in vanilla RNN, we pass the output of the encoder as the context of the decoder RNN.
+
+A similar architecture can be used for image captioning, where a CNN encodes an image which is then fed as context input to a RNN.
+
+![[Pasted image 20240926070100.png]]
+##### Picking the most likely sentence
+
+Notice that the decoder is going to predict a probability distribution over words in the vocabulary. In the language model setting, when we tried to generate text (e.g. shakespeare poems), we would generate text by sampling from the distribution and feeding it to the network recursively.
+
+![[Pasted image 20240926070636.png]]
+
+However, for e.g. machine translation, we want the **best** translation, we don't want to risk sampling something sub optimal:
+
+![[Pasted image 20240926070919.png]]
+
+One may be tempted to go for a greedy approach to pick the final translation:
+1. Input the French sentence to the encoder, and pass the encoder output as initial context to the decoder
+2. On each decoder step, pick the **most probable** (highest softmax) word, add it to the translation so far, and feed it to the RNN recursively.
+
+In practise, this doesn't really work well. E.g:
+
+ *Suppose that when you are choosing with greedy approach, the first two words were "Jane is", the word that may come after that will be "going" as "going" is the most common word that comes after " is" so the result may look like this: "Jane is going to be visiting Africa in September.". And that isn't the best/optimal solution.*
+
+Instead of the greedy approach, we need to get a better solution. The optimal translation would be the one that maximizes the conditional probability (which is the learned softmax):
+
+![[Pasted image 20240926185223.png]]
+
+This is a huge space of options to explore and it's impossible to find the optimal. Greedy search is a bit of a bad search heuristic, but there is a better alternative: **beam search**.
+
+Beam search helps approximate the most likely translation by keeping track of multiple hypotheses at each time step. If you generate the translation word by word using only the highest-probability word at each time step (greedy search), the model might miss better overall sequences because some of the best translations may involve words with lower probabilities at earlier time steps.
+
+Beam search mitigates this by exploring multiple possibilities in parallel, keeping track of the top _k_ most likely sequences (where _k_ is the beam width, a hyperparameter).
+
+1. **Initialization**:
+    - Start with the encoded sentence from the encoder.
+    - The first word of the output sequence is typically a special token, such as `<start>`.
+    - At the first time step, the decoder outputs a probability distribution over the target vocabulary using softmax.
+2. **Beam Expansion**:
+    - Instead of choosing just the most probable word (as in greedy search), beam search selects the _k_ most probable words (beam width _k_).
+    - Each of these _k_ words is considered as the start of a possible translation. These words become separate hypotheses.
+3. **Recursion**:
+    - For each of these _k_ hypotheses, the decoder generates the next word’s probability distribution (softmax).
+    - For each hypothesis, you compute the probabilities of continuing the sentence with each word in the vocabulary.
+    - Now, you have _k_ hypotheses, each with a full vocabulary of possible next words. But you only keep the _k_ best sequences across all hypotheses (based on their cumulative probabilities).
+    - This process repeats for each time step until an end condition is met (like an `<end>` token or a maximum sequence length).
+4. **Cumulative Probability**:
+    - Beam search tracks the overall sequence probability, which is the product of the probabilities of the chosen words at each step.
+    - Since probabilities are between 0 and 1, their product decreases exponentially. To avoid numerical underflow, log probabilities are typically used. So, instead of multiplying probabilities, the log probabilities are summed.
+
+In industry standards, perhaps k=10 is a normal result ; in academia they may use k ~ 1000  when trying to squeeze the maximum performance possilble. k=1 is greedy search.
+
+##### Length optimization
+
+**Length optimization**: Recall that the cumulative probability that we keep and try to optimize is the product of the conditional probability of each word:
+![[Pasted image 20240926185756.png]]
+`P(y<1> | x) * P(y<2> | x, y<1>) * ... * P(y<t> | x, y<y(t-1)>)`
+
+Since probabilities are almost always lower than 1, this makes longer sequence have smaller probabilities and thus (1) cause numerical instability (2)  benefits shorter translations. 
+
+To solve (1)  we sum the logs, and optimize the log probabilties.
+
+![[Pasted image 20240926190145.png]]
+
+To solve (2) we normalize by the number of elements in the sequence (powered to a hyperparameter that actually governs how much we normalize... people use 0.7)
+![[Pasted image 20240926190310.png]]
+
+To optimize k (called B sometimes) we may look into the errors:
+* Look at a bunch of samples that were mistranslated
+* Calculate the cumulative probability of the translation and of the ground truth.
+	* If the probability of the beam-search approximation is way smaller than the probability of the ground truth, they there is a search issue, and perhaps increasing B is a good thing.
+	* otherwise, the RNN is at fault
+
+##### BLEU Score
+
+The BLEU (Bilingual Evaluation Understudy) score is a metric used to evaluate the quality of machine-translated text by comparing it to one or more reference translations. It’s widely used in machine translation to assess how close the generated translations are to human translations, since there may be many valid translations.
+
+An **n-gram** is a contiguous sequence of words in a sentence. For example:
+- 1-gram (unigram): "the"
+- 2-gram (bigram): "the dog"
+- 3-gram (trigram): "the dog sleeps"
+- BLEU typically considers up to 4-grams (unigrams, bigrams, trigrams, and 4-grams).
+BLEU measures the overlap of n-grams between the machine translation and the reference translations.
+
+BLEU computes **precision** for n-grams, which is the proportion of n-grams in the machine translation that match n-grams in the reference translation(s).
+
+E.g:
+reference translation: "The cat is on the mat"
+machine translation: "The cat is mat"
+
+- **Unigram precision**: The unigrams in the machine translation are "The", "cat", "is", and "mat". These words also appear in the reference translation. So, the unigram precision is 4/4=1
+- **Bigram precision**: The bigrams in the machine translation are "The cat", "cat is", and "is mat". Only "The cat" and "cat is" appear in the reference, so the bigram precision is 2/3=0.67.
+- **Trigram precision**: "The cat is" and "cat is mat" ; thus 0.5
+- **4-gram precision**: There is a single 4-gram, which is not in the reference. thus, 0/1 = 0.
+
+Importantly, BLEU uses **modified precision** to avoid rewarding the model for simply repeating words many times. It caps the count of each n-gram by the maximum number of times it appears in the reference.
+
+E.g. if the prediction is "the the the the", the unigram precision is 1/4 insead of 4/4.
+
+BLEU also implements a BP penalty (brevity penalty) to penalize too short sentences:
+
+![[Pasted image 20240926215934.png]]
+
+
+Putting it all together, the final BLEU score is the product of the geometric mean of the n-gram precisions, times the brevity penalty.
+
+![[Pasted image 20240926220953.png]]
+`BLEU = BP * P_n`
+
+Strengths:
+- **Simple and fast**: BLEU is easy to compute and widely accepted.
+- **Works well with large datasets**: It correlates well with human judgments when comparing many translations.
+Weaknesses:
+- **No consideration of meaning**: BLEU focuses purely on matching words and n-grams, without considering whether the translation is grammatically correct or preserves meaning.
+- **No reward for fluency**: A translation can score highly even if it's awkward or unnatural, as long as it has good n-gram matches.
+- **Shortcomings for individual sentences**: BLEU was designed to work well on **corpora** (large datasets), so its usefulness for evaluating individual sentences can be limited.
+
+**Motivating the next section**
+- If you had to translate a book's paragraph from French to English, you would not read the whole paragraph, then close the book and translate.
+- Even during the translation process, you would read/re-read and focus on the parts of the French paragraph corresponding to the parts of the English you are writing down.
+- The attention mechanism tells a Neural Machine Translation model where it should pay attention to at any step
+
+#### Attention model intuition
+
+The **attention mechanism** was indeed introduced in the context of machine translation, specifically to address some key limitations of the basic sequence-to-sequence (Seq2Seq) models using RNNs (LSTMs/GRUs).
+##### Problem with Basic RNN (Seq2Seq) Model:
+
+In the basic Seq2Seq model:
+
+1. The **encoder** reads an input sentence (e.g., in French) and encodes it into a **fixed-size context vector** (also called the hidden state), which is passed to the **decoder**.
+2. The **decoder** then generates the translated sentence (e.g., in English) word by word based on this context vector.
+
+The context vector is a **fixed-size summary** of the entire input sentence, no matter how long the sentence is. This can lead to two key issues: information bottleneck and context loss over long sequences.
+##### How the Attention Mechanism Helps
+
+The **attention mechanism** was introduced to overcome these limitations by allowing the decoder to focus on different parts of the input sentence at each decoding step. Instead of relying on a single fixed context vector, attention gives the model the ability to access **all hidden states of the encoder** dynamically.
+
+Here’s how attention helps:
+- At each step of the decoder’s generation process, instead of using a single fixed context vector, the decoder can **attend to specific words** in the input sentence, using a weighted combination of all the encoder's hidden states.
+- The model learns to decide **which parts of the input are most relevant** to the current decoding step.
+##### How the Attention Mechanism Works:
+
+- **Encoding**:
+    - The input sentence `X=(x1,x2,…,xn)` is passed through the encoder (an RNN/LSTM/GRU).
+    - At each time step, the encoder generates a hidden state `h_t`​, which is a representation of the input word at that time step, capturing both the current input word and the context of previous words.
+    - Instead of collapsing all these hidden states into a single vector, we keep **all hidden states**​, one for each word in the input.
+- **Decoding with Attention**:
+    - At each step `t` of decoding, the decoder generates a hidden state `s_t`​ (its internal representation at time step `t`, based on the words generated so far).
+    - The attention mechanism then computes **attention scores** for each encoder hidden state `h_i`​, determining how much attention to give to each input word.
+    - The attention score `e_{t,i}`​ between the decoder hidden state `s_t`​ and the encoder hidden state `h_i`​ is calculated, typically using a **similarity function** such as dot product, general linear transformation, or learned neural network function (e.g., a small feed-forward neural network):
+        ![[Pasted image 20240926225537.png]]
+        *e stands for energies*
+    - These scores are then normalized to form **attention weights** `\alpha_{t,i}` using the softmax function:
+        ![[Pasted image 20240926225609.png]]
+    - The attention weights `\alpha_{t,i}`​ represent the importance of each encoder hidden state `h_i`​ for the current decoding step `t`.
+- **Context Vector**:
+    - Using the attention weights, the model computes a **context vector** for the current decoding step. The context vector `c_t`​ is a weighted sum of the encoder hidden states `h1,h2,…,hn`:
+        ![[Pasted image 20240926225755.png]]
+    - This context vector `c_t`​ contains information about the parts of the input sentence most relevant to generating the current output word.
+- **Generating the Output Word**:
+    
+    - The decoder uses both its current hidden state `s_t`​ and the context vector ctc_tct​ to predict the next word in the output sequence:
+        ![[Pasted image 20240926225912.png]]
+    - This step generates the probability distribution over the target vocabulary, from which the next word is chosen.
+
+
+![[Pasted image 20240927163550.png]]
+
+Here we can zoom into what a single "Attention" block is doing:
+
+![[Pasted image 20240927163655.png]]
+
+To sum up: When generating output token t, we do it by combining all hidden states from the encoder, weighed by attention coefficients. Then we pass on a context. Notice that the encoder may be a bidirectional RNN.
+
+Notes:
+* There are two separate LSTMs in the previous model: pre-attention (encoder) and post-attention (decoder).
+* If we use LSTM, remember that it has both a hidden state and a cell state. 
+* There are variants where the post-attention LSTM at time t' only takes the hidden state `s_t` and the cell state `c_t`, but not the prediction at the previous time-step;  this may be suitable for applications where there isn't a strong dependency between previous character and next character (unlike language translation)
+
+
+![[Pasted image 20240927160946.png]]
+simplified view
+##### The complexity of attention
+
+The attention mechanism described above involves computing **scores** between the current decoder hidden state and **every encoder hidden state**. 
+
+For each output word `t` (where the length of the target sequence is `m`), we calculate the score for `n` words in the input sequence. Thus, `m x n` operations. If `m` and `n` have similar lengths, this means that the computational cost is `O(n^2)`
+
+This means the computational cost grows **quadratically** as the sequence gets longer
+
+##### Visualising attention weights
+
+![[Pasted image 20240927000009.png]]
+The image shows which words in the English sentence are most important for predicting each word in the French sentence according to the attention mechanism.
+
+##### Speech recognition
+
+A clip of audio is just a sequence of numbers. e.g. a 10 second audio clip is represented by 441000 numbers.
+
+You can build an accurate speech recognition system using the attention model that we have descried in the previous section. One of the methods that seem to work well is CTC cost "Connectionist temporal classification".
+
+Notice, that the number of inputs and number of outputs are the same here, but in speech recognition problem input X tends to be a lot larger than output Y.
+
+![[Pasted image 20240927000933.png]]
+
+The CTC cost function allows the RNN to output something like this:
+
+`ttt_h_eee<SPC>___<SPC>qqq___`  (from a clip saying "the q") where
+* `_` is the blank caracter
+* `<SPC>` is the space character
+* A basic rule is to collapse repeated characters not separated by blank
+
+There is an interesting assignment where we predict 1 in a sound clip if the word "activate" has just been said. Similar to what an alexa would do when someone says alexa.
+
+![[Pasted image 20240928195640.png]]
+#### Week 4: Transformers
+##### Self-Attention
+
+Intuition: We have studied architectures that are able to process sequential data, but they have the disadvantage that they have to process each input token one at a time.
+
+Transformers overcome this limitation by processing the entire input **at once**. For each element in the input sequence  `x^<i>`, the **self-attention** mechanism is going to calculate another representation of that element `A^<i>` by looking at the surrounding elements of the sequence and producing an "attention-based" representation.
+
+E.g. for `l'Afrique` in the following sentence, it will produce a "contextualized representation" of the word. It actually does this in parallel for all words.
+
+![[Pasted image 20241003195526.png]]
+
+The actual calculation of `A^<i>` bears some resemblance to the attention mechanism we studied before, in the sense that a softmax is calculated. 
+
+![[Pasted image 20241003195756.png]]
+
+However, there are a lot of new terms. For instance, in order to calculate the self-attention representation `A^<3>` of `l'Afrique`, we proceed as follows:
+
+![[Pasted image 20241003202542.png]]
+
+(1) *for each input element* Calculate three vectors `q<3>, k<3>` and `v<3>` (query, key and value) using a learned projection `W^Q`, `W^K`, `W^V`. 
+
+* The **query**: "What's happening there?"  (in `l'Afrique`)
+* The **key** tells us how good an answer each other word is
+	* `q<3> . k<1>` : How good an answer to the question word 1 is
+	* `q<3> . k<2>` : How good an answer to the question word 2 is.
+	* Each dot product tells us how much relevant as a context each other word is. They are called  **attention scores**.
+	
+(2) We will calculate a **softmax** over all the `q<3> . k` multiplications. The result is a probability distribution, since all resulting **attention weights** add up to 1. Remark: They are single scalar values associated with each sequence element.
+- *WHY A SOFTMAX? The scores might not be bounded, leading to potential instabilities during training.*.
+
+(3) We calculate a weighted sum of all the values using the output of the softmax as coefficients.
+
+We can actually compute everything at once:
+
+![[Pasted image 20241003202639.png]]
+* `d_k` is a scale to the dot product to prevent convergence issues
+
+##### Multi-Head Self-Attention
+
+We will have N blocks of self attention running in parallell.
+
+Given an input `X`, each of the N heads will calculate its own `K_h`, `Q_h`, `V_h` using its own learnable matrixes.
+
+The output of each head will be a tensor of the same dimensionality than `X`.
+
+![[Pasted image 20241004165302.png]]
+
+Since we have `n` heads, we'll have `n` attention outputs that will be concatenated along the feature dimension.
+
+`Concat(head1​,head2​,…,headH​)`
+
+Finally, a learnable weight matrix `W^O` is used to combine information from all heads and project it back into the original dimensional space (same shape as `X`)
+
+Intuition: Each head can focus on different parts of the sequence or capture different relationships between words or tokens.
+
+Practical tips: The number of heads usually ranges between 8 (original transformer) and 24 (GPT-3).
+
+![[Pasted image 20241004170021.png]]
+
+##### The transformer architecture
+
+Let's study the original architecture, designed for sequence-to-sequence tasks.
+![[Pasted image 20241004170134.png]]
+**Positional encoding:** Used to give the model a sense of the order of the input tokens, since the self-attention mechanism is inherently **order-agnostic** (unliKe RNNS). Self-attention treats the input sequence as a set and has no notion of token position unless explicitly provided.
+
+In the original Transformer, positional encoding is added to the input embeddings:
+
+![[Pasted image 20241004170359.png]]
+
+![[Pasted image 20241004222153.png]]
+Each row represents a positional encoding - notice how none of the rows are identical! 
+
+Note: modern systems use learned positional embedding instead of sine-cosine-based ones. In this approach, the positional encodings become trainable parameters, similar to the word embeddings.
+
+**Add & Norm**: Residual connections and layer normalization, crucial for stabilizing training and improving information flow.
+
+**MLP**: Self-attention by itself is actually a **linear operation**, despite how it might seem at first. The non-linearity in the Transformer architecture comes from other components, like the activation functions (e.g., ReLU) in the feed-forward neural networks (MLPs), not from the self-attention mechanism itself.
+
+**Autoregression**
+The encoder is used just once to encode the entire input. Then, the decoder is going to generate the output sequence one token at a time, using self attention with:
+* The encoder output as **Key** and **Value**
+* The **queries** come from the sentence generated so far
+* actually, **we still use learned weight matrices to generate the Queries (Q), Keys (K), and Values (V),** but the inputs for these matrixes come from different sources.
+
+
+**Training and Masked self attention**
+The first self-attention mechanism in the decoder is **masked** to ensure that the model generates output in a **causal** or **auto-regressive** manner.
+
+During training, the model has access to the entire target sequence. If the self-attention mechanism were not masked, the model could "cheat" by looking ahead at future tokens that it is supposed to predict, leading to **information leakage**. 
+
+During training in a Transformer model, the **loss is calculated** using the predicted tokens generated by the decoder compared to the **ground truth target sequence**. At each time step, the decoder processes the input token (the previous ground truth token, **forced teaching**) and generates a probability distribution over the vocabulary for the next token.
+
+The total loss for the entire sequence is computed by summing the loss across all time steps.
+
+![[Pasted image 20241018033436.png]]

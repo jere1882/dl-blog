@@ -233,7 +233,7 @@ From 2018. A simple stock of transformer blocks (as described above), pretrained
 
 Unlike the original Transformer encoder which processes text in a unidirectional (left-to-right) manner, BERT uses bidirectional context, allowing it to understand words based on their surrounding words in both directions.
 
-*The original transformer we described above presents the self attention mechanism that is already able to attend to words before and after a given word in the input sequence. BERT is specifically designed to leverage this in a more structured way by using specific pretraining tasks that force the model to rely on what's after and before e.g. predict the missing word. So, the original Transformer encoder does indeed use bidirectional attention in practice, but BERT’s pretraining methodology with MLM explicitly enhances its ability to leverage and understand bidirectional context.*
+*The original transformer we described above presents the self attention mechanism that is already able to attend to words before and after a given word in the input sequence. BERT is specifically designed to leverage this in a more structured way by using specific pretraining tasks that force the model to rely on what's after and before e.g. predict the missing word. So, the original Transformer encoder does indeed use bidirectional attention in practice, but BERT’s pretraining methodology with MLM explicitly enhances its ability to leverage and understand bidirectional context.*￼￼
 
 * Human level performance on a variety of language tasks such as question answering, sentiment classification
 * Uses WordPiece tokenization, which is somewhere in between mord-level and character-level sequences.
