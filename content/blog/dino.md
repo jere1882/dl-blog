@@ -7,7 +7,7 @@ slug: dino-self-distillation-with-no-labels
 title: DINO - self-distillation with no labels
 description: Let's go over the paper "Emerging Properties in Self-Supervised Vision Transformers"
 date: 2024-10-27
-image: /thumbnails/pick_architecure.jpeg
+image: /thumbnails/DINO.jpeg
 ---
 # Introduction
 

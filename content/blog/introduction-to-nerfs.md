@@ -8,7 +8,7 @@ slug: introduction-to-nerfs
 title: Introduction to Neural Radiance Fields (NERFS)
 description: In this post I go over the original NERF paper as well as a selection of follow up works.
 date: 2024-09-08
-image: /thumbnails/pick_architecure.jpeg
+image: /thumbnails/NERF.png
 ---
 # Introduction
 These are my notes on the popular 2020 paper that introduced NeRF
