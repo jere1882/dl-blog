@@ -5,14 +5,14 @@ tags:
 aliases: 
 publish: true
 slug: introduction-to-nerfs
-title: Introduction to Neural Radiance Fields (NERFS)
+title: Introduction to Neural Radiance Fields (NERF)
 description: In this post I go over the original NERF paper as well as a selection of follow up works.
 date: 2024-09-08
 image: /thumbnails/NERF.png
 ---
 # Introduction
 These are my notes on the popular 2020 paper that introduced NeRF
-# What are NeRFs used for?
+# What are NeRF used for?
 
 ![[Pasted image 20240908173357.png]]
 
