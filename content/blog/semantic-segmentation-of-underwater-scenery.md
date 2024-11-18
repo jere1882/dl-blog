@@ -7,7 +7,7 @@ publish: true
 slug: semantic-segmentation-of-underwater-scenery
 title: Semantic Segmentation of Underwater Scenery
 description: Application of ViT and other architectures to a novel semantic segmentation task.
-date: 2024-08-03
+date: 2024-11-03
 image: /thumbnails/underwater_segmentation.png
 ---
 ## Introduction
