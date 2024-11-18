@@ -183,9 +183,8 @@ The star method implemented by NeRFStudio is **nerfacto**, which basically takes
 
 Here is a short demo of one of the NeRF's I trained at home. Stay tuned while I finish writing this blogpost!
 
-
-<iframe width="916" height="389" src="https://www.youtube.com/watch?v=DoU7-JTeMzw" title="NeRF of my apartment" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-
-
-
+<iframe width="560" height="315" src="https://www.youtube.com/embed/DoU7-JTeMzw" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+</iframe>
