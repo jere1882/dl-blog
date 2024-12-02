@@ -155,6 +155,10 @@ export const Tag = defineDocumentType(() => ({
       type: "string",
       required: true,
     },
+    postSlug: {
+      type: "string",
+      required: false,
+    },
   },
   computedFields,
 }))
