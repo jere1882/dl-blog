@@ -1,20 +1,17 @@
 import Image from "next/image"
 import Link from "next/link"
 import basicsIcon from "@/assets/logos/basics.png"
-import ARresearchIcon from "@/assets/logos/conicet.jpg"
-import interpretabilityIcon from "@/assets/logos/interpretability.jpeg"
+import foundModelsIcon from "@/assets/logos/foundation_models.jpg"
+import nerfIcon from "@/assets/logos/nerf_2.gif"
 import computerVisionIcon from "@/assets/logos/semseg.gif"
-import transformerIcon from "@/assets/logos/transformers.png"
 import { FORMAT_H3 } from "@/styles/format"
 
 import { cn } from "@/lib/utils"
 
 const ICONS = {
   "Computer Vision": computerVisionIcon,
-  Transformers: transformerIcon,
-  "Deep Learning Basics": basicsIcon,
-  Interpretability: interpretabilityIcon,
-  "Research in Argentina": ARresearchIcon,
+  "View Synthesis": nerfIcon,
+  "Foundation Models": foundModelsIcon,
 }
 
 export function TechCard({

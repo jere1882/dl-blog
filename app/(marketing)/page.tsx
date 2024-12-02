@@ -12,21 +12,23 @@ import { GitHubStars } from "@/components/github-stars"
 import { getTagsItems, TagGroup } from "@/components/tag-group"
 import { TechCard } from "@/components/tech-card"
 
-const TECHNOLOGIES = [
-  "computer-vision",
-  "transformers",
-  "deep-learning-basics",
-  "interpretability",
-  "ML-research-in-Argentina",
-]
+const TECHNOLOGIES = ["computer-vision", "view-synthesis", "foundation-models"]
+
+const TECHNOLOGY_POSTS = {
+  "computer-vision": "semantic-segmentation-of-underwater-scenery",
+  "view-synthesis": "indoor-nerf-reconstruction",
+  "foundation-models": "k-correction-via-foundation-model",
+}
 
 export default async function IndexPage() {
   const tagsItems = await getTagsItems(allTags)
 
-  const technologiesTags = TECHNOLOGIES.map(function (value) {
-    return allTags.find(function (obj) {
-      return obj.slug === value
-    })
+  const technologiesTags = TECHNOLOGIES.map((value) => {
+    const tag = allTags.find((obj) => obj.slug === value)
+    return {
+      ...tag,
+      postSlug: TECHNOLOGY_POSTS[value], // Add the specific blog post slug
+    }
   }) as Tag[]
 
   const posts = allPosts
@@ -81,7 +83,7 @@ export default async function IndexPage() {
             Spotlight
           </h2>
           <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            {"Key areas of focus in my machine learning explorations"}
+            {"Selected projects from my main areas of interest."}
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-5xl md:grid-cols-3">
@@ -90,7 +92,7 @@ export default async function IndexPage() {
               key={tag.slug}
               name={tag.tag}
               description={tag.description || ""}
-              link={tag.routepath}
+              link={`/blog/${tag.postSlug}`} // Redirect to the specific blog post
             />
           ))}
         </div>

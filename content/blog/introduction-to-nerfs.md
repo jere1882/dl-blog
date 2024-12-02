@@ -81,3 +81,32 @@ After the original 2020 paper, which for machine learning standards is ancient b
 * Efficiency improvements, some implementation allowing even real-time rendering speeds.
 * Enhanced realism
 * Extend to 3D reconstruction, video, augmented reality
+
+# Metrics 
+  
+Evaluating the quality of a Neural Radiance Field (NeRF) reconstruction typically involves measuring how well the rendered views match the ground truth views. Common metrics are:
+
+1. **Peak Signal-to-Noise Ratio (PSNR)**  
+   - Measures the similarity between the rendered and ground truth images.
+   - Higher PSNR indicates better reconstruction quality.
+
+2. **Structural Similarity Index Measure (SSIM)**  
+   - Evaluates perceptual similarity, focusing on structural information in the images.
+   - Values range from 0 to 1, with 1 being a perfect match.
+
+3. **Mean Squared Error (MSE)**  
+   - Quantifies pixel-wise differences between rendered and ground truth images.
+   - Lower MSE indicates better reconstruction.
+
+4. **Learned Perceptual Image Patch Similarity (LPIPS)**  
+   - Measures perceptual differences using features extracted from a deep neural network.
+   - Lower LPIPS scores indicate better perceptual quality.
+
+5. **Rendering Speed and Efficiency**  
+   - Evaluates the time taken to generate a single view.
+   - Important for real-time or practical applications.
+
+6. **Novel View Synthesis Accuracy**  
+   - Tests how accurately NeRF renders unseen viewpoints by comparing to withheld validation images.
+
+IMO, metrics cannot replace **visual Inspection** , especially for evaluating geometric consistency, artifacts, and texture quality in rendered scenes.

@@ -20,45 +20,113 @@ To push the limits of NeRFs, I imposed significant constraints on the training d
 
 These challenges make the task much harder. NeRFs are typically tested on small objects and often struggle to scale to larger, more complex scenes. Additionally, training on images from a single plane makes it especially difficult to reconstruct views at different camera heights, and lower image resolution exacerbates the problem. Yet, the strong results I obtained despite these restrictions highlight NeRFs’ potential for applications in **robotics industries**, where constrained data collection is a common scenario.
 
-Finally, I’ll showcase advanced NeRF variants that incorporate NLP prompts to perform tasks requiring semantic understanding of the environment. As a bonus, I’ll compare NeRFs with an emerging alternative: **Gaussian Splatting**.
+Finally, I’ll showcase advanced NeRF variants that incorporate NLP prompts to perform tasks requiring semantic understanding of the environment. As a bonus, I’ll compare NeRFs with a classical alternative: **Gaussian Splatting**.
 
 # Data Collection
 
-Let's quickly go over the two datasets that I collected for these experiments. Below you can see a plane of my apartments, where I collected video using an iPhone 14.
+Let's quickly go over the two datasets that I collected for these experiments. Below you can see a plane of my apartment, where I collected video using an iPhone 14.
 
-* For dataset 1, I walked around holding the phone in my forehead, capturing video for about 3 minutes from different viewpoints. I was always facing forward, meaning that the camera poses should roughly lie at `z=1.75` meters and a fixed angle around the `x` and `y` axis.
-* For dataset 2, I attached the phone to a wheeled toy at a height of 5 cm from the floor. I moved the toy around the home, capturing footage from a very low viewpoint. Again, there was no rotation along the `x` and `y` axis. I did zoom out to get a fisheye effect and better expose higher areas of the room.
+![[Pasted image 20241124065520.png]]
 
-After extracting the individual frames from each video, the resulting datasets are
+* For **dataset 1**, I walked around holding the phone in my forehead, capturing video for about 3 minutes from different viewpoints. I was always facing forward, meaning that the camera poses should roughly lie at `z=1.75` meters and at a fixed angle around the `x` and `y` axis.
+* For **dataset 2**, I attached the phone to a wheeled toy at a height 5 cm from the floor. I moved the camera around the home, capturing footage from a very low viewpoint. Again, there was no rotation along the `x` and `y` axis. 
 
-| Dataset   | Height  | Number of Images | Camera settings     | Original Resolution |
-| --------- | ------- | ---------------- | ------------------- | ------------------- |
-| Dataset 1 | ~175 cm | 4980             | Standard iphone 14. | 1080x1920           |
-| Dataset 2 | ~5cm    | 8823             | 0.5x zoom.          | 1080x1920           |
+After extracting the individual frames from each video, the resulting datasets are:
 
-I downgraded the quality of the images to 540x960 in order to test the ability of the models to reconstruct scenes from low quality imagery, and also to lower memory footprint. Moreover, due to GPU constraints, for many methods I had to downsample the frame-rate of dataset itself.
+| Dataset   | Height  | Number of Images | Camera settings | Original Resolution |
+| --------- | ------- | ---------------- | --------------- | ------------------- |
+| Dataset 1 | ~175 cm | 6962             | 0.5X zoom       | 1080x1920           |
+| Dataset 2 | ~5cm    | 8823             | 0.5X zoom       | 1080x1920           |
 
+Across the experiments you will notice that I reduced the resolution significantly (up to 540x960) to test the limits of NeRF when data quality is not good. 
 # Camera Pose Estimation
 
-This is the trickiest step in the process, and perhaps the most critical one. For most NERF methods to work, we need a training dataset of images, each one annotated with their 3D camera position. Intrinsic camera parameters are also required.
+This is the trickiest step in the process, and perhaps the most critical one. For most NERF methods to work, not only do we need a training dataset of images, but also their 3D camera positions. Intrinsic camera parameters are also required.
 
-For the purposes of this post, let's assume that no prior knowledge of camera poses is available, as is the case of my iphone datasets. In an upcoming post, I will be discussing how to integrate prior pose knowledge, e.g. from a SLAM system.
+For the purposes of this post, let's assume that no prior knowledge of camera poses is available. In an upcoming post, I will be discussing how to integrate prior pose knowledge, e.g. from a SLAM system.
 
 [**Colmap**](https://colmap.github.io/) is the standard tool to be used to estimate the poses of a set of overlapping images, and I found that most NERF implementations assume people have run Colmap on their data before training.
 
-The pose estimation step is in my opinion quite undocumented, and colmap can be **very finicky**. Often fails without any hint of what is wrong, so I will make an effort to explain how it works step by step, and share debugging techniques I learned along the way. You can skip the next section if you are not interested in the pose construction steps.
+Colmap can be **very finicky**, often failing without providing any hint of what is wrong. It is crucial to clean up your dataset as much as possible and provide the proper settings to the different colmap commands. I wrote a detailed appendix with a step-by-step description on how to use colmap.
 
-A good, clean dataset is the single most important factor to a good NERF result:
+If everything went fine, you should now have a **sparse model** specifying the camera poses of each image in your dataset, as well as the intrinsics of your camera. We are ready to train NeRFs!
+# Training NeRFs
 
-* If possible, remove featureless images such as closeups of walls.
+After exploring a handful of implementations, I came across [NeRFStudio](https://docs.nerf.studio/) , which conveniently implements a wide variety of cutting-edge NeRF methods:
+
+* Intuitive API for training, rendering videos.
+* Well documented and maintained.
+* It works perfectly with Viser in order to navigate the 3D reconstruction.
+* Supports tracking with W&B.
+
+A couple of general comments about training NeRFs:
+
+* Training is very fast, even for larger scenes. In my experiments, it takes up to 30 minutes to fully train a NeRF using 4 NVIDIA GeForce RTX 2080 GPUs.
+* Training quickly converges to a sensible reconstruction in the first handful of iterations. If you didn't get a roughly accurate reconstruction in the first couple of minutes, then something is off.
+* Training can be memory intensive, if you run out of memory consider reducing the batch size or reducing image resolution.
+
+As of metrics:
+* The loss depends on the specific method, but usually involves a "rgb-loss" term measuring the difference between the rendered color and the ground truth color. Depth, opacity and regularization terms may be added.
+* Evaluation metrics usually include PSNR (Peak Signal-to-Noise Ratio).
+* Human supervision can catch many details that aggregated stats do not represent.
+
+Let's now dive into the experiments and their results. Checkout appendix 2 for a step-by-step guide on how to setup and run experiments in NeRFStudio.
+
+Tip: Use W&B to track and tag your experiments. Training a NeRF is so fast that chances are you will be training MANY just to try our hyperparemeters and models:
+
+![[Pasted image 20241124081607.png]]
+
+## Nerfacto
+
+The star method implemented by NeRFStudio is **[nerfacto](https://docs.nerf.studio/nerfology/methods/nerfacto.html)**, which takes the best ideas of recent innovations in the field and fuses them into a single implementation. In my experience, nerfacto provides the most realistic reconstructions for real-world data, and it is widely used as the default choice by practitioners in the field.
+
+Let's first inspect the results of training nerfacto on dataset 1 at full resolution, in order to establish a baseline:
+
+
+Notice that all images in this render are synthetic, and the trajectory features many viewpoints not included in the training dataset. The ability to generate novel views from arbitrary camera positions is what makes NeRFs so powerful.
+
+As stated before, the training loss quickly converges, with only marginal improvements after the first thousand of iterations:
+
+![[Pasted image 20241124081805.png]]
+
+W&B provides a convenient way to inspect the rgb and depth reconstruction evolution of specific validation images at different iterations.
+
+![[Pasted image 20241124082030.png]]
+
+
+
+
+
+
+
+
+
+
+
+
+Here is a short demo of one of the NeRF's I trained at home. Stay tuned while I finish writing this blogpost!
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/DoU7-JTeMzw" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+</iframe>
+
+
+
+# Appendix I : How to run Colmap on custom data 
+
+First and foremost, a good clean dataset is the single most important factor to obtain a good reconstruction. Tips that I have learned in the last months are:
+
+* Try to remove featureless images, such as closeups of walls, from your dataset.
 * Try to expose the scene from as many viewpoints as possible.
 * If possible, remove blurry images.
 * Try to prevent too many dynamic objects, if possible have none.
 * For the current SOTA methods, keep your dataset size bounded, don't go over 10K, images, ideally much less.
 * For the current SOTA methods, don't try to reconstruct environments larger than `~100 m^2`
 * Consistent good lighting
-* If you have too many duplicates or very high frame-rate, consider downsampling
-* Reconstruction quality degrades significantly with low image resolution
+* If you have too many duplicates or very high frame-rate, consider downsampling.
+* Reconstruction quality degrades with low image resolution. Use the highest resolution possible.
 * Make sure all images were obtained with the same camera, using the same settings ; and if possible research the camera model used.
 ## Step 1: Feature Extraction
 
@@ -86,7 +154,10 @@ If you happen to know that your camera uses a specific [camera model](https://co
 --ImageReader.camera_model OPENCV_FISHEYE --ImageReader.camera_params "281.08,282.98,319.51,236.08,0.01,-0.23,-0.27,0.19"
 ```
 
-For the iPhone images, I used the default camera model. 
+For the iPhone images with zoom 0.5X I used a RADIAL model, which is able to model the distortion caused by the zoom.
+```
+--ImageReader.camera_model RADIAL
+```
 
 The execution time of this step is very short, less than 2 minutes. After it finishes, colmap should have populated several tables on database.db. I strongly encourage you to sanity-check the database by inspecting it:
 
@@ -170,21 +241,56 @@ colmap bundle_adjuster --input_path sparse/0 --output_path sparse/0 --BundleAdju
 ```
 
 
-# Training NeRFs
+# Appendix II: NeRFStudio
 
-After exploring a handful of implementations, I came across [NeRFStudio](https://docs.nerf.studio/) , which conveniently implements a wide variety of cutting-edge NeRF methods:
+In order to train NeRF using NeRFStudio, you must first create a conda environment and [setup NeRFStudio](https://docs.nerf.studio/quickstart/installation.html). The official instructions work seamlessly, I suggest you install from source so that you can edit the scripts as needed.
 
-* It works perfectly with Viser in order to visualize training.
-* Intuitive API for training, rendering videos.
-* Supports tracking with W&B.
-* Well documented and maintained.
+The next step is to convert colmap estimated poses into NeRFStudio input format:
 
-The star method implemented by NeRFStudio is **nerfacto**, which basically takes the best ideas of recent innovations in the field and fuses them into a single implementation. 
+```
+ns-process-data images --data ./colmap/imgs --output-dir .
+```
 
-Here is a short demo of one of the NeRF's I trained at home. Stay tuned while I finish writing this blogpost!
+This will generate a `transforms.json` file listing the camera poses as homogeneous transforms.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/DoU7-JTeMzw" 
-        title="YouTube video player" frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-</iframe>
+In order to train nerfacto, you can run:
+
+```
+ns-train nerfacto --data DATA_FOLDER --output-dir OUTPUT_FOLDER --vis=viewer+wandb
+```
+
+Where:
+* Data folder is the folder where transforms.json and images are located
+* Output folder is where the trained model will be stored
+
+There are literally hundreds of parameters that you can provide to `ns-train`, you can see the list (and very lazy descriptions) by running `ns-train nerfacto -h`. 
+
+If you are running out of memory, you can try reducing memory consumption by sacrificing training speed by using settings like:
+
+```
+--steps-per-eval-batch 200 --pipeline.datamanager.train-num-rays-per-batch 1024 --pipeline.datamanager.eval-num-rays-per-batch 1024
+``` 
+
+If you are still out of memory, or if you want to reduce the resolution of your images before training, use:
+
+```
+--pipeline.datamanager.camera-res-scale-factor 0.5
+```
+
+Finally, I have found that disabling pose optimization can often lead to best reconstructions:
+
+```
+--pipeline.model.camera-optimizer.mode off
+```
+
+During training, you will be provided with an address to run Viser on a browser. This visualization is likely going to be very rough due to latency and the model being updated live.
+
+You can navigate the reconstruction as though you were playing a FPS game. Use WASDQE and the arrows to navigate in all 3 dimensions. Create viewpoints and click on "generate command" to save a trajectory which can be then rendered in full resolution after training:
+
+```
+ns-render camera-path --load-config CONFIG_PATH --camera-path-filename CAMERA_PATH --output-path renders/nerfstudio.mp4
+```
+
+You can use other models by picking one out of the list enumerated in `ns-train -h`. I encourage you to try `splatfacto-big` which is much very efficient and not as resource heavy as NeRF.
+
+As a final piece of advise, track your experiments with W&B since you can easily train hundreds of reconstructions while trying out models and parameters.

@@ -1,7 +1,5 @@
 ---
-tags:
-  - Computer
-  - Vision
+tag: Computer Vision
 aliases: 
 publish: true
 slug: semantic-segmentation-of-underwater-scenery
@@ -176,6 +174,20 @@ Let's have a look at the results:
 <iframe width="916" height="389" src="https://www.youtube.com/embed/2MQDcxpr5B8" title="Sharks and Rays in Bora Bora - Semantic Segmentation demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 *A snorkelling session in Bora Bora, showcasing a huge school of black-tip sharks, stingrays, as well as humans snorkelling (me!) and smaller fish. This hectic scene poses a generalization challenge for the model, which is trained in less populated scenarios and hasn't seen any humans snorkelling. Yet, the segmentations are quite resonable, showing great generalization power to unseen scenarios. Notice the sea floor segmentation often flickering between `reef` and `sea-floor and rocks` classes.*
 
+## Tracking experiments with W&B
+
+I used Weights&Biases to track the different experiments and quickly compare key stats like mIoU
+
+![[Pasted image 20241120043743.png]]
+
+You can inspect pretty much any details of interest of your runs, from stats to actual predictions. For instance, here we can see how the prediction of a given validation sample changes as the number of iterations increases:
+
+![[semseg.gif]]
+
+## Segment Anything 2 (SAM2)
+For the sake of comparison, I ran [SAM2](https://github.com/facebookresearch/sam2) on the dolphin video shown in the intro. To be more specific, I used the `SAM2AutomaticMaskGenerator` model with default parameters.
+
+
 ## Summary of contributions and future work
 
 In this project, I tackled the task of underwater semantic segmentation. I began by replicating the results of the 2020 paper "[Semantic Segmentation of Underwater Imagery](https://arxiv.org/pdf/2004.01241)," successfully training three CNN-based models that achieved IoU values comparable to those reported by the paper.
@@ -189,3 +201,4 @@ One challenge encountered was distinguishing between `Sea floor and Rocks` and `
 The models also struggled to produce precise boundaries for divers and fish that blend with their surroundings. This may be due to imprecise annotations in the dataset and the small size of the training dataset.
 
 To sum up, I am proud of the models' ability to identify varying species of fish and human divers, which are two of the most interesting and interactive classes for potential applications. I enjoyed refining my computer vision skills, and I hope the public dataset continues to grow.
+
