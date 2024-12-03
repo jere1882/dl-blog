@@ -27,7 +27,7 @@ export default async function IndexPage() {
     const tag = allTags.find((obj) => obj.slug === value)
     return {
       ...tag,
-      postSlug: TECHNOLOGY_POSTS[value], // Add the specific blog post slug
+      postSlug: TECHNOLOGY_POSTS[value],
     }
   }) as Tag[]
 

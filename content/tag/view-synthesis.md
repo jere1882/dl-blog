@@ -1,6 +1,6 @@
 ---
 slug: view-synthesis
-tag: View Synthesis (NeRF)
+tag: View Synthesis
 
 title: View Synthesis - Neural Raiance Fields
 description: Personal experiments and notes related to View Synthesis models using deep networks.
