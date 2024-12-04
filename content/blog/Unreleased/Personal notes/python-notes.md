@@ -35,6 +35,9 @@ for sublist in nested_list:
 	flat_list += sublist
 ```
 
+## Sorting
+* `sorted()` function returns a new list containing all items from the iterable in ascending order (by default)
+*  **`.sort()`**: Sorts a list **in place**.
 ## Handy data structures
 
 ### Default Dict
@@ -111,3 +114,32 @@ def bfs(start, target):
 
 ## Pointers
 BE VERY CAREFUL ABOUT PASSING MUTABLE OBJECTS E.G. LISTS AS ARGUMENTS OF RECURSIVE FUNCTIONS! IT'S ALL PASSED BY ARGUMENT.
+
+### nonlocal: mutable vs imutable
+
+```python
+class Solution:
+    def sumNumbers(self, root: Optional[TreeNode]) -> int:
+        
+        retv = 0  # Variable to hold the result
+
+        def dfs(node: Optional[TreeNode], acum: int):
+            nonlocal retv  # Reference to retv from the outer function
+            
+            if node is None:
+                return
+            
+            acum = 10 * acum + node.val  # Update acum with the current node's value
+            
+            if node.left is None and node.right is None:  # Leaf node check
+                retv += acum  # Add the accumulated number to retv
+            else:
+                dfs(node.left, acum)  # Recur on the left child
+                dfs(node.right, acum)  # Recur on the right child
+
+        dfs(root, 0)  # Start DFS with the root node and an initial accumulated value of 0
+
+        return retv  # Return the final result
+```
+
+If retv was a list variable, you don't need to specify nonlocal.
