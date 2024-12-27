@@ -12,15 +12,17 @@ image: /thumbnails/NERF.png
 ---
 # Introduction
 
-In my [previous post](https://www.jeremias-rodriguez.com/blog/introduction-to-nerfs), I explored Neural Radiance Fields (NeRFs)—a remarkable technique for synthesizing images from unseen viewpoints, given a training set of images with annotated camera poses.
+In my [previous post](https://www.jeremias-rodriguez.com/blog/introduction-to-nerfs), I introduced Neural Radiance Fields (NeRFs)—a technique for synthesizing realistic images from novel viewpoints, given a set of training images with camera pose annotations.
 
 This time, I’m taking the theory into practice by training several NeRF variants on images of my own **60 m² apartment**. You’ll see detailed reconstructions of rooms and objects, demonstrating the impressive capabilities of these methods.
 
-To push the limits of NeRFs, I imposed significant constraints on the training data. I restricted the camera poses to lie in a plane parallel to the floor (e.g., **z = 5 cm** for one dataset and **z = 1.60 meters** for another) and reduced the resolution of the original iPhone images to just **720x480**.
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/8jPuu7D16ic" title="NERF Reconstruction - Dataset 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-These challenges make the task much harder. NeRFs are typically tested on small objects and often struggle to scale to larger, more complex scenes. Additionally, training on images from a single plane makes it especially difficult to reconstruct views at different camera heights, and lower image resolution exacerbates the problem. Yet, the strong results I obtained despite these restrictions highlight NeRFs’ potential for applications in **robotics industries**, where constrained data collection is a common scenario.
+To push the boundaries of what NeRFs can handle, I introduced challenging constraints on the training data. For instance, one dataset consists solely of images captured very close to the floor (z=5 cm), while another uses low-resolution images restricted to a fixed height plane (z=175 cm). These setups simulate real-world limitations often encountered in fields like **robotics**, where data collection can be constrained by environment or equipment.
 
-Finally, I’ll showcase advanced NeRF variants that incorporate NLP prompts to perform tasks requiring semantic understanding of the environment. As a bonus, I’ll compare NeRFs with a classical alternative: **Gaussian Splatting**.
+NeRFs are typically designed and tested on small-scale objects, so scaling them to larger and more intricate scenes is a significant challenge. Despite the constraints I imposed in my experiments, the results were surprisingly robust, demonstrating the potential of NeRFs to perform well under practical limitations.
+
+In addition to these experiments, I’ll explore advanced NeRF variants that incorporate natural language processing (NLP) prompts for tasks requiring semantic understanding of the environment. As a bonus, I’ll compare NeRFs to a classical alternative: **Gaussian Splatting**, offering a more efficient alternative.
 
 # Data Collection
 
@@ -38,18 +40,21 @@ After extracting the individual frames from each video, the resulting datasets a
 | Dataset 1 | ~175 cm | 6962             | 0.5X zoom       | 1080x1920           |
 | Dataset 2 | ~5cm    | 8823             | 0.5X zoom       | 1080x1920           |
 
-Across the experiments you will notice that I reduced the resolution significantly (up to 540x960) to test the limits of NeRF when data quality is not good. 
+Across the experiments you will notice that I reduced the resolution significantly to test the limits of NeRF when data quality is not good.
 # Camera Pose Estimation
 
 This is the trickiest step in the process, and perhaps the most critical one. For most NERF methods to work, not only do we need a training dataset of images, but also their 3D camera positions. Intrinsic camera parameters are also required.
 
-For the purposes of this post, let's assume that no prior knowledge of camera poses is available. In an upcoming post, I will be discussing how to integrate prior pose knowledge, e.g. from a SLAM system.
+For the purposes of this post, let's assume that no prior knowledge of camera poses is available. In an upcoming post, I will be discussing how to integrate prior pose knowledge, e.g. from a SLAM system or iPhone's Polycam.
 
-[**Colmap**](https://colmap.github.io/) is the standard tool to be used to estimate the poses of a set of overlapping images, and I found that most NERF implementations assume people have run Colmap on their data before training.
+[**Colmap**](https://colmap.github.io/) is the standard tool used to estimate the poses of a set of overlapping images, and I found that most NERF implementations assume people have run Colmap on their data before training.
 
 Colmap can be **very finicky**, often failing without providing any hint of what is wrong. It is crucial to clean up your dataset as much as possible and provide the proper settings to the different colmap commands. I wrote a detailed appendix with a step-by-step description on how to use colmap.
 
 If everything went fine, you should now have a **sparse model** specifying the camera poses of each image in your dataset, as well as the intrinsics of your camera. We are ready to train NeRFs!
+
+![[Pasted image 20241226200915.png]]
+*3D poses of my training dataset images estimated by Colmap*
 # Training NeRFs
 
 After exploring a handful of implementations, I came across [NeRFStudio](https://docs.nerf.studio/) , which conveniently implements a wide variety of cutting-edge NeRF methods:
@@ -59,20 +64,15 @@ After exploring a handful of implementations, I came across [NeRFStudio](https:/
 * It works perfectly with Viser in order to navigate the 3D reconstruction.
 * Supports tracking with W&B.
 
-A couple of general comments about training NeRFs:
+A couple of practical comments about training NeRFs - A detailed guide is included in appendix II:
 
 * Training is very fast, even for larger scenes. In my experiments, it takes up to 30 minutes to fully train a NeRF using 4 NVIDIA GeForce RTX 2080 GPUs.
-* Training quickly converges to a sensible reconstruction in the first handful of iterations. If you didn't get a roughly accurate reconstruction in the first couple of minutes, then something is off.
+* Training quickly converges to a sensible reconstruction. If you didn't get a roughly accurate reconstruction after 2-3 minutes, then something is off.
 * Training can be memory intensive, if you run out of memory consider reducing the batch size or reducing image resolution.
 
-As of metrics:
-* The loss depends on the specific method, but usually involves a "rgb-loss" term measuring the difference between the rendered color and the ground truth color. Depth, opacity and regularization terms may be added.
-* Evaluation metrics usually include PSNR (Peak Signal-to-Noise Ratio).
-* Human supervision can catch many details that aggregated stats do not represent.
+As of metrics, I will mostly use pixel-wise rgb loss and PSNR (Peak Signal-to-Noise Ratio). Human supervision can catch many details that aggregated stats do not represent.
 
-Let's now dive into the experiments and their results. Checkout appendix 2 for a step-by-step guide on how to setup and run experiments in NeRFStudio.
-
-Tip: Use W&B to track and tag your experiments. Training a NeRF is so fast that chances are you will be training MANY just to try our hyperparemeters and models:
+Tip: Use W&B to track and tag your experiments. NERFs can be trained very fast, and it is easy to lose track of each execution.
 
 ![[Pasted image 20241124081607.png]]
 
@@ -80,10 +80,19 @@ Tip: Use W&B to track and tag your experiments. Training a NeRF is so fast that 
 
 The star method implemented by NeRFStudio is **[nerfacto](https://docs.nerf.studio/nerfology/methods/nerfacto.html)**, which takes the best ideas of recent innovations in the field and fuses them into a single implementation. In my experience, nerfacto provides the most realistic reconstructions for real-world data, and it is widely used as the default choice by practitioners in the field.
 
-Let's first inspect the results of training nerfacto on dataset 1 at full resolution, in order to establish a baseline:
+In the introduction you can watch a video from a trained Nerfacto on Dataset 1 at full resolution. The following video showcases Nerfacto trained on Dataset 2 at 0.5 resolution.
 
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/DoU7-JTeMzw" 
+        title="YouTube video player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+</iframe>
+The following reconstruction is a NeRF on a sparser version of Dataset 1>
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/7y8HbiYjnvI" title="NERF Reconstruction - Dataset 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-Notice that all images in this render are synthetic, and the trajectory features many viewpoints not included in the training dataset. The ability to generate novel views from arbitrary camera positions is what makes NeRFs so powerful.
+Notice that all images in these videos are synthetic, and the trajectory features many viewpoints not included in the training dataset. The ability to generate novel views from arbitrary camera positions is what makes NeRFs so powerful.
+
+The NeRFs from Dataset 1 struggle to generate views for z much higher or much lower than 1.75m ; whereas the NeRF from Dataset 2 struggles to generate views higher vantage points. This is due to the training data being restricted to 1.75 m and 0.05 m respectively.
 
 As stated before, the training loss quickly converges, with only marginal improvements after the first thousand of iterations:
 
@@ -93,26 +102,59 @@ W&B provides a convenient way to inspect the rgb and depth reconstruction evolut
 
 ![[Pasted image 20241124082030.png]]
 
+At times I am mesmerized by the details that the NeRF is able to encode in its weights:
 
+![[Pasted image 20241226204937.png]]
+*A NeRF trained on very low res images (430x760) is able to learn the mattress pattern, as well as details of individual books on a shelf.*
 
+![[Pasted image 20241226205713.png]]
+*A NeRF trained on low resolution images (540x960) is able to learn the wooden floor pattern in detail. Notice the accurate reconstruction of the TV screen and the map in the wall.*
 
+![[Pasted image 20241226205904.png]]
+*A NeRF trained on 540x960 images is able to perfectly learn the mirror reflection. The mirror reflection is adjusted as the viewpoint changes.
 
+A small fraction of the dataset is set aside for validation. Different status, such as PSNR, can be calculated on the reconstructed-original image pairs. PSNR was around 23 for Dataset 1 and 26 for Dataset 2 on their respective validation datasets.
 
+![[Pasted image 20241226215448.png]]
+## Splatfacto
 
+A traditional yet much more efficient alternative to NeRF is Gaussian Splatting. It can be trained even faster than NeRFs, uses up considerably less memory, and occasionally produces better results. 
 
+For the demo video below I used Splatfacto, which is conveniently implemented in NeRFStudio. Given the reduced memory usage, I was able to train at full resolution and obtain an amazing reconstruction:
 
+<iframe width="1280" height="720" src="https://www.youtube.com/embed/8jPuu7D16ic" title="NERF Reconstruction - Dataset 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
+The following table summarizes a few key metrics, although comparing different columns is not really correct, given the differences in resolution and different holdout sets from Dataset 1 and Dataset 2.
 
+| Metric        | NeRF Dataset 1 <br>(0.5x res) | NeRF Dataset 2 <br>(0.4x res) | Gaussian Splatting <br>Dataset 1 (0.8x res) |
+| ------------- | ----------------------------- | ----------------------------- | ------------------------------------------- |
+| PSNR (dB)     | 23                            | 26                            | 27                                          |
+| SSIM          | 0.85                          | 0.88                          | 0.90                                        |
+| Training Time | 27 mins                       | 25 mins                       | 23 mins                                     |
+| Memory Usage  | High                          | High                          | High                                        |
 
-Here is a short demo of one of the NeRF's I trained at home. Stay tuned while I finish writing this blogpost!
+## Advanced NeRF variants
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/DoU7-JTeMzw" 
-        title="YouTube video player" frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-</iframe>
+I spent quite a while playing with other NeRF variants, such as LERF (Language Embedded Radiance Fields). LERF introduced the **CLIP** concept to NeRFs, allowing the user to make text queries and producing an activation heatmap in response.
 
+For instance, the relevancy map for "sofa" is:
+![[Pasted image 20241226220346.png]]
+The relevancy map for "mirror":
+![[Pasted image 20241226220944.png]]
 
+Given the heavy memory requirements, I was only able to train a Lite version of LERF, which was capable of accurately handling queries for individual objects like "tv", "window", "shoes". However, the model struggled to understand more complex concepts like "a comfortable place to sit down".
+
+# Conclusion
+
+In this blog post, I explored the application of NeRF and Gaussian Splatting models trained on severely restricted, low-resolution real-world images.
+
+On the positive side, these techniques successfully captured the structure of the apartment, and in many cases, they were able to reconstruct fine details with impressive accuracy. Once the dataset is properly cleaned, these models are relatively quick and straightforward to train.
+
+However, there are challenges. View synthesis models, particularly NeRF, can struggle to generate realistic views from unseen viewpoints. In the demo videos, NeRF exhibits hallucinations, creating bright, unrealistic shapes when the novel viewpoints deviate too far from the training data. Additionally, preparing an effective training dataset is no small feat, as outlined in Annex I.
+
+Towards the end of the post, I briefly introduced LERF, a 2023 model that combines NeRF with natural language processing (NLP). The lightweight model I trained offers a glimpse into the exciting possibilities when a powerful representation like NeRF is merged with language models. 
+
+This emerging field is full of potential, and I am eager to see how it evolves in the coming years—there are undoubtedly many breakthroughs on the horizon!
 
 # Appendix I : How to run Colmap on custom data 
 

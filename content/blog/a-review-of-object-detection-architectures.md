@@ -129,10 +129,20 @@ The most popular benchmark datasets for object detection include:
 3. **ImageNet**: Primarily known for image classification, ImageNet also provides a large number of annotated images for object detection tasks, particularly through its ImageNet Detection Challenge.
 ### Metrics
 Different models are typically evaluated according to a Mean Average Precision (MAP) metric. It combines the concepts of precision and recall across different object classes and detection thresholds.
-* **Precision**: The proportion of true positive detections (correctly detected objects) among all positive detections (both true and false positives).
-* **Recall**: The proportion of true positive detections among all actual objects (true positives plus false negatives).
-* **Average Precision** is the area under the Precision-Recall curve for a specific class.
+* **Precision**: The proportion of true positive detections (correctly detected objects) among all positive detections (both true and false positives). If you have many classes, you can calculate precision for each class grouping all other classes as the negative class.
+* **Recall**: The proportion of true positive detections among all actual objects (true positives plus false negatives). Can also be calculated per class.
+* **Average Precision** is the area under the Precision-Recall curve for a specific class. You get one per class. The precision recall curve is made of the precision,recall pairs at different confidence thresholds e.g. confidence > 0.5 ; etc.
 * **mAP** is the mean of the Average Precision (AP) values computed for each class in the dataset. It provides a single metric that summarizes the model's performance across all classes.
+* *`mAP_{50-95}`*: mAP is computed for each class and for each IoU threshold in a range from  are computer at 10 IoU tresholds (0.50 to 0.95) for each class.
+
+
+Example:
+* Imagine you have 3 classes: Person, Car, and Dog.
+* Ground Truth: 3 persons, 2 cars, 1 dog in an image.
+Predictions:
+* 2 boxes for Person: 1 is correct (IoU ≥ threshold), 1 is incorrect (IoU < threshold).
+* 1 box for Car: Correct (IoU ≥ threshold).
+* 2 boxes for Dog: 1 is correct, 1 is misclassified (e.g., as Person).
 
 ### Tangent tasks and variations
 
