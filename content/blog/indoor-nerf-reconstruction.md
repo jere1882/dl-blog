@@ -126,7 +126,7 @@ For the demo video below I used Splatfacto, which is conveniently implemented in
 
 The following table summarizes a few key metrics, although comparing different columns is not really correct, given the differences in resolution and different holdout sets from Dataset 1 and Dataset 2.
 
-| Metric        | NeRF Dataset 1 <br>(0.5x res) | NeRF Dataset 2 <br>(0.4x res) | Gaussian Splatting <br>Dataset 1 (0.8x res) |
+| Metric        | NeRF Dataset 1  (0.5x res) | NeRF Dataset 2  (0.4x res) | Gaussian Splatting  Dataset 1 (0.8x res) |
 | ------------- | ----------------------------- | ----------------------------- | ------------------------------------------- |
 | PSNR (dB)     | 23                            | 26                            | 27                                          |
 | SSIM          | 0.85                          | 0.88                          | 0.90                                        |

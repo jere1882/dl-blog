@@ -216,7 +216,7 @@ Common choices for α\alphaα are 0.05 or 0.01, which means you are willing to a
 
 4. **Calculate the p-value:** The **p-value** tells you the probability of observing the data you have (or something more extreme) assuming the null hypothesis is true. Usually you can lookup the p-value form the z value.
 
-Then. p-value <= alpha => reject null hypothesis  ; otherwise keep it.
+Then. `p-value <= alpha` => reject null hypothesis  ; otherwise keep it.
 
 ## Confidence intervals
 
