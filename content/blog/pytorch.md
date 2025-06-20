@@ -411,3 +411,175 @@ Example workflow:
 3. Update Training Script. Configure `train.py` to handle additional hyperparameters or custom callbacks.
 4. Train the Model `python training/train.py`
 5. Evaluate the Model - Add evaluation scripts and validate your model's performance.
+
+# PyTorch official tutorials
+
+## Quickstart
+
+### Data primitives
+
+PyTorch has two primitives:
+* `torch.utils.Dataset`: Stores samples and their corresponding labels
+* `torch.utils.Dataloader` : Wraps an iterable around `Dataset`
+
+PyTorch offers domain-specific libraries such as `TorchText`, `TorchVision` and `TorchAudio` ; all of which include datasets. Example:
+
+```Python
+training_data = datasets.FashionMNIST(
+root="data",
+train=True,
+download=True,
+transform=ToTensor(),
+)
+
+test_data = datasets.FashionMNIST(
+root="data",
+train=False,
+download=True,
+transform=ToTensor(),
+)
+```
+
+A dataset like this is meant to be wrapped into a `DataLoader`:
+
+```Python
+batch_size = 64
+# Create data loaders.
+train_dataloader = DataLoader(training_data, batch_size=batch_size)
+test_dataloader = DataLoader(test_data, batch_size=batch_size)
+for X, y in test_dataloader:
+    print(f"Shape of X [N, C, H, W]: { X.shape }")
+    print(f"Shape of y: { y.shape } { y.dtype }")
+    break
+```
+
+### Creating Models
+
+To define a neural network in Pytorch we create a class that inherits from `nn.Module`:
+```Python
+# Get CPU, GPU, or MPS device for training.
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+print(f"Using {device} device")
+
+# Define model
+class NeuralNetwork(nn.Module):
+	# We define the layers of the network in the __init__ function
+    def __init__(self):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(28 * 28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10),
+        )
+
+	# We specify how data will pass through the function in forward
+    def forward(self, x):
+        x = self.flatten(x)
+        logits = self.linear_relu_stack(x)
+        return logits
+
+#To accelerate operations in the neural network, we move it to the GPU or MPS if available.
+model = NeuralNetwork().to(device)
+print(model)
+```
+### Optimizing
+To train a model, we need a loss function and an optimizer:
+
+```python
+loss_fn = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+```
+
+A training pass over the dataset looks like this:
+
+```python
+def train(dataloader, model, loss_fn, optimizer):
+	size = len(dataloader.dataset)
+	model.train()
+	for batch, (X, y) in enumerate(dataloader):
+		X, y = X.to(device), y.to(device)
+		# Compute prediction error
+		pred = model(X)
+		loss = loss_fn(pred, y)
+		# Backpropagation
+		loss.backward()
+		optimizer.step()
+		optimizer.zero_grad()
+		if batch % 100 == 0:
+			loss, current = loss.item(), (batch + 1) * len(X)
+			print(f"loss: { loss :>7f} [{ current :>5d}/{ size :>5d}]")
+```
+
+We also check model performance against a test dataset:
+
+```python
+def test(dataloader, model, loss_fn):
+	size = len(dataloader.dataset)
+	num_batches = len(dataloader)
+	model.eval()
+	test_loss, correct = 0, 0
+	with torch.no_grad():
+		for X, y in dataloader:
+			X, y = X.to(device), y.to(device)
+			pred = model(X)
+			test_loss += loss_fn(pred, y).item()
+			correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+	test_loss /= num_batches
+	correct /= size
+	print(f"Test Error: \n Accuracy: { (100*correct) :>0.1f}%, Avg loss: { test_loss :>8f}
+```
+
+This loop takes place over several epochs:
+
+```python
+epochs = 5
+for t in range(epochs):
+	print(f"Epoch { t+1 } \n-------------------------------")
+	train(train_dataloader, model, loss_fn, optimizer)
+	test(test_dataloader, model, loss_fn)
+print("Done!")
+```
+
+## Saving and loading a model
+
+### Saving and loading model weights only
+
+PyTorch models store the learned parameters in an internal state dictionary, called
+state_dict . These can be persisted via the torch.save method:
+
+```python
+import torch
+import torchvision.models as models
+
+model = models.vgg16(weights='IMAGENET1K_V1')
+torch.save(model.state_dict(), 'model_weights.pth')
+```
+
+Similarly:
+
+```python
+model = models.vgg16() # we do not specify ``weights``, i.e. create untrained model
+model.load_state_dict(torch.load('model_weights.pth', weights_only=True))
+model.eval()
+```
+
+Note: Be sure to call `model.eval()` method before inferencing to set the dropout and batch normalization layers to evaluation mode. Failing to do this will yield inconsistent inference result.
+### Saving and loading weights and architecture
+
+When loading model weights, we needed to instantiate the model class first, because the class defines the structure of a network. We might want to save the structure of this class together
+with the model, in which case we can pass
+model (and not model.state_dict() ) to the saving function:
+
+```python
+torch.save(model, 'model.pth')
+model = torch.load('model.pth', weights_only=False)
+```

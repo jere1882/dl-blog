@@ -906,6 +906,7 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
+Note: **Redis** is often used as a caching mechanism, but it's actually a **data store** that can be used in several different ways, not just for caching. Redis is an **in-memory database**, meaning it stores data in memory (RAM) rather than on disk like traditional databases. This makes it extremely fast for operations, which is why it is commonly used for caching, session management, real-time data processing, and pub/sub messaging.
 # AWS deployment choices
 
 | **Deployment Option**   | **Best For** | **Key Features** | **Pros** | **Cons** |

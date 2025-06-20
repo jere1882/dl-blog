@@ -139,3 +139,11 @@ Este espacio ha sido pensado para que los usuarios puedan escribir los datos tem
 El directorio `/home`, como su nombre lo indica, alberga las carpetas personales de los usuarios del cluster. Actualmente, posee una capacidad de 50 Terabytes y se encuentra accesible a través de un montaje NFS.
 - Idealmente, este sistema de archivos debería utilizarse unicamente para salvar los datos que se desean conservar una vez terminado el trabajo de cálculo.
 - Sin embargo, en términos de desempeño las capacidades en lectura y escritura disminuyen de manera importante en caso de acceso concurrente (diferentes usuarios desde varios nodos).
+# Module Commands:
+
+- **`module avail`**: Lists all available modules (software environments).
+    - Example: `module avail` will show available software like Python, MPI, etc.
+- **`module load [module_name]`**: Loads a specific module to set up the environment (e.g., for Python, compilers).
+    - Example: `module load python/3.8`
+- **`module unload [module_name]`**: Unloads a previously loaded module.
+    - Example: `module unload python/3.8`

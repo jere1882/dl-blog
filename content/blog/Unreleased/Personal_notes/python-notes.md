@@ -35,6 +35,16 @@ for sublist in nested_list:
 	flat_list += sublist
 ```
 
+Iterate over a dict
+```python
+for k,v in kcorr_df_log.items():
+    print(f"There are {len(v)} instances of error {k}")
+```
+## Dict comprehension
+```python
+def greet(names: list[str]) -> dict[str, int]:     
+	return {name: len(name) for name in names}
+```
 ## Sorting
 * `sorted()` function returns a new list containing all items from the iterable in ascending order (by default)
 *  **`.sort()`**: Sorts a list **in place**.
@@ -267,3 +277,183 @@ import numpy as np
 np.random.randint(1, 10, size=5) # Random integers between 1 and 10, 5 values 
 np.random.normal(0, 1, size=100) # Generate 100 random values from a normal distribution
 ```
+
+# Multiple lines
+
+Do
+```
+x1,x2,x3 = /
+	function(dag)
+```
+or
+```
+x1,x2,x3 = (
+	function(dag)
+)
+```
+to split long lines into many lines
+
+# Unpacking
+
+```Python
+def initialize_model(config):
+    """Initialize a model based on the configuration."""
+    model_type = config['model_type']
+    # Convert DictConfig to a regular dictionary
+    parameters = {k: v for k, v in config.items() if k != 'model_type'}
+
+    model_mapping = {
+        "MLP": MLP,
+        "SelfAttentionMLP": SelfAttentionMLP
+    }
+
+    if model_type in model_mapping:
+        model_class = model_mapping[model_type]
+        model = model_class(**parameters)
+    else:
+        raise ValueError(f"Unsupported model type: {model_type}")
+
+    return model
+```
+
+look how we pass a dictionary as parameters of a function, unpacking the dict!
+
+# AsyncIO
+
+
+The `asyncio` module in Python provides support for writing **concurrent** code using **async/await syntax**. It is useful for I/O-bound and high-level structured network code where multiple tasks need to be executed efficiently without blocking the entire program.
+
+- **Handling I/O-bound tasks efficiently** (e.g., network requests, database queries, file I/O)
+- **Executing multiple tasks concurrently** without creating multiple threads or processes
+- **Building asynchronous applications** such as web scrapers, chat servers, and APIs
+
+Key components:
+
+### **Coroutines (`async def`) ; `create_task` and `asyncio.run`**
+
+Coroutines are special functions declared using `async def`. They represent tasks that can be paused and resumed.
+import asyncio
+
+```Python
+async def say_hello():
+    print("Hello")
+    await asyncio.sleep(1)  # Simulating an I/O operation
+    print("World")
+  
+# Running the coroutine
+asyncio.run(say_hello())
+```
+
+Compare this against:
+
+```Python
+def say_hello():
+    print("Hello")
+    sleep(1)  # Simulating an I/O operation
+    print("World")
+
+# Running the coroutine
+say_hello()
+```
+
+The later is SYNCHRONOUS , meaning that:
+1- Prints Hello
+2- Pauses everything for 1 second
+3- Prints World
+4- Program finished
+
+While `sleep(1)` is running, **nothing else can happen** in the program.
+
+Asyncio's version doesn't block execution. Other tasks can run while waiting. After 1 second, world is printed.
+If there were other async tasks running, they would not be delayed by this sleep.
+
+A more revealing example:
+
+```Python
+from time import sleep
+
+def task_1():
+    print("Task 1 started")
+    sleep(2)
+    print("Task 1 finished")
+
+def task_2():
+    print("Task 2 started")
+    sleep(1)
+    print("Task 2 finished")
+
+task_1()
+task_2()
+```
+
+This results in:
+
+```bash
+Task 1 started
+(Task 1 sleeps for 2 seconds...)
+Task 1 finished
+Task 2 started
+(Task 2 sleeps for 1 second...)
+Task 2 finished
+```
+
+Whereas an asynchronous approach:
+
+```Python
+import asyncio
+
+async def task_1():
+    print("Task 1 started")
+    await asyncio.sleep(2)
+    print("Task 1 finished")
+
+async def task_2():
+    print("Task 2 started")
+    await asyncio.sleep(1)
+    print("Task 2 finished")
+
+async def main():
+    t1 = asyncio.create_task(task_1())
+    t2 = asyncio.create_task(task_2())
+    await t1  # Wait for both to finish
+    await t2  
+
+asyncio.run(main())
+```
+
+results in
+```bash
+Task 1 started
+Task 2 started
+(Task 2 finishes first because it sleeps for only 1 second)
+Task 2 finished
+(Task 1 finishes after 2 seconds)
+Task 1 finished
+```
+
+**THUS: - `asyncio` is useful for running multiple I/O-bound tasks concurrently**. 
+
+The `async` keyword before `def` **doesn't make a function run asynchronously by itself**. Instead, it transforms the function into a **coroutine**, which behaves differently from a normal function.
+
+- Calling an `async def` function **does not execute it immediately**.
+- Instead, it returns a **coroutine object** that must be awaited or scheduled with `asyncio.run()`.
+
+### **Waiting for Multiple Tasks (asyncio.gather)**
+
+`asyncio.gather()` is used to run multiple coroutines concurrently and wait for all to complete.
+
+```python
+async def fetch_data(n):
+    print(f"Fetching data {n}...")
+    await asyncio.sleep(n)  # Simulating an I/O operation
+    print(f"Data {n} fetched")
+    return n * 10  # Simulating a return value
+
+async def main():
+    results = await asyncio.gather(fetch_data(2), fetch_data(3), fetch_data(1))
+    print("Results:", results)
+
+asyncio.run(main())
+```
+
+Here we never explicitly called `asyncio.run(fetch_data(...))`, yet the coroutines still executed. The reason is that **`asyncio.gather()` schedules and runs them automatically when awaited**.
