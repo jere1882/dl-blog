@@ -2,9 +2,11 @@ import path from "path"
 import { getPermalinks, remarkWikiLink } from "@portaljs/remark-wiki-link"
 import { defineDocumentType, makeSource } from "contentlayer/source-files"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import rehypeKatex from "rehype-katex"
 import rehypePrettyCode from "rehype-pretty-code"
 import rehypeSlug from "rehype-slug"
 import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
 import { visit } from "unist-util-visit"
 
 import { siteConfig } from "./config/site"
@@ -242,6 +244,7 @@ export default makeSource(async () => {
       cwd: process.cwd(),
       remarkPlugins: [
         remarkGfm,
+        remarkMath,
         [remarkWikiLink, { permalinks, pathFormat: "obsidian-short" }],
         () => (tree) => {
           // TODO: Extract into a npm package
@@ -262,6 +265,7 @@ export default makeSource(async () => {
       ],
       rehypePlugins: [
         rehypeSlug,
+        rehypeKatex,
         () => (tree) => {
           visit(tree, (node) => {
             if (node?.type === "element" && node?.tagName === "pre") {

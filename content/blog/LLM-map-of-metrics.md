@@ -3,7 +3,7 @@ tags:
   - Transformers
   - LLM
 aliases: 
-publish: true
+publish: false
 slug: llm-metrics
 title: Metrics used in LLM tasks
 description: A comprehensive summary of metrics used in LLM-Related tasks
@@ -25,35 +25,36 @@ When we evaluate language models (e.g. machine translation, summarization, text 
 | **Machine Translation**                  | English to German translation             | BLEU, METEOR, chrF++, TER, COMET                                                |
 | **Summarization**                        | Document to summary                       | ROUGE, BLEU, METEOR, BERTScore, SummaC                                          |
 | **Question Answering (QA)**              | SQuAD-style answer extraction             | Exact Match (EM), F1 score, BLEU, ROUGE-L                                       |
-| **Retrieval-Augmented Generation (RAG)** | Answer generation with document retrieval | Retrieval: Recall@k, MRR, nDCGGeneration: BLEU, ROUGE, BERTScore                |
+| **Retrieval-Augmented Generation (RAG)** | Answer generation with document retrieval | Retrieval: Recall@k, MRR, nDCG<br/>Generation: BLEU, ROUGE, BERTScore           |
 | **Information Retrieval / Ranking**      | Search result ranking                     | nDCG, MAP, MRR, Precision@k, Recall@k                                           |
 | **Text Classification**                  | Sentiment analysis, spam detection        | Accuracy, Precision, Recall, F1 Score, ROC-AUC                                  |
 | **Dialogue / Conversational Agents**     | Chatbots, virtual assistants              | Human evaluation (helpfulness, safety, coherence), BLEU, METEOR, USR, DialogRPT |
 | **Code Generation**                      | Code completion (e.g. Python)             | Exact Match, BLEU, CodeBLEU, pass@k (functional correctness)                    |
 | **Reasoning / Logic Tasks**              | Logical deduction, arithmetic reasoning   | Accuracy, Exact Match, Chain-of-Thought correctness                             |
 | **Fact Verification**                    | True/False claim verification             | Accuracy, Precision, Recall, F1 Score                                           |
-|                                          |                                           |                                                                                 |
+
+
 # PPL (Perplexity)
 Measures how well a model predicts a sequence of words. Lower perplexity means better model performance.
 * A language model is often evaluated on a sequence prediction task
 * e.g. input "the cat sat on the" - ground truth "mat"
-* say the model predicts a probability distribution over its vocabulary of size K, and `q_i` is the predicted probability of the `i-th` word in the vocab
+* say the model predicts a probability distribution over its vocabulary of size K, and q_i is the predicted probability of the i-th word in the vocab
 
 In theoretical cross entropy, we compare two full distributions:
 
 ![[Pasted image 20250616231326.png]]
-But in practice `p` is not known, all we know is that the next correct token at position `j`. Thus we define `p` to be 0 in all components except `p_j=0`
+But in practice p is not known, all we know is that the next correct token at position j. Thus we define p to be 0 in all components except p_j=1
 
-Then, the sum simplifies just to `-log q(x_j)`
+Then, the sum simplifies just to -log q(x_j)
 
-If we calculate tHis over N data points (a dataset), we get:
+If we calculate this over N data points (a dataset), we get:
 
 ![[Pasted image 20250616231526.png]]
 We finally define:
 
-`Perplexity = e^H(p,q)`
+Perplexity = e^(H(p,q))
 
-Why the `e`? Let's explain that with an example.
+Why the e? Let's explain that with an example.
 
 Input: "the cat sat on the"
 Target "mat"
@@ -66,23 +67,23 @@ Cross entropy (unit would be "nats" from natural logarithm)
 Model A cross entropy: 0.916 nats
 Model B cross entropy: 1.609 nats
 
-😕 Who cares? What’s a "nat" anyway?
+😕 Who cares? What's a "nat" anyway?
 
 Model A perplexity => 2.5
 Model B perplexity => 5.0
 
- "**Model A behaves as if it’s picking between 2.5 words on average — Model B behaves as if it’s choosing from 5 words.**"
+ "**Model A behaves as if it's picking between 2.5 words on average — Model B behaves as if it's choosing from 5 words.**"
 You now have a measure of the **effective 'uncertainty' or 'confusion'** of the model.
 
 In other words, it's a way to report the "branching factor" which is relevant in text generation, but not that relevant in e.g. cat/dog classification.
 
 * Cross entropy is used as a loss but it's hard to interpret as a metric
 * perplexity: Clear, interpretable: "How many real options the model behaves like it sees?"
-**Perplexity isn’t measuring what the model outputs — it’s measuring how confidently it _thinks_**.
+**Perplexity isn't measuring what the model outputs — it's measuring how confidently it _thinks_**.
 
 Beware though - A model with **ultra-low perplexity** may always predict the _most likely_, common, boring word. Minimizing perplexity blindly may make the model too safe. Human-like text has natural entropy and uncertainty.
 
-You don’t just want "min perplexity" — you want **controlled entrop**
+You don't just want "min perplexity" — you want **controlled entrop**
 
 ## Definition: n-gram
 An **n-gram** is simply a **sequence of 'n' consecutive words** (or tokens) from a text.
@@ -133,7 +134,7 @@ Unigrams (1-grams):
 ✅ **Total clipped matches = 2 + 1 + 0 + 1 + 1 = 5**  
 ✅ **Total hypothesis unigrams = 7**
 
-Unigram precision is tus P_1 = 5/7 = 0.714
+Unigram precision is thus P_1 = 5/7 = 0.714
 
 Bigrams (2-grams):
 
@@ -150,47 +151,47 @@ Bigrams (2-grams):
 | the mat | 1               | 1                | 1             |
 | others  | -               | not in ref       | 0             |
 
-P2​=3/6​=0.5
+P_2 = 3/6 = 0.5
 
-BP = len(hyp) - len(ref) = 1
-BLEU = BP * exp( 1/2 P1 + 1/2 P2) = 0.59
+BP = |hyp| - |ref| = 1
+BLEU = BP * exp((1/2) P_1 + (1/2) P_2) = 0.59
 
 ## Intuition
 
 > **"A good machine-generated sentence should contain many of the same words and word patterns (n-grams) as high-quality human references — and in roughly the right order and length."**
 
 Downsides:
-* It **doesn’t care if you missed some words in the reference** — only if you said extra or wrong things => it focuses on **precision** and not **recall**
+* It **doesn't care if you missed some words in the reference** — only if you said extra or wrong things => it focuses on **precision** and not **recall**
 * **Cannot detect paraphrases** ("The feline sits on the rug" scores poorly).
 * Cannot check **meaning** — only **word overlap**.
 
 🔷 **BLEU**:
 
-- Measures **precision** — _How many of your output’s n-grams appear in the reference?_  
-    _(“Did the system output contain what it should?”)_
+- Measures **precision** — _How many of your output's n-grams appear in the reference?_  
+    _("Did the system output contain what it should?")_
     
 🔶 **ROUGE**:
 
-- Measures **recall** — _How many of the reference’s n-grams appear in your output?_  
-    _(“Did the system miss anything the reference had?”)_
+- Measures **recall** — _How many of the reference's n-grams appear in your output?_  
+    _("Did the system miss anything the reference had?")_
 
 #  ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
 
-Use case: Popular for summarization tasks, also translation and text genetarion. ROUGE is commonly used in **text summarization evaluation** — because in summaries, covering key points (recall) is more important than matching exact phrasing.
+Use case: Popular for summarization tasks, also translation and text generation. ROUGE is commonly used in **text summarization evaluation** — because in summaries, covering key points (recall) is more important than matching exact phrasing.
 
 ### Rouge-N (N-gram overlap)
 
 compares n-gram recall between system output and reference.
 
-ROUGE_N =  # overlapping_ngrams / # n_grams in reference
+ROUGE_N = (overlapping n-grams) / (n-grams in reference)
 
 Example for ROUGE-1:
 
 Reference: The cat sat on the mat
 Hypothesis: The cat sat mat
 
-Unigrams in Hypothesis: { the, cat, sat, mat}
-Unigrams in Reference : { the, cat, sat, on, the, mat}
+Unigrams in Hypothesis: `{ the, cat, sat, mat}`
+Unigrams in Reference : `{ the, cat, sat, on, the, mat}`
 
 ROUGE-1 = 4/5 = 0.8
 
@@ -208,7 +209,7 @@ Ref: the cat sat on the mat
 Hyp: the cat mat
 LCS: The cat mat => length 3
 
-ROUGE_L Recall = LCS_length / reference_length = 3/6 = 0.5
+ROUGE_L Recall = (LCS length) / (reference length) = 3/6 = 0.5
 
 ROUGE-S (Skip-bigram)
 
@@ -217,13 +218,13 @@ ROUGE-S (Skip-bigram)
 # METEOR
 Computes similarity between generated (candidate) sentence and a reference (gold standard) sentence. METEOR uses:
 - **Exact word matches**  
-    (e.g., “dog” = “dog”)
+    (e.g., "dog" = "dog")
 - **Stemming matches**  
-    (e.g., “run” matches “running”)
+    (e.g., "run" matches "running")
 - **Synonym matches**  
-    (e.g., “car” matches “automobile” using WordNet)
+    (e.g., "car" matches "automobile" using WordNet)
 - **Paraphrase matches** _(in some versions)_  
-    (e.g., “shut the door” matches “close the door”)
+    (e.g., "shut the door" matches "close the door")
 
 METEOR align words from the candidate to the reference using the best matches from the 4 types above. Then it computes F-score weighted towards recall, then applies penalty for matching words that are out of order.
 
@@ -249,7 +250,7 @@ There is no explicit order modeling though.
 
 **RAG** (Retrieval-Augmented Generation) is a class of LLM-based systems that **combines retrieval of external knowledge (from a document store or database) with text generation** to produce informed, contextually rich outputs.
 
-Instead of generating purely from the model’s parameters (like vanilla GPT models), RAG models fetch relevant documents at inference time and use them as additional context to guide generation.
+Instead of generating purely from the model's parameters (like vanilla GPT models), RAG models fetch relevant documents at inference time and use them as additional context to guide generation.
 
 In RAG (Retrieval-Augmented Generation): there are two "layers" of evaluation:
 * Retrieval metrics: Recall@k, MRR -> These focus mostly on whether the correct documents were retrieved and fed to the generator. These metrics don't care about the final generated answer
@@ -274,10 +275,10 @@ Q1, Q3: Hit ; Q2: Miss ->  Recall@5 = 2/3 = 66.6%
 
 Measures **how high the first relevant document appears in the ranked list of retrieved documents**.
 
-Reciprocal Rank = 1 /  Rank of first relevant document
+Reciprocal Rank = 1 / (Rank of first relevant document)
 
 # Factual consistency
-Factual consistency in large language models (LLMs) refers to ==the degree to which the information generated by the LLM aligns with known facts or information present in a given source document or context==. In simpler terms, it's about whether the LLM is telling the truth and not making things up that aren't supported by the evidence.
+Factual consistency in large language models (LLMs) refers to **the degree to which the information generated by the LLM aligns with known facts or information present in a given source document or context**. In simpler terms, it's about whether the LLM is telling the truth and not making things up that aren't supported by the evidence.
 
 It's hard to capture though. Often involves a second LLM call judging whether there's been a hallucination.
 # Non-functional metrics

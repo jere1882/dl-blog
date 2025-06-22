@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 
 import "@/styles/globals.css"
+import "katex/dist/katex.min.css"
 
 import { Suspense } from "react"
 import { Metadata, Viewport } from "next"

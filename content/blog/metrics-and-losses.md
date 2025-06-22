@@ -17,19 +17,19 @@ The following metrics are commonly used to assess the performance of classificat
 | **Metric**         | **Formula**                                   | **Interpretation**                          |
 |---------------------|-----------------------------------------------|---------------------------------------------|
 | **Accuracy**        | $\frac{TP + TN}{TP + TN + FP + FN}$        | Overall performance of the model            |
-| **Precision**       | \frac{TP}{TP + FP}                      | How accurate the positive predictions are   |
-| **Recall (Sensitivity)** | \frac{TP}{TP + FN}                   | Coverage of actual positive samples         |
-| **Specificity**     | \frac{TN}{TN + FP}                       | Coverage of actual negative samples         |
-| **F1 Score**        | $\frac{`2TP`}{`2TP` + FP + FN}$                | Hybrid metric useful for unbalanced classes |
+| **Precision**       | $\frac{TP}{TP + FP}$                      | How accurate the positive predictions are   |
+| **Recall (Sensitivity)** | $\frac{TP}{TP + FN}$                   | Coverage of actual positive samples         |
+| **Specificity**     | $\frac{TN}{TN + FP}$                       | Coverage of actual negative samples         |
+| **F1 Score**        | $\frac{2 * TP}{2 * TP + FP + FN}$                | Hybrid metric useful for unbalanced classes |
 
 The receiver operating characteristic (ROC) curve plots TPR versus FPR by varying the threshold. These metrics are summarized below:
 
 ![[Pasted image 20241220174613.png]]
 
-| **Metric**                    | **Formula**            | **Equivalent**           |     |
-| ----------------------------- | ---------------------- | ------------------------ | --- |
-| **True Positive Rate (TPR)**  | \$\frac{TP}{TP + FN}\$ | Recall, Sensitivity      |     |
-| **False Positive Rate (FPR)** | $\frac{FP}{TN + FP}$   | $1 - Specificity} |     |
+| **Metric**                    | **Formula**            | **Equivalent**           |
+| ----------------------------- | ---------------------- | ------------------------ |
+| **True Positive Rate (TPR)**  | $\frac{TP}{TP + FN}$ | Recall, Sensitivity      |
+| **False Positive Rate (FPR)** | $\frac{FP}{TN + FP}$   | $1 - Specificity$ |
 
 | **Metric**                     | **Formula/Definition**                                                    | **Interpretation**                                                                 |
 |---------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
@@ -37,7 +37,7 @@ The receiver operating characteristic (ROC) curve plots TPR versus FPR by varyin
 | **Area Under the Precision-Recall Curve (AUC-PR)** | Integral of the Precision-Recall curve                                | Focuses on the performance of the positive class                                 |
 
 - **AUC-ROC** scores range from 0.5 (random guessing) to 1 (perfect discrimination).
-- **AUC-PR** is particularly valuable when there’s a significant imbalance between classes, as it emphasizes the minority class.
+- **AUC-PR** is particularly valuable when there's a significant imbalance between classes, as it emphasizes the minority class.
 
 Both metrics are widely used in fields like fraud detection, medical diagnosis, and any domain with highly skewed class distributions.
 
@@ -75,7 +75,7 @@ metrics are extended to handle multiple classes
 | **Huber Loss**                            | Useful for datasets with outliers; balances the sensitivity between MAE and MSE.                       |
 
 **Mean Absolute Error (MAE):**  
-$ \frac{1}{n} \sum_{i=1}^n \text{abs}(y_i - \hat{y}_i) $
+$ \frac{1}{n} \sum_{i=1}^n abs(y_i - \hat{y}_i) $
 
 **Mean Squared Error (MSE):**  
 $ \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 $
@@ -107,25 +107,25 @@ $ sqrt( \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 ) $
 | **Pixel Accuracy**            | (Number of correctly predicted pixels)/(Total number of pixels)                      | Fraction of correctly classified pixels.                                                                    |
 | **Mean Pixel Accuracy**       | $ \frac{1}{N} \sum_{c=1}^N (Correct predictions for class c) / (Total pixels in class  c) $| Average accuracy for each class, accounting for class imbalance.                                            |
 | **Intersection over Union (IoU)** | $ \frac{TP}{TP+FP+FN} $                   | Overlap between predicted and ground truth areas divided by their union.                                    |
-| **Mean IoU (mIoU)**           | $ \frac{1}{N} \sum_{c=1}^N IoU for class c $                                                       | Average IoU across all classes.                                                                             |
+| **Mean IoU (mIoU)**           | $ \frac{1}{N} \sum_{c=1}^N IoU_c $                                                       | Average IoU across all classes.                                                                             |
 | **Dice Coefficient (F1 Score)** | $ \frac{2 * TP}{2 * TP + FP + FN} $ | Measures overlap between prediction and ground truth, emphasizing smaller regions.                          |
 | **Boundary IoU**              | Computes IoU specifically for boundaries of segmented regions.                                              | Focuses on the accuracy of object boundaries.                                                               |
-| **Per-Class Precision**       | True Positive for class / TP + FP per class  $                  | Measures how well each class is correctly predicted relative to predictions.                                 |
-| **Per-Class Recall**          | $ True Positive for class / TP + FN per class$                  | Measures how well each class is detected.                                                                   |
+| **Per-Class Precision**       | $ \frac{TP_c}{TP_c + FP_c} $                  | Measures how well each class is correctly predicted relative to predictions.                                 |
+| **Per-Class Recall**          | $ \frac{TP_c}{TP_c + FN_c} $                  | Measures how well each class is detected.                                                                   |
 
 # Loss functions
 | Loss Name                                           | Formula                                                                                 | Use Case                                              |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | Mean Squared Error (MSE)                            | $MSE = \frac{1}{N} \sum_{i=1}^N (y_i - \hat{y}_i)^2$                                   | Regression tasks. Penalizes large errors heavily.     |
-| Mean Absolute Error (MAE)                           | $MAE = \frac{1}{N} \sum_{i=1}^N \text{abs}(y_i - \hat{y}_i)$                          | Regression tasks. Robust to outliers.                |
+| Mean Absolute Error (MAE)                           | $MAE = \frac{1}{N} \sum_{i=1}^N abs(y_i - \hat{y}_i)$                          | Regression tasks. Robust to outliers.                |
 | Huber Loss                                          |  google it | Regression with outlier tolerance and smooth gradients. |
 | Cross-Entropy Loss                                  | $-\frac{1}{N} \sum_{i=1}^N \sum_{k=1}^C y_{i,k} \log(\hat{y}_{i,k})$                    | Multi-class classification.                          |
 | Binary Cross-Entropy (BCE)                          | $-\frac{1}{N} \sum_{i=1}^N \big(y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i)\big)$ | Binary classification.                               |
-| Kullback-Leibl<br><br><br><br><br><br>er Divergence | $\text{KL}(P || Q) = \sum_{i} P(i) \log \frac{P(i)}{Q(i)}$                          | Comparing probability distributions.                 |
-| Hinge Loss                                          | $\text{Hinge} = \frac{1}{N} \sum_{i=1}^N \text{max}(0, 1 - y_i \hat{y}_i)$              | Binary classification with SVMs.                     |
+| Kullback-Leibler Divergence                         | $KL(P \| Q) = \sum_{i} P(i) \log \frac{P(i)}{Q(i)}$                          | Comparing probability distributions.                 |
+| Hinge Loss                                          | $Hinge = \frac{1}{N} \sum_{i=1}^N max(0, 1 - y_i \hat{y}_i)$              | Binary classification with SVMs.                     |
 | Focal Loss                                          | $-\frac{1}{N} \sum_{i=1}^N \alpha (1 - \hat{y}_i)^\gamma y_i \log(\hat{y}_i)$           | Class-imbalanced classification tasks.               |
 | IoU Loss                                            | $1 - \frac{Intersection}{Union}$                                          | Object detection or segmentation tasks.              |
-| Dice Loss                                           | $1 - \frac{2 * TP}{2 * TP + FP + FN}$             | Semantic segmentation tasks.                         |
+| Dice Loss                                           | $1 - \frac{2 * TP}{2 * TP + FP + FN} $             | Semantic segmentation tasks.                         |
 | Smooth L1 Loss                                      | next | Object detection (e.g., bounding box regression).    |
 # A deep dive into Cross Entropy
 
@@ -157,14 +157,14 @@ Observations:
 ![[Pasted image 20250616220050.png]]
 * the log is applied to the model prediction:
 	* p * q ->linear, the penalty is directly proportional to how good the prediction is
-	* -p * log(q) -> non linear. it explodes when the model is wrong! applies thus a stronger penalty - this is because   x << -log(x) when x is small
+	* -p * log(q) -> non linear. it explodes when the model is wrong! applies thus a stronger penalty - this is because   `x << -log(x)` when x is small
 	* Example: 
 		* K=3 ; `p=[0,1,0]` ; `q1=[0.9,0.05,0.05]`; `q2=[0.4,0.3,0.3]`
 
 | **Case**               | **Prediction qq**    | **Dot Product (p · q)** | **Cross-Entropy Loss** −log⁡q(c)-\log q(c) | **Better?**                                        |
 | ---------------------- | -------------------- | ----------------------- | ------------------------------------------ | -------------------------------------------------- |
-| **Confidently Wrong**  | `[0.90, 0.05, 0.05]` | **0.05**                | **2.9957**                                 | ❌ Bad — Confident but wrong → Strong penalty in CE |
-| **Uncertain / Unsure** | `[0.40, 0.30, 0.30]` | **0.30**                | **1.2040**                                 | ✅ Less bad — unsure, gentler penalty               |
+| **Confidently Wrong**  | `[0.90, 0.05, 0.05]` | **0.05**                | **2.9957**                                 | ❌ Bad — Confident but wrong → Strong penalty in CE |
+| **Uncertain / Unsure** | `[0.40, 0.30, 0.30]` | **0.30**                | **1.2040**                                 | ✅ Less bad — unsure, gentler penalty               |
 		* Remember that the loss should be LARGE for incorrect predictions. The dot product is actually terrible, it penalizes less the confidently wrong one!
 	* Cross entropy is 0 for a perfect prediction and it's always >= 0 
 	* Simple MSE is not good for classes or probabilities because it punishes large numeric errors but not uncertainty. In the above example, MSE for the confidently wrong is 0.2 and MSE for the uncertian is much larger.
@@ -188,5 +188,5 @@ E.g:
 * Entropy of features => how predictable or random the feature values are
 * Joint entropy => how unpredictable are the pairs feature/labels
 
-In this context, cross entropy is **not "error" or "loss"** — it’s a statistical property describing **uncertainty/diversity in the data itself**.
+In this context, cross entropy is **not "error" or "loss"** — it's a statistical property describing **uncertainty/diversity in the data itself**.
 
