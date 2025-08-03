@@ -15,5 +15,6 @@ export function formatDate(input: string | number): string {
 }
 
 export function absoluteUrl(path: string) {
-  return `${process.env.NEXT_PUBLIC_APP_URL}${path}`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002"
+  return `${baseUrl}${path}`
 }

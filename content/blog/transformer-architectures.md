@@ -1,6 +1,6 @@
 ---
 tags:
-  - Transformers
+  - deep-learning-basics
 aliases: 
 publish: true
 slug: a-comprehensive-introduction-to-transformers
@@ -9,21 +9,16 @@ description: Notes and a comprehensive summary of basic concepts in the field of
 date: 2024-07-07
 image: /thumbnails/pick_architecure.jpeg
 ---
+This post is an organized compendium of personal notes, excerpts from other posts and papers, which I’ve assembled into my own in-depth introductory guide to transformers. My goal is to understand the basic building blocks of these architectures and how they are used in cutting-edge modern systems.
 
-When I attended the ICRA 2023, one of the most important robotics conferences in the world, I was astonished to see that half the papers presented made use of transformer architectures. I realised that any machine learning practitioner, and even researchers in other fields such as robotics, must have a reasonably good understanding of this new technology and how to apply it.
+The reason I decided to revisit my foundations in transformers is that I attended ICRA 2023 (arguably the most important robotics conference in the world!), and literally half the papers were about using transformers for virtually every imaginable robotics task. It made me realize that transformer architectures may well come to dominate the field in the decades to come.
 
-The transformer may well be the simplest machine learning architecture to
-dominate the field in decades to come. As of 2024, popular services such as ChatGPT have introduced themselves in record time in the lives of millions of people due to their outstanding versatility and helpfulness. 
-
-This post is an organised compendium of personal notes, pieces of other posts and papers that have I put together as my own in depth introductory guide to transformers. I aim at understanding the basic building blocks that form these architectures, as well as how they are employed in cutting edge modern systems.
-
-Let's dive into it!
+Let’s dive in!
 # Introduction
 
 Transformer architectures have been in the spotlight for the last six years, ever since the groundbreaking paper "[Attention is All You Need](https://arxiv.org/abs/1706.03762)" introduced the Transformer model in 2017. Even though they were initially designed for natural language processes, transformers have made significant inroads into computer vision.
 
 A transformer is an attention-based encoder-decoder neural network architecture that was developed to deal with sequential data, as RNNs and LSTMs do.
-
 ![[Pasted image 20240729043308.png]]
 *Image from the original paper*
 
@@ -51,7 +46,6 @@ This is done by a trick called **positional encoding**, which consists of adding
 > 💡 **Remark:** In this example, you have an input sequence of size 4 and embedding size 3. Notice that the input of the encoder is thus a tensor of size 4x3, and the output of the encoder is a tensor of the exactly same size. The Multi-Headed Attention also returns a tensor of the same shape as the input.
 
 The **Multi Headed Attention** block applies a specific attention mechanism called **SELF-ATTENTION**. Self attention allows the models to associate each word in the input to other words in the input.
-
 * We use residual connections
 * Feed forward is just a fully connected NN with ReLu activations
 
@@ -69,7 +63,7 @@ They get fed to a linear layer,  Q and K undergo a dot product to produce a **sc
 
 ![[Pasted image 20240729044347.png]]
 
-The scores are scaled down to stabilise the gradients, and softmax is applied to map the scores to the range 0-1. The result are the **attention weights**, which tell you for each pair of words in the input sequence, their relative attention.
+The scores are scaled down to stabilize the gradients, and softmax is applied to map the scores to the range 0-1. The result are the **attention weights**, which tell you for each pair of words in the input sequence, their relative attention.
 
 Finally, the attention weights are multiplied by the values to get the attention block output.
 
@@ -79,7 +73,7 @@ Finally, the attention weights are multiplied by the values to get the attention
 
 **Key point: The semantic meaning of the output of the attention mechanism**
 
-Attention doesn't change the shape of the data, but it drastically changes its _content_. The new content is:
+*Attention* doesn't change the shape of the data, but it drastically changes its _content_. The new content is:
 - Each element in the output is a weighted sum of all input elements.
 - The weights are determined by how relevant each input element is to the current position.
 
@@ -254,22 +248,26 @@ GPT, despite not having a separate encoder component like the original Transform
 *I need to see a picture of the architecture to better understand it. It's unclear, are prompts and the sequence generated so far encoded and integrated? when and how*
 
 ## Subsequent versions
+| Architecture        | Year | Key Contributions                                                                                                |
+| ------------------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
+| **GPT‑2**           | 2019 | First widely-known autoregressive model with fluent long-form text generation; sparked interest in scaling laws. |
+| **T5**              | 2019 | Introduced the “text-to-text” paradigm; influential in unifying NLP tasks under a single framework.              |
+| **GPT‑3**           | 2020 | Breakthrough in scale (175B), strong zero-shot and few-shot performance, brought LLMs to mainstream awareness.   |
+| **PaLM**            | 2022 | Pushed scaling further (540B), demonstrated multilingual and logical reasoning gains.                            |
+| **ChatGPT**         | 2022 | First conversational LLM interface based on GPT‑3.5; made LLMs accessible to the public.                         |
+| **GPT‑4**           | 2023 | Multimodal (text + vision), large context window, major leap in reasoning and reliability.                       |
+| **Claude 2**        | 2023 | Strong alignment and safety emphasis; competitor to GPT‑4 in quality.                                            |
+| **Gemini 1.5**      | 2024 | Introduced million-token context windows, high-quality multimodal capabilities from Google DeepMind.             |
+| **GPT‑4o**          | 2024 | “Omnimodel” with real-time text, vision, and audio; very fast and cost-efficient.                                |
+| **Claude 3.5**      | 2024 | Advanced reasoning and transparency tools; top-tier coding and math performance.                                 |
+| **Gemini 2.5**      | 2025 | Google’s “thinking” model with internal reasoning steps; strong in multimodal tasks and robotics.                |
+| **GPT‑4.5 (Orion)** | 2025 | Latest OpenAI flagship; larger model, excellent reasoning and world knowledge. Currently in research preview.    |
 
-| Architecture | Year | Key Features                                                                                        |
-| ------------ | ---- | --------------------------------------------------------------------------------------------------- |
-| GPT-2        | 2019 | Larger model size, improved generation capabilities                                                 |
-| T5           | 2019 | Text-to-text transfer transformer, unified framework for various tasks                              |
-| XLNet        | 2019 | Permutation language modeling, addressing limitations of BERT                                       |
-| RoBERTa      | 2019 | Robustly optimized BERT pretraining, improved performance                                           |
-| ALBERT       | 2019 | Lightweight BERT, reduced model size while maintaining performance                                  |
-| ELECTRA      | 2020 | Efficient pre-training, discriminator-generator framework                                           |
-| DeBERTa      | 2020 | Disentangled attention mechanisms, improved long-range dependencies                                 |
-| GPT-3        | 2020 | Massive model size, exceptional generation and understanding capabilities                           |
-| LLaMA        | 2023 | Efficient large language model, designed for lower computational costs                              |
-| PaLM 2       | 2023 | More powerful and versatile version of PaLM, improved capabilities in various tasks                 |
-| BLOOM        | 2023 | Large and diverse language model, developed by a consortium                                         |
-| LaMDA        | 2023 | Foundational language model, impressive capabilities in understanding and generating human language |
+As of **mid‑2025**, the LLM landscape has **consolidated** around **three dominant model families**, each led by a major player:
 
-**Note:** This is not an exhaustive list, and the field of transformer architectures continues to evolve rapidly. Newer models and variations are constantly being developed.
-
-
+|Family|Organization|Key Strengths|Flagship Models|
+|---|---|---|---|
+|**GPT**|OpenAI|Scale, general performance, multimodal speed, ecosystem|GPT‑3 → GPT‑4 → GPT‑4o → GPT‑4.5|
+|**Claude**|Anthropic|Safety, transparency, reasoning depth|Claude 1 → 2 → 3 → 3.5 → 3.7|
+|**Gemini**|Google DeepMind|Multimodal context, tool integration, robotic/agent use|Gemini 1 → 1.5 → 2.5|
+This post goes on in my LLM architectures post :) !

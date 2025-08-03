@@ -1,0 +1,303 @@
+{
+  "main": {
+    "id": "5577a21d184c31c5",
+    "type": "split",
+    "children": [
+      {
+        "id": "2d19bcc3bd097b15",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "21eee884d769c3a5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/blog/Unreleased/Personal_notes/mlops-notes.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "mlops-notes"
+            }
+          },
+          {
+            "id": "a902c4a28f5d59a6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/blog/Unreleased/Personal_notes/python-notes.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "python-notes"
+            }
+          },
+          {
+            "id": "08aba13534d4224f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/blog/Unreleased/Personal_notes/SLURM.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SLURM"
+            }
+          },
+          {
+            "id": "a0f7fab6876d1fb0",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.8.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.8.7"
+            }
+          },
+          {
+            "id": "beb13bd01ad7834b",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.8.9"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.8.9"
+            }
+          },
+          {
+            "id": "d857fa1acb6b4d20",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/tag/large-language-models.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "large-language-models"
+            }
+          },
+          {
+            "id": "c1de7119fb435397",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/tag/view-synthesis.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "view-synthesis"
+            }
+          },
+          {
+            "id": "7e7133fd61664072",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/blog/LLM-map-of-metrics.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "LLM-map-of-metrics"
+            }
+          }
+        ],
+        "currentTab": 7
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "242786c1b9f6b948",
+    "type": "split",
+    "children": [
+      {
+        "id": "f2836d0980c03921",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3eb2d269a469eb88",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a8ee3fae3c8e402a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "56f44764731e9126",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 541.5
+  },
+  "right": {
+    "id": "3535932d686ee14a",
+    "type": "split",
+    "children": [
+      {
+        "id": "e09bec5cd47e602d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5dbf8a1e40b068dc",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "content/blog/LLM-map-of-metrics.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for LLM-map-of-metrics"
+            }
+          },
+          {
+            "id": "ed146394e949087c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "content/blog/Unreleased/Personal notes/python-package-structure-notes.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from python-package-structure-notes"
+            }
+          },
+          {
+            "id": "112701088f090a19",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "de6d58d18e272789",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "content/blog/Unreleased/Personal notes/python-package-structure-notes.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of python-package-structure-notes"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "command-palette:Open command palette": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false
+    }
+  },
+  "active": "7e7133fd61664072",
+  "lastOpenFiles": [
+    "content/blog/Unreleased/Personal_notes/trained_model_types.md",
+    "content/blog/Unreleased/Personal_notes/typing module in Python.md",
+    "content/blog/Unreleased/Personal_notes/python-notes.md",
+    "content/blog/LLM-map-of-metrics.md",
+    "content/blog/probability-recap.md",
+    "content/blog/mmsegmentation-tutorial.md",
+    "content/blog/pytorch.md",
+    "content/blog/metrics-and-losses.md",
+    "content/blog/llm-architectures.md",
+    "Pasted image 20250629152728.png",
+    "content/blog/transformer-architectures.md",
+    "content/tag/computer-vision.md",
+    "content/tag/deep-learning-basics.md",
+    "content/tag/foundation-models.md",
+    "content/tag/large-language-models.md",
+    "content/tag/machine-learning-engineering.md",
+    "content/tag/python.md",
+    "content/tag/view-synthesis.md",
+    "Pasted image 20250629111836.png",
+    "content/authors/jeremiasrodriguez.md",
+    "content/blog/Unreleased/Personal_notes/python-package-structure-notes.md",
+    "content/blog/LLM-map-of-metrics.md.bak",
+    "_tmp_188628_9e5b5a73653bc14d59670b4f1ad40321",
+    "public/assets/Pasted image 20250616231526.png",
+    "public/assets/Pasted image 20250616231326.png",
+    "public/assets/Pasted image 20250616230214.png",
+    "public/assets/Pasted image 20250616220050.png",
+    "public/assets/Pasted image 20250616215344.png",
+    "public/assets/Pasted image 20250615225650.png",
+    "public/assets/Pasted image 20250614232415.png",
+    "public/assets/Pasted image 20250609200452.png",
+    "content/blog/cv2.md",
+    "content/blog/Unreleased/Personal_notes/python_stack_interfaces.md",
+    "content/blog/Unreleased/Personal_notes/understanding-backpropagation.md",
+    "content/blog/Unreleased/Personal_notes/system-design-notes.md",
+    "content/blog/Unreleased/Personal_notes/spark.md",
+    "content/blog/ml-on-a-cluster.md",
+    "content/blog/SLURM.md",
+    "content/blog/Unreleased/Personal_notes/Untitled",
+    "Untitled.canvas"
+  ]
+}

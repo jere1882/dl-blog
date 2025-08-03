@@ -1,4 +1,3 @@
-import { siteConfig } from "@/config/site"
 import { Icons } from "@/components/icons"
 
 export function SiteFooter() {
@@ -9,22 +8,8 @@ export function SiteFooter() {
           <Icons.logo />
           <p className="text-center text-sm leading-loose md:text-left">
             Built by{" "}
-            <a
-              href={siteConfig.links.linkedin}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-4"
-            >
+            <a href="/cv" className="font-medium underline underline-offset-4">
               Jeremias Rodriguez
-            </a>
-            . Based on Francisco Moretti&apos;s
-            <a
-              href={siteConfig.links.fran_github}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-4"
-            >
-              Site
             </a>
           </p>
         </div>

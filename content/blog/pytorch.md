@@ -53,38 +53,38 @@ The neural network module provides:
 * Built in layers
 * Built in loss functions
 
-| Layer                  | Description                                                                                         |
-|------------------------|-----------------------------------------------------------------------------------------------------|
-| `nn.Linear`            | Fully connected layer (dense layer), performs a linear transformation.                             |
-| `nn.Conv2d`            | 2D convolutional layer, commonly used in image processing tasks.                                   |
-| `nn.Conv1d`            | 1D convolutional layer, commonly used in sequence data like time series or audio.                  |
-| `nn.LSTM`              | Long Short-Term Memory (LSTM) layer for sequence modeling and recurrent neural networks.            |
-| `nn.GRU`               | Gated Recurrent Unit (GRU) layer, similar to LSTM, but with fewer parameters.                       |
-| `nn.RNN`               | Basic Recurrent Neural Network layer for sequence modeling.                                        |
-| `nn.BatchNorm2d`       | 2D batch normalization layer, used to normalize the inputs of each layer to improve training.       |
+| Layer                  | Description                                                                                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `nn.Linear`            | Fully connected layer (dense layer), performs a linear transformation.                                 |
+| `nn.Conv2d`            | 2D convolutional layer, commonly used in image processing tasks.                                       |
+| `nn.Conv1d`            | 1D convolutional layer, commonly used in sequence data like time series or audio.                      |
+| `nn.LSTM`              | Long Short-Term Memory (LSTM) layer for sequence modeling and recurrent neural networks.               |
+| `nn.GRU`               | Gated Recurrent Unit (GRU) layer, similar to LSTM, but with fewer parameters.                          |
+| `nn.RNN`               | Basic Recurrent Neural Network layer for sequence modeling.                                            |
+| `nn.BatchNorm2d`       | 2D batch normalization layer, used to normalize the inputs of each layer to improve training.          |
 | `nn.Dropout`           | Regularization technique that randomly zeros some of the elements of the input tensor during training. |
-| `nn.MaxPool2d`         | Max pooling layer for downsampling in 2D (typically used in CNNs).                                 |
-| `nn.AvgPool2d`         | Average pooling layer for downsampling in 2D.                                                      |
-| `nn.Embedding`         | Layer for learning dense representations of categorical variables, often used in NLP tasks.        |
-| `nn.AdaptiveAvgPool2d` | Adaptive average pooling layer that outputs a fixed-size output regardless of the input size.       |
-| `nn.LayerNorm`         | Layer normalization, normalizes the input across the features for each sample.                      |
-| `nn.Transformer`       | Transformer architecture layer, used for sequence-to-sequence tasks such as translation.            |
+| `nn.MaxPool2d`         | Max pooling layer for downsampling in 2D (typically used in CNNs).                                     |
+| `nn.AvgPool2d`         | Average pooling layer for downsampling in 2D.                                                          |
+| `nn.Embedding`         | Layer for learning dense representations of categorical variables, often used in NLP tasks.            |
+| `nn.AdaptiveAvgPool2d` | Adaptive average pooling layer that outputs a fixed-size output regardless of the input size.          |
+| `nn.LayerNorm`         | Layer normalization, normalizes the input across the features for each sample.                         |
+| `nn.Transformer`       | Transformer architecture layer, used for sequence-to-sequence tasks such as translation.               |
 
-| Loss Function                 | Description                                                                                         |
-|--------------------------------|-----------------------------------------------------------------------------------------------------|
-| `nn.MSELoss`                   | Mean Squared Error Loss, commonly used for regression tasks.                                        |
-| `nn.CrossEntropyLoss`          | Cross-entropy loss, used for classification tasks (combines `softmax` and `negative log likelihood`).|
-| `nn.BCELoss`                   | Binary Cross-Entropy Loss, used for binary classification tasks.                                    |
-| `nn.BCEWithLogitsLoss`         | Binary Cross-Entropy Loss with logits, for binary classification with raw scores (logits).           |
-| `nn.NLLLoss`                   | Negative Log Likelihood Loss, used for classification when the outputs are log probabilities.        |
-| `nn.L1Loss`                    | L1 Loss, also known as Mean Absolute Error (MAE), used for regression tasks where we minimize absolute differences. |
-| `nn.HingeEmbeddingLoss`        | Hinge embedding loss, often used for support vector machines and binary classification with margins.  |
-| `nn.SmoothL1Loss`              | Smooth L1 Loss, a combination of L1 and L2 loss, used for regression tasks and robust to outliers.    |
-| `nn.KLDivLoss`                 | Kullback-Leibler Divergence Loss, measures the difference between two probability distributions.      |
-| `nn.MarginRankingLoss`         | Loss function that provides margin-based ranking for pairwise comparison tasks.                      |
-| `nn.CosineEmbeddingLoss`       | Cosine similarity loss used for measuring the similarity between two tensors in embedding space.     |
-| `nn.MultiLabelMarginLoss`      | Multi-label classification loss for tasks where each example can belong to more than one class.      |
-| `nn.PoissonNLLLoss`            | Poisson negative log-likelihood loss, typically used for count-based predictions.                    |
+| Loss Function             | Description                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `nn.MSELoss`              | Mean Squared Error Loss, commonly used for regression tasks.                                                        |
+| `nn.CrossEntropyLoss`     | Cross-entropy loss, used for classification tasks (combines `softmax` and `negative log likelihood`).               |
+| `nn.BCELoss`              | Binary Cross-Entropy Loss, used for binary classification tasks.                                                    |
+| `nn.BCEWithLogitsLoss`    | Binary Cross-Entropy Loss with logits, for binary classification with raw scores (logits).                          |
+| `nn.NLLLoss`              | Negative Log Likelihood Loss, used for classification when the outputs are log probabilities.                       |
+| `nn.L1Loss`               | L1 Loss, also known as Mean Absolute Error (MAE), used for regression tasks where we minimize absolute differences. |
+| `nn.HingeEmbeddingLoss`   | Hinge embedding loss, often used for support vector machines and binary classification with margins.                |
+| `nn.SmoothL1Loss`         | Smooth L1 Loss, a combination of L1 and L2 loss, used for regression tasks and robust to outliers.                  |
+| `nn.KLDivLoss`            | Kullback-Leibler Divergence Loss, measures the difference between two probability distributions.                    |
+| `nn.MarginRankingLoss`    | Loss function that provides margin-based ranking for pairwise comparison tasks.                                     |
+| `nn.CosineEmbeddingLoss`  | Cosine similarity loss used for measuring the similarity between two tensors in embedding space.                    |
+| `nn.MultiLabelMarginLoss` | Multi-label classification loss for tasks where each example can belong to more than one class.                     |
+| `nn.PoissonNLLLoss`       | Poisson negative log-likelihood loss, typically used for count-based predictions.                                   |
  Offers utilities for defining, training, and running neural networks.
 
 ```

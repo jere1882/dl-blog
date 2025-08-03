@@ -1,17 +1,19 @@
 import Image from "next/image"
 import Link from "next/link"
-import basicsIcon from "@/assets/logos/basics.png"
-import foundModelsIcon from "@/assets/logos/foundation_models.jpg"
-import nerfIcon from "@/assets/logos/nerf3.gif"
-import computerVisionIcon from "@/assets/logos/semseg_2.gif"
 import { FORMAT_H3 } from "@/styles/format"
 
 import { cn } from "@/lib/utils"
 
-const ICONS = {
-  "Computer Vision": computerVisionIcon,
-  "View Synthesis": nerfIcon,
-  "Foundation Models": foundModelsIcon,
+const THUMBNAILS = {
+  "Computer Vision": "/thumbnails/semantic-segmentation.gif",
+  "View Synthesis": "/thumbnails/NERF.png",
+  "View Synthesis - Neural Raiance Fields": "/thumbnails/NERF.png",
+  "Foundation Models": "/thumbnails/astronomy.jpeg",
+  "Egyptian AI Lens": "/sample-egyptian-images/VoK.jpg",
+  "foundation-models": "/thumbnails/astronomy.jpeg",
+  "computer-vision": "/thumbnails/semantic-segmentation.gif",
+  "view-synthesis": "/thumbnails/NERF.png",
+  "egyptian-ai-lens": "/sample-egyptian-images/VoK.jpg",
 }
 
 export function TechCard({
@@ -23,24 +25,34 @@ export function TechCard({
   description: string
   link: string
 }) {
+  // Get the thumbnail, fallback to semantic segmentation if not found
+  const thumbnailSrc =
+    THUMBNAILS[name] || "/thumbnails/semantic-segmentation.gif"
+
   return (
     <Link href={link}>
       <div className="relative animate-border overflow-hidden rounded-lg bg-gradient-to-r from-border via-primary to-border bg-[length:400%_400%] p-px ">
         <span className="block rounded-md bg-background hover:bg-accent">
-          <div className="h-65 flex flex-col justify-between rounded-md p-4">
-            <div className="space-y-4">
+          <div className="flex h-72 flex-col justify-between rounded-md p-4">
+            <div className="flex flex-1 flex-col space-y-4">
               <div className="flex items-center gap-3">
-                <h3 className={cn(FORMAT_H3, "mt-0")}>{name}</h3>
+                <h3 className={cn(FORMAT_H3, "mt-0 text-lg font-semibold")}>
+                  {name}
+                </h3>
               </div>
-              <p className="line-clamp-4 text-sm text-muted-foreground">
+              <p className="line-clamp-3 flex-1 text-sm text-muted-foreground">
                 {description}
               </p>
-              <div className="flex justify-center">
-                <Image
-                  src={ICONS[name]}
-                  alt={`${name} icon`}
-                  className="w-45 h-40"
-                />
+              <div className="flex items-end justify-center">
+                <div className="relative h-28 w-36 overflow-hidden rounded-lg border border-border/20">
+                  <Image
+                    src={thumbnailSrc}
+                    alt={`${name} illustration`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 144px) 100vw, 144px"
+                  />
+                </div>
               </div>
             </div>
           </div>

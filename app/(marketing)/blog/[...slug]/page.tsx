@@ -45,7 +45,7 @@ export async function generateMetadata({
     return {}
   }
 
-  const url = process.env.NEXT_PUBLIC_APP_URL
+  const url = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002"
 
   const ogUrl = new URL(`${url}/api/og`)
   ogUrl.searchParams.set("heading", post.title)
@@ -102,7 +102,7 @@ export async function generateStaticParams(): Promise<
     })
 
     const projectFolderPath = path.join(process.cwd(), "public", "thumbnails")
-    const url = process.env.NEXT_PUBLIC_APP_URL
+    const url = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002"
   }
 
   return allPosts.map((post) => ({

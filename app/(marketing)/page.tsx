@@ -12,12 +12,18 @@ import { GitHubStars } from "@/components/github-stars"
 import { getTagsItems, TagGroup } from "@/components/tag-group"
 import { TechCard } from "@/components/tech-card"
 
-const TECHNOLOGIES = ["computer-vision", "view-synthesis", "foundation-models"]
+const TECHNOLOGIES = [
+  "computer-vision",
+  "view-synthesis",
+  "foundation-models",
+  "egyptian-ai-lens",
+]
 
 const TECHNOLOGY_POSTS = {
   "computer-vision": "semantic-segmentation-of-underwater-scenery",
   "view-synthesis": "indoor-nerf-reconstruction",
   "foundation-models": "k-correction-via-foundation-model",
+  "egyptian-ai-lens": "egyptian-ai-lens", // Points to the project page
 }
 
 export default async function IndexPage() {
@@ -49,7 +55,8 @@ export default async function IndexPage() {
             Machine Learning in Action
           </h2>
           <p className=" text-center leading-normal text-muted-foreground sm:text-start sm:text-xl sm:leading-8">
-            Exploring the depths of AI, one project at a time.
+            Welcome to my personal blog, where I explore the depths of AI, one
+            project at a time.
           </p>
           <div className="flex gap-4">
             <Link href="/blog" className={cn(buttonVariants({ size: "lg" }))}>
@@ -86,15 +93,23 @@ export default async function IndexPage() {
             {"Selected projects from my main areas of interest."}
           </p>
         </div>
-        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-5xl md:grid-cols-3">
-          {technologiesTags.map((tag) => (
-            <TechCard
-              key={tag.slug}
-              name={tag.tag}
-              description={tag.description || ""}
-              link={`/blog/${tag.postSlug}`} // Redirect to the specific blog post
-            />
-          ))}
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-6xl md:grid-cols-2 lg:grid-cols-4">
+          {technologiesTags.map((tag) => {
+            // Special handling for Egyptian AI Lens to link to project page
+            const link =
+              tag.slug === "egyptian-ai-lens"
+                ? "/egyptian-ai-lens"
+                : `/blog/${tag.postSlug}`
+
+            return (
+              <TechCard
+                key={tag.slug}
+                name={tag.title}
+                description={tag.description || ""}
+                link={link}
+              />
+            )
+          })}
         </div>
       </section>
       <hr className="container" />

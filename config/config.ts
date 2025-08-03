@@ -34,6 +34,14 @@ const config: UserConfig = {
   },
   analytics: "G-RQWLTRWBS2",
   navLinks: [
+    {
+      title: "📄 Resume",
+      href: "/cv",
+    },
+    {
+      title: "🏺 Egyptian AI Lens",
+      href: "/egyptian-ai-lens",
+    },
     //{ href: "/code-tips", title: "Code Tips" },
     //{ href: "/blog", title: "Blog" },
   ],
