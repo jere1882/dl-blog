@@ -8,7 +8,7 @@ import PIL.Image
 from .schemas import EgyptianArtAnalysis
 import sys
 
-DEFAULT_THINKING_BUDGET = 10000
+DEFAULT_THINKING_BUDGET = 2000
 
 def create_egyptian_art_prompt(image_type_hint=None):
     """Create the expert Egyptologist prompt for analyzing Egyptian art images."""
@@ -79,11 +79,23 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
         }
         model_name = speed_to_model.get(speed, 'gemini-2.5-flash')
         
-        print(f"Using model: {model_name} for speed: {speed}", file=sys.stderr)
-        print(f"Image type hint: {image_type}", file=sys.stderr)
+        # Initialize retry configuration before debug logging
+        max_retries = 2
+        
+        print(f"=== GEMINI API CALL DEBUG INFO ===")
+        print(f"Model: {model_name}")
+        print(f"Speed setting: {speed}")
+        print(f"Image type hint: {image_type}")
+        print(f"Thinking budget: {thinking_budget}")
+        print(f"Image data size: {len(image_data)} characters (base64)")
+        print(f"Prompt length: {len(prompt_text)} characters")
+        print(f"Max retries: {max_retries}")
+        print(f"Temperature: 0 (deterministic)")
+        print(f"Response format: JSON with structured schema")
+        print(f"Schema: EgyptianArtAnalysis (characters, picture_location, interesting_detail, date, ancient_text_translation)")
+        print(f"=== END DEBUG INFO ===")
         
         api_call_start_time = time.time()
-        max_retries = 2
         retry_count = 0
         
         while retry_count <= max_retries:
@@ -91,8 +103,10 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
                 if retry_count > 0:
                     # Exponential backoff: wait 1s, then 2s, then 4s, etc.
                     wait_time = 2 ** (retry_count - 1)
-                    print(f"Retrying Gemini call in {wait_time} seconds... (attempt {retry_count + 1}/{max_retries + 1})", file=sys.stderr)
+                    print(f"RETRY: Gemini call retry #{retry_count + 1}/{max_retries + 1} after {wait_time}s wait")
                     time.sleep(wait_time)
+                else:
+                    print(f"STARTING: Initial Gemini API call to {model_name}")
                 
                 model = genai.GenerativeModel(
                     model_name=model_name,
@@ -102,9 +116,16 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
                         temperature=0
                     )
                 )
+                
+                print(f"MODEL CREATED: {model_name} with JSON schema enforcement")
+                print(f"CALLING: generate_content() with prompt + image...")
+                
                 response = model.generate_content([prompt_text, image])
                 
                 # If we get here, the call succeeded
+                print(f"SUCCESS: API call completed in {time.time() - api_call_start_time:.2f}s")
+                print(f"RESPONSE TYPE: {type(response)}")
+                print(f"RESPONSE CANDIDATES: {len(response.candidates) if hasattr(response, 'candidates') else 'N/A'}")
                 break
                 
             except Exception as e:
@@ -113,7 +134,7 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
                 
                 if is_5xx_error and retry_count < max_retries:
                     retry_count += 1
-                    print(f"Gemini API error (5xx): {str(e)}. Retrying... ({retry_count}/{max_retries})", file=sys.stderr)
+                    print(f"Gemini API error (5xx): {str(e)}. Retrying... ({retry_count}/{max_retries})")
                     continue
                 else:
                     # Either not a 5xx error, or we've exhausted retries
@@ -138,16 +159,16 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
                     raise Exception(f"Cannot access response text. Response structure: {type(response)}")
         
         # Debug: Log the raw response for troubleshooting
-        print(f"Raw Gemini response (first 500 chars): {response_text[:500]}", file=sys.stderr)
-        print(f"Raw Gemini response (last 200 chars): {response_text[-200:]}", file=sys.stderr)
-        print(f"Response length: {len(response_text)} characters", file=sys.stderr)
+        print(f"Raw Gemini response (first 500 chars): {response_text[:500]}")
+        print(f"Raw Gemini response (last 200 chars): {response_text[-200:]}")
+        print(f"Response length: {len(response_text)} characters")
         
         # Try to parse JSON with better error handling
         try:
             analysis_data = json.loads(response_text)
         except json.JSONDecodeError as json_error:
-            print(f"JSON parsing failed: {json_error}", file=sys.stderr)
-            print(f"Error at position {json_error.pos}: '{response_text[max(0, json_error.pos-50):json_error.pos+50]}'", file=sys.stderr)
+            print(f"JSON parsing failed: {json_error}")
+            print(f"Error at position {json_error.pos}: '{response_text[max(0, json_error.pos-50):json_error.pos+50]}'")
             
             # Try to fix common JSON issues
             cleaned_text = response_text.strip()
@@ -162,7 +183,7 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
             # Try parsing the cleaned text
             try:
                 analysis_data = json.loads(cleaned_text)
-                print("Successfully parsed after cleaning", file=sys.stderr)
+                print("Successfully parsed after cleaning")
             except json.JSONDecodeError:
                 # Last resort: try to extract just the JSON part
                 import re
@@ -170,13 +191,23 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
                 if json_match:
                     try:
                         analysis_data = json.loads(json_match.group())
-                        print("Successfully extracted and parsed JSON", file=sys.stderr)
+                        print("Successfully extracted and parsed JSON")
                     except json.JSONDecodeError:
                         raise Exception(f"Could not parse Gemini response as JSON. Raw response: {response_text[:1000]}...")
                 else:
                     raise Exception(f"No JSON found in Gemini response. Raw response: {response_text[:1000]}...")
         
         analysis = EgyptianArtAnalysis(**analysis_data)
+        
+        # Final debug summary
+        print(f"=== FINAL RESULT SUMMARY ===")
+        print(f"Status: SUCCESS")
+        print(f"Total duration: {api_call_duration:.2f}s")
+        print(f"Characters found: {len(analysis.characters)}")
+        print(f"Location: {analysis.picture_location[:50]}{'...' if len(analysis.picture_location) > 50 else ''}")
+        print(f"Historical period: {analysis.date}")
+        print(f"Translation length: {len(analysis.ancient_text_translation)} chars")
+        print(f"=== END SUMMARY ===")
         
         return {
             "failure_status": "success",
@@ -187,6 +218,12 @@ def analyze_egyptian_art_with_gemini(image_data, speed='fast', image_type='unkno
             
     except Exception as e:
         import traceback
+        api_call_duration = time.time() - api_call_start_time if 'api_call_start_time' in locals() else 0
+        print(f"=== ERROR SUMMARY ===")
+        print(f"Status: FAILED")
+        print(f"Duration before failure: {api_call_duration:.2f}s")
+        print(f"Error: {str(e)}")
+        print(f"=== END ERROR SUMMARY ===")
         return {
             "failure_status": "api_failure",
             "failure_reason": f"Gemini API call failed: {str(e)}",

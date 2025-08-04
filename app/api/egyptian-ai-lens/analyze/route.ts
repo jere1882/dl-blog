@@ -21,9 +21,9 @@ interface GeminiResult {
       description: string
       location: string
     }>
-    location_guess: string
+    picture_location: string
     interesting_detail: string
-    historical_date: string
+    date: string
   }
   failure_reason?: string
   api_call_duration: number
@@ -201,11 +201,19 @@ except Exception as e:
     let errorOutput = ""
 
     pythonProcess.stdout.on("data", (data: any) => {
-      output += data.toString()
+      const dataStr = data.toString()
+      output += dataStr
+
+      // Forward Python debug output to console for real-time visibility
+      console.log("[Python Debug]", dataStr.trim())
     })
 
     pythonProcess.stderr.on("data", (data: any) => {
-      errorOutput += data.toString()
+      const dataStr = data.toString()
+      errorOutput += dataStr
+
+      // Forward Python errors to console for real-time visibility
+      console.error("[Python Error]", dataStr.trim())
     })
 
     pythonProcess.on("close", () => {
@@ -239,7 +247,7 @@ except Exception as e:
 }
 
 // Egyptian AI Lens integration for local testing with enhanced debugging!
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     console.log("Starting Python Gemini backend call...")
     const formData = await request.formData()
@@ -267,7 +275,7 @@ export async function POST(request: NextRequest) {
     // First, test if python works at all
     const pythonTest = spawn("python", ["--version"])
 
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       let pythonVersion = ""
       let pythonError = ""
 
@@ -321,14 +329,15 @@ export async function POST(request: NextRequest) {
                           analysis.ancient_text_translation ||
                           "No ancient text detected",
                         characters: analysis.characters || [],
-                        location: analysis.location_guess || "Location unknown",
+                        location:
+                          analysis.picture_location || "Location unknown",
                         processing_time: `Analysis completed in ${
                           geminiResult.api_call_duration?.toFixed(2) || "N/A"
                         }s`,
                         interesting_detail:
                           analysis.interesting_detail ||
                           "No notable details identified",
-                        date: analysis.historical_date || "Period unknown",
+                        date: analysis.date || "Period unknown",
                       })
                     )
                     console.log("SUCCESS! Real Gemini analysis completed!")

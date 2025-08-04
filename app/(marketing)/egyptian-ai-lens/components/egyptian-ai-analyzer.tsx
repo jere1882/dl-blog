@@ -249,6 +249,24 @@ export function EgyptianAIAnalyzer({
       setProgress(30)
       setState("analyzing")
 
+      // Start progress simulation
+      let currentProgress = 30
+      let progressCompleted = false
+
+      // Progress simulation: increment 1% per second for up to 60 seconds
+      const progressInterval = setInterval(() => {
+        if (progressCompleted) {
+          clearInterval(progressInterval)
+          return
+        }
+
+        currentProgress += 1
+        if (currentProgress >= 95) {
+          currentProgress = 95 // Cap at 95% until API call completes
+        }
+        setProgress(currentProgress)
+      }, 1000) // Update every 1 second (1% per second)
+
       // Allow switching between local Python server and Next.js API
       const apiBase = process.env.NEXT_PUBLIC_API_BASE || ""
       const endpoint = apiBase
@@ -261,6 +279,10 @@ export function EgyptianAIAnalyzer({
         method: "POST",
         body: formData,
       })
+
+      // Stop progress simulation and complete
+      progressCompleted = true
+      clearInterval(progressInterval)
 
       if (!response.ok) {
         throw new Error(`Analysis failed: ${response.statusText}`)
@@ -351,7 +373,7 @@ export function EgyptianAIAnalyzer({
             <img
               src={previewUrl}
               alt="Preview"
-              className="mx-auto max-h-64 rounded-lg border object-contain"
+              className="mx-auto max-h-96 rounded-lg border object-contain"
             />
 
             <div className="text-center">
