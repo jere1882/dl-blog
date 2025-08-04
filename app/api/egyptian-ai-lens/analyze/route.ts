@@ -4,7 +4,7 @@ import path from "path"
 import { NextRequest, NextResponse } from "next/server"
 
 interface TestResult {
-  success: boolean
+  failure_status: string
   failure_reason?: string
   api_call_duration: number
   python_output?: string
@@ -12,7 +12,7 @@ interface TestResult {
 }
 
 interface GeminiResult {
-  success: boolean
+  failure_status: string
   analysis?: {
     ancient_text_translation: string
     characters: Array<{
@@ -61,7 +61,7 @@ try:
     
     # Mock response for testing
     mock_result = {
-        "success": True,
+        "failure_status": "success",
         "ancient_text_translation": "Mock hieroglyph translation - Python modules working correctly",
         "characters": [
             {
@@ -119,7 +119,7 @@ except Exception as e:
         resolve(result)
       } catch (error) {
         resolve({
-          success: false,
+          failure_status: "failure",
           failure_reason: `Failed to parse Python output: ${error}`,
           python_output: output,
           api_call_duration: 0,
@@ -143,6 +143,31 @@ import sys
 import traceback
 import json
 import base64
+import os
+
+# Load environment variables from .env.local
+def load_env_file():
+    env_file = '.env.local'
+    if os.path.exists(env_file):
+        print(f"✓ Found {env_file}", file=sys.stderr)
+        with open(env_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key] = value
+        print(f"✓ Loaded environment variables", file=sys.stderr)
+    else:
+        print(f"✗ {env_file} not found", file=sys.stderr)
+
+# Load environment variables first
+load_env_file()
+
+# Debug: Check if API key is loaded
+google_key = os.environ.get('GOOGLE_API_KEY')
+gemini_key = os.environ.get('GEMINI_API_KEY')
+print(f"Google API Key loaded: {'Yes' if google_key else 'No'}", file=sys.stderr)
+print(f"Gemini API Key loaded: {'Yes' if gemini_key else 'No'}", file=sys.stderr)
 
 # Read image data from temp file
 with open('temp_image_data.txt', 'r') as f:
@@ -151,6 +176,8 @@ with open('temp_image_data.txt', 'r') as f:
 try:
     sys.path.append('.')
     from api.egyptian_ai_lens.gemini_strategy import analyze_egyptian_art_with_gemini
+    
+    print(f"Processing image of {len(image_b64)} characters", file=sys.stderr)
     
     # Call Gemini analysis
     result = analyze_egyptian_art_with_gemini(image_b64, "${speed}", "${imageType}")
@@ -200,7 +227,7 @@ except Exception as e:
         console.error("Raw output:", output)
         console.error("Error output:", errorOutput)
         resolve({
-          success: false,
+          failure_status: "failure",
           failure_reason: `Failed to parse Python response: ${error}`,
           python_output: output,
           python_errors: errorOutput,
@@ -279,11 +306,14 @@ export async function POST(request: NextRequest) {
         console.log("Python available, testing our modules...")
         testPythonModules()
           .then((result) => {
-            if (result.success) {
+            if (result.failure_status === "success") {
               console.log("Module test successful!")
               callRealGemini(imageBase64, speed, imageType)
                 .then((geminiResult) => {
-                  if (geminiResult.success && geminiResult.analysis) {
+                  if (
+                    geminiResult.failure_status === "success" &&
+                    geminiResult.analysis
+                  ) {
                     const analysis = geminiResult.analysis
                     resolve(
                       NextResponse.json({

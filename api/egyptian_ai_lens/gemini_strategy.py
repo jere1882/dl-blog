@@ -8,7 +8,7 @@ import PIL.Image
 from .schemas import EgyptianArtAnalysis
 import sys
 
-DEFAULT_THINKING_BUDGET = 200
+DEFAULT_THINKING_BUDGET = 10000
 
 def create_egyptian_art_prompt(image_type_hint=None):
     """Create the expert Egyptologist prompt for analyzing Egyptian art images."""
