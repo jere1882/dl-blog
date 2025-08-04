@@ -34,6 +34,9 @@ importers:
       "@editorjs/table":
         specifier: ^2.2.2
         version: 2.2.2
+      "@google/generative-ai":
+        specifier: ^0.21.0
+        version: 0.21.0
       "@hookform/resolvers":
         specifier: ^2.9.11
         version: 2.9.11(react-hook-form@7.51.0(react@18.2.0))
@@ -973,6 +976,13 @@ packages:
       {
         integrity: sha512-m0G6wlnhm/AX0H12IOWtK8gASEMffnX08RtKkCgTdHb9JpHKGloI7icFfLg9ZmQeavcvR0PKmzxClyuFPSjKWw==,
       }
+
+  "@google/generative-ai@0.21.0":
+    resolution:
+      {
+        integrity: sha512-7XhUbtnlkSEZK15kN3t+tzIMxsbKm/dSkKBFalj+20NvPKe1kBY7mR2P7vuijEn+f06z5+A8bVGKO0v39cr6Wg==,
+      }
+    engines: { node: ">=18.0.0" }
 
   "@grpc/grpc-js@1.10.3":
     resolution:
@@ -9134,6 +9144,8 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   "@floating-ui/utils@0.1.1": {}
+
+  "@google/generative-ai@0.21.0": {}
 
   "@grpc/grpc-js@1.10.3":
     dependencies:

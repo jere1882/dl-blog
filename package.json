@@ -14,7 +14,7 @@
     "lint": "next lint --fix",
     "preview": "next build && next start",
     "format": "prettier --write .",
-    "postinstall": "prisma generate",
+    "postinstall": "if test \"$DISABLE_DB\" != \"true\"; then prisma generate; else echo 'Skipping prisma generate due to DISABLE_DB=true'; fi",
     "sync": "node scripts/sync.mjs",
     "prepare": "husky install"
   },
@@ -28,6 +28,7 @@
     "@editorjs/list": "^1.8.0",
     "@editorjs/paragraph": "^2.10.0",
     "@editorjs/table": "^2.2.2",
+    "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^2.9.11",
     "@libsql/client": "^0.6.0",
     "@mdx-js/loader": "^3.1.0",

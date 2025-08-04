@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "app/api/egyptian-ai-lens/analyze/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "build": {
+    "env": {
+      "DISABLE_DB": "true"
+    }
+  }
+}

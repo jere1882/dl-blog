@@ -13,8 +13,18 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Exclude heavy packages from client bundle
+      config.externals.push({
+        sharp: "commonjs sharp",
+        "@prisma/client": "commonjs @prisma/client",
+      })
+    }
+    return config
+  },
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client"],
+    serverComponentsExternalPackages: ["@prisma/client", "sharp", "katex"],
   },
   async redirects() {
     return [

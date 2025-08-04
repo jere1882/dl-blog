@@ -1,255 +1,73 @@
-import { spawn } from "child_process"
-import fs from "fs"
-import path from "path"
 import { NextRequest, NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
-interface TestResult {
-  failure_status: string
-  failure_reason?: string
-  api_call_duration: number
-  python_output?: string
-  traceback?: string
+interface Character {
+  character_name: string
+  reasoning: string
+  description: string
+  location: string
 }
 
-interface GeminiResult {
-  failure_status: string
-  analysis?: {
-    ancient_text_translation: string
-    characters: Array<{
-      character_name: string
-      reasoning: string
-      description: string
-      location: string
-    }>
-    picture_location: string
-    interesting_detail: string
-    date: string
+interface EgyptianArtAnalysis {
+  ancient_text_translation: string
+  characters: Character[]
+  picture_location: string
+  interesting_detail: string
+  date: string
+}
+
+function createEgyptianArtPrompt(imageType?: string): string {
+  let basePrompt = `You are an expert Egyptologist with deep knowledge of ancient Egyptian art, tomb paintings, temple reliefs, and ancient texts. You are analyzing a photograph taken by a tourist of ancient Egyptian wall decorations, likely from famous sites like the Valley of the Kings, Karnak Temple, or other well-documented locations.
+
+**IMPORTANT: Use your extensive knowledge of famous Egyptian tombs and their documented artwork, especially:**
+- Tutankhamun's tomb (KV62) and its famous painted scenes
+- Other Valley of the Kings tombs (KV1-KV64)
+- Well-documented temple reliefs from Karnak, Luxor, Abu Simbel
+- Famous Egyptian artworks
+
+Your task is to analyze what is depicted in the captured image. Provide a detailed analysis in JSON format with the following structure:
+
+{
+  "ancient_text_translation": "Translation of any hieroglyphs or ancient text visible",
+  "characters": [
+    {
+      "character_name": "Name of deity/person",
+      "reasoning": "Why you identified them as such",
+      "description": "Brief description and facts",
+      "location": "Position in image"
+    }
+  ],
+  "picture_location": "Best guess of where this was photographed",
+  "interesting_detail": "One fascinating detail an amateur might miss",
+  "date": "Historical period when artwork was created"
+}
+
+If there are characters depicted (e.g., gods, pharaohs, queens, officials, or other people), identify them by name. For each identified character, provide:
+1. **Character Name**: The name of the individual or deity.
+2. **Reasoning**: A clear explanation of *why* you identified them as such (e.g., specific regalia, iconography, context).
+3. **Description**: Any interesting facts or a brief description of the character/deity.
+4. **Location**: Their approximate position in the image (e.g., "far left", "center", "right side", "behind the pharaoh").
+
+For any ancient Egyptian text, hieroglyphs, or symbols, attempt to translate them. If a full translation is not possible due to image quality or complexity, try to identify individual elements, cartouches (especially those containing royal or deity names), or speculate on the general meaning based on context.
+
+Guess the location where the picture was taken (e.g., "Valley of the Kings, Tomb of Tutankhamun (KV62)", "Karnak Temple, Hypostyle Hall"). Be specific if possible, but use speculative language ("possibly", "likely", "could be") if you are not absolutely certain.
+
+Highlight one particularly interesting detail from the image that an amateur might miss but an Egyptologist would find fascinating.
+
+Finally, provide your best guess as to the historical period when the artwork was produced (e.g., "Old Kingdom", "Middle Kingdom", "New Kingdom", "Ptolemaic Period").
+
+IMPORTANT: Respond ONLY with valid JSON. Do not include any other text, explanations, or formatting.`
+
+  if (imageType && imageType !== "unknown") {
+    basePrompt += `\n\nHint: The image most likely belongs to a ${imageType}.`
   }
-  failure_reason?: string
-  api_call_duration: number
-  python_output?: string
-  python_errors?: string
-  traceback?: string
+
+  return basePrompt
 }
 
-async function testPythonModules(): Promise<TestResult> {
-  return new Promise((resolve) => {
-    const testScript = `
-import sys
-import traceback
-
-try:
-    from pydantic import BaseModel
-    from typing import List
-    print("✓ Pydantic and typing imports successful")
-    
-    # Test the schema
-    class Character(BaseModel):
-        character_name: str
-        reasoning: str
-        description: str
-        location: str
-
-    class EgyptianArtAnalysis(BaseModel):
-        ancient_text_translation: str
-        characters: List[Character]
-        location_guess: str
-        interesting_detail: str
-        historical_date: str
-    
-    print("✓ Schema definitions successful")
-    
-    # Mock response for testing
-    mock_result = {
-        "failure_status": "success",
-        "ancient_text_translation": "Mock hieroglyph translation - Python modules working correctly",
-        "characters": [
-            {
-                "character_name": "Test Deity",
-                "reasoning": "Testing character identification system",
-                "description": "Mock character for testing purposes",
-                "location": "Test location"
-            }
-        ],
-        "location_guess": "Mock location - Egypt",
-        "interesting_detail": "This is a test response to verify Python integration",
-        "historical_date": "Test period",
-        "api_call_duration": 0.1
-    }
-    
-    import json
-    print(json.dumps(mock_result))
-    
-except ImportError as e:
-    error_result = {
-        "success": False,
-        "failure_reason": f"Import error: {str(e)}",
-        "traceback": traceback.format_exc(),
-        "api_call_duration": 0
-    }
-    import json
-    print(json.dumps(error_result))
-except Exception as e:
-    error_result = {
-        "success": False, 
-        "failure_reason": f"General error: {str(e)}",
-        "traceback": traceback.format_exc(),
-        "api_call_duration": 0
-    }
-    import json
-    print(json.dumps(error_result))
-`
-
-    const pythonProcess = spawn("python3", ["-c", testScript])
-
-    let output = ""
-    pythonProcess.stdout.on("data", (data: any) => {
-      output += data.toString()
-    })
-
-    pythonProcess.stderr.on("data", (data: any) => {
-      console.error("Python stderr:", data.toString())
-    })
-
-    pythonProcess.on("close", () => {
-      try {
-        const lines = output.trim().split("\n")
-        const jsonLine = lines[lines.length - 1]
-        const result = JSON.parse(jsonLine)
-        resolve(result)
-      } catch (error) {
-        resolve({
-          failure_status: "failure",
-          failure_reason: `Failed to parse Python output: ${error}`,
-          python_output: output,
-          api_call_duration: 0,
-        })
-      }
-    })
-  })
-}
-
-async function callRealGemini(
-  imageBase64: string,
-  speed: string,
-  imageType: string
-): Promise<GeminiResult> {
-  return new Promise((resolve) => {
-    const tempImagePath = path.join(process.cwd(), "temp_image_data.txt")
-    fs.writeFileSync(tempImagePath, imageBase64)
-
-    const realScript = `
-import sys
-import traceback
-import json
-import base64
-import os
-
-# Load environment variables from .env.local
-def load_env_file():
-    env_file = '.env.local'
-    if os.path.exists(env_file):
-        print(f"✓ Found {env_file}", file=sys.stderr)
-        with open(env_file, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    os.environ[key] = value
-        print(f"✓ Loaded environment variables", file=sys.stderr)
-    else:
-        print(f"✗ {env_file} not found", file=sys.stderr)
-
-# Load environment variables first
-load_env_file()
-
-# Debug: Check if API key is loaded
-google_key = os.environ.get('GOOGLE_API_KEY')
-gemini_key = os.environ.get('GEMINI_API_KEY')
-print(f"Google API Key loaded: {'Yes' if google_key else 'No'}", file=sys.stderr)
-print(f"Gemini API Key loaded: {'Yes' if gemini_key else 'No'}", file=sys.stderr)
-
-# Read image data from temp file
-with open('temp_image_data.txt', 'r') as f:
-    image_b64 = f.read().strip()
-
-try:
-    sys.path.append('.')
-    from api.egyptian_ai_lens.gemini_strategy import analyze_egyptian_art_with_gemini
-    
-    print(f"Processing image of {len(image_b64)} characters", file=sys.stderr)
-    
-    # Call Gemini analysis
-    result = analyze_egyptian_art_with_gemini(image_b64, "${speed}", "${imageType}")
-    print(json.dumps(result))
-    
-except Exception as e:
-    error_result = {
-        "success": False,
-        "failure_reason": f"Error in Gemini analysis: {str(e)}",
-        "traceback": traceback.format_exc(),
-        "api_call_duration": 0
-    }
-    print(json.dumps(error_result))
-`
-
-    const pythonProcess = spawn("python3", ["-c", realScript], {
-      cwd: process.cwd(),
-    })
-
-    let output = ""
-    let errorOutput = ""
-
-    pythonProcess.stdout.on("data", (data: any) => {
-      const dataStr = data.toString()
-      output += dataStr
-
-      // Forward Python debug output to console for real-time visibility
-      console.log("[Python Debug]", dataStr.trim())
-    })
-
-    pythonProcess.stderr.on("data", (data: any) => {
-      const dataStr = data.toString()
-      errorOutput += dataStr
-
-      // Forward Python errors to console for real-time visibility
-      console.error("[Python Error]", dataStr.trim())
-    })
-
-    pythonProcess.on("close", () => {
-      // Clean up temp file
-      try {
-        fs.unlinkSync(tempImagePath)
-      } catch (e) {
-        console.warn("Could not clean up temp file:", e)
-      }
-
-      try {
-        // Try to extract JSON from the last line of output
-        const lines = output.trim().split("\n")
-        const jsonLine = lines[lines.length - 1]
-        const result = JSON.parse(jsonLine)
-        resolve(result)
-      } catch (error) {
-        console.error("Failed to parse Python output:", error)
-        console.error("Raw output:", output)
-        console.error("Error output:", errorOutput)
-        resolve({
-          failure_status: "failure",
-          failure_reason: `Failed to parse Python response: ${error}`,
-          python_output: output,
-          python_errors: errorOutput,
-          api_call_duration: 0,
-        })
-      }
-    })
-  })
-}
-
-// Egyptian AI Lens integration for local testing with enhanced debugging!
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting Python Gemini backend call...")
+    console.log("Starting Gemini API analysis...")
     const formData = await request.formData()
     const image = formData.get("image") as File
     const speed = (formData.get("speed") as string) || "fast"
@@ -265,109 +83,128 @@ export async function POST(request: NextRequest) {
 
     console.log(`Settings: speed=${speed}, imageType=${imageType}`)
 
-    const bytes = await image.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const imageBase64 = buffer.toString("base64")
-    console.log(
-      `Received image: ${bytes.byteLength} bytes, base64 length: ${imageBase64.length}`
-    )
-
-    // First, test if python works at all
-    const pythonVersionResult = await new Promise<{
-      code: number
-      version: string
-      error: string
-    }>((resolve) => {
-      const pythonTest = spawn("python", ["--version"])
-      let pythonVersion = ""
-      let pythonError = ""
-
-      pythonTest.stdout.on("data", (data) => {
-        pythonVersion += data.toString()
-      })
-
-      pythonTest.stderr.on("data", (data) => {
-        pythonError += data.toString()
-      })
-
-      pythonTest.on("close", (code) => {
-        resolve({
-          code: code || 0,
-          version: pythonVersion.trim(),
-          error: pythonError.trim(),
-        })
-      })
-    })
-
-    console.log(
-      `Python test result: code=${pythonVersionResult.code}, version="${pythonVersionResult.version}", error="${pythonVersionResult.error}"`
-    )
-
-    if (pythonVersionResult.code !== 0) {
-      console.error("Python is not available!")
+    // Get API key
+    const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      console.error("No Google API key found")
       return NextResponse.json(
         {
-          translation: "Python environment error",
+          translation: "API configuration error",
           characters: [],
-          location: "Local development environment",
-          processing_time: "Python interpreter not found or not working",
+          location: "Unable to process request",
+          processing_time: "API key not found",
           interesting_detail:
-            "Please ensure Python is installed and accessible",
-          date: "Environment check failed",
+            "Please configure GOOGLE_API_KEY or GEMINI_API_KEY environment variable",
+          date: "Configuration required",
         },
         { status: 500 }
       )
     }
 
-    console.log("Python available, testing our modules...")
-    const moduleTestResult = await testPythonModules()
+    // Convert image to base64
+    const bytes = await image.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64Data = buffer.toString("base64")
 
-    if (moduleTestResult.failure_status !== "success") {
-      console.log(`Module test failed: ${moduleTestResult.failure_reason}`)
-      return NextResponse.json({
-        translation: "Python module import failed",
-        characters: [],
-        location: "Development environment",
-        processing_time: `Module test failed with code ${moduleTestResult.api_call_duration}`,
-        interesting_detail: moduleTestResult.failure_reason,
-        date: "Import test failed",
-      })
+    console.log(
+      `Received image: ${bytes.byteLength} bytes, base64 length: ${base64Data.length}`
+    )
+
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(apiKey)
+
+    // Select model based on speed
+    const modelName =
+      speed === "regular"
+        ? "gemini-2.5-pro"
+        : speed === "super-fast"
+        ? "gemini-2.5-flash-lite"
+        : "gemini-2.5-flash"
+
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 4096,
+      },
+    })
+
+    console.log(`Using model: ${modelName}`)
+
+    // Prepare image data
+    const imageData = {
+      inlineData: {
+        data: base64Data,
+        mimeType: image.type,
+      },
     }
 
-    console.log("Module test successful!")
-    const geminiResult = await callRealGemini(imageBase64, speed, imageType)
+    const prompt = createEgyptianArtPrompt(imageType)
+    console.log(`Prompt length: ${prompt.length} characters`)
 
-    if (geminiResult.failure_status === "success" && geminiResult.analysis) {
-      const analysis = geminiResult.analysis
-      console.log("SUCCESS! Real Gemini analysis completed!")
+    // Make API call
+    const startTime = Date.now()
+    console.log("Calling Gemini API...")
+
+    const result = await model.generateContent([prompt, imageData])
+    const response = await result.response
+    const text = response.text()
+
+    const duration = (Date.now() - startTime) / 1000
+    console.log(`Gemini API call completed in ${duration.toFixed(2)}s`)
+    console.log(`Response length: ${text.length} characters`)
+
+    // Parse JSON response
+    let analysis: EgyptianArtAnalysis
+    try {
+      // Clean up the response text
+      let cleanedText = text.trim()
+
+      // Remove markdown code blocks if present
+      if (cleanedText.startsWith("```json")) {
+        cleanedText = cleanedText.slice(7)
+      }
+      if (cleanedText.endsWith("```")) {
+        cleanedText = cleanedText.slice(0, -3)
+      }
+      cleanedText = cleanedText.trim()
+
+      // Parse JSON
+      analysis = JSON.parse(cleanedText)
+      console.log("Successfully parsed Gemini response")
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response as JSON:", parseError)
+      console.error("Raw response:", text.substring(0, 500))
+
+      // Fallback response
       return NextResponse.json({
-        translation:
-          analysis.ancient_text_translation || "No ancient text detected",
-        characters: analysis.characters || [],
-        location: analysis.picture_location || "Location unknown",
-        processing_time: `Analysis completed in ${
-          geminiResult.api_call_duration?.toFixed(2) || "N/A"
-        }s`,
+        translation: "Unable to parse hieroglyphs due to response format issue",
+        characters: [],
+        location: "Egyptian archaeological site (analysis partially failed)",
+        processing_time: `Analysis attempted in ${duration.toFixed(2)}s`,
         interesting_detail:
-          analysis.interesting_detail || "No notable details identified",
-        date: analysis.date || "Period unknown",
-      })
-    } else {
-      console.log(`Gemini analysis failed: ${geminiResult.failure_reason}`)
-      return NextResponse.json({
-        translation: "Gemini analysis failed",
-        characters: [],
-        location: "Service error",
-        processing_time: `Gemini error: ${geminiResult.failure_reason}`,
-        interesting_detail: geminiResult.traceback || "No additional details",
-        date: "Analysis failed",
+          "The response could not be properly parsed, but the image appears to contain Egyptian artwork",
+        date: "Ancient Egyptian period",
       })
     }
+
+    // Return successful analysis
+    console.log("Analysis completed successfully")
+    return NextResponse.json({
+      translation:
+        analysis.ancient_text_translation || "No ancient text detected",
+      characters: analysis.characters || [],
+      location: analysis.picture_location || "Location unknown",
+      processing_time: `Analysis completed in ${duration.toFixed(2)}s`,
+      interesting_detail:
+        analysis.interesting_detail || "No notable details identified",
+      date: analysis.date || "Period unknown",
+    })
   } catch (error: any) {
-    console.error("Top-level error in API route:", error)
+    console.error("API route error:", error)
     return NextResponse.json(
       {
-        translation: "Request processing failed",
+        translation: "Analysis failed",
         characters: [],
         location: "Unable to process request",
         processing_time: `Error: ${error.message}`,
