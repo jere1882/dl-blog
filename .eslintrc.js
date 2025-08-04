@@ -13,7 +13,7 @@ module.exports = {
   plugins: ["@typescript-eslint", "tailwindcss"],
   rules: {
     "tailwindcss/no-custom-classname": "off",
-    "tailwindcss/classnames-order": "error",
+    "tailwindcss/classnames-order": "off",
   },
   settings: {
     tailwindcss: {

@@ -247,7 +247,7 @@ except Exception as e:
 }
 
 // Egyptian AI Lens integration for local testing with enhanced debugging!
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
   try {
     console.log("Starting Python Gemini backend call...")
     const formData = await request.formData()
@@ -273,9 +273,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     )
 
     // First, test if python works at all
-    const pythonTest = spawn("python", ["--version"])
-
-    return new Promise<NextResponse>((resolve) => {
+    const pythonVersionResult = await new Promise<{
+      code: number
+      version: string
+      error: string
+    }>((resolve) => {
+      const pythonTest = spawn("python", ["--version"])
       let pythonVersion = ""
       let pythonError = ""
 
@@ -288,118 +291,78 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       })
 
       pythonTest.on("close", (code) => {
-        console.log(
-          `Python test result: code=${code}, version="${pythonVersion.trim()}", error="${pythonError.trim()}"`
-        )
-
-        if (code !== 0) {
-          console.error("Python is not available!")
-          resolve(
-            NextResponse.json(
-              {
-                translation: "Python environment error",
-                characters: [],
-                location: "Local development environment",
-                processing_time: "Python interpreter not found or not working",
-                interesting_detail:
-                  "Please ensure Python is installed and accessible",
-                date: "Environment check failed",
-              },
-              { status: 500 }
-            )
-          )
-          return
-        }
-
-        console.log("Python available, testing our modules...")
-        testPythonModules()
-          .then((result) => {
-            if (result.failure_status === "success") {
-              console.log("Module test successful!")
-              callRealGemini(imageBase64, speed, imageType)
-                .then((geminiResult) => {
-                  if (
-                    geminiResult.failure_status === "success" &&
-                    geminiResult.analysis
-                  ) {
-                    const analysis = geminiResult.analysis
-                    resolve(
-                      NextResponse.json({
-                        translation:
-                          analysis.ancient_text_translation ||
-                          "No ancient text detected",
-                        characters: analysis.characters || [],
-                        location:
-                          analysis.picture_location || "Location unknown",
-                        processing_time: `Analysis completed in ${
-                          geminiResult.api_call_duration?.toFixed(2) || "N/A"
-                        }s`,
-                        interesting_detail:
-                          analysis.interesting_detail ||
-                          "No notable details identified",
-                        date: analysis.date || "Period unknown",
-                      })
-                    )
-                    console.log("SUCCESS! Real Gemini analysis completed!")
-                  } else {
-                    console.log(
-                      `Gemini analysis failed: ${geminiResult.failure_reason}`
-                    )
-                    resolve(
-                      NextResponse.json({
-                        translation: "Gemini analysis failed",
-                        characters: [],
-                        location: "Service error",
-                        processing_time: `Gemini error: ${geminiResult.failure_reason}`,
-                        interesting_detail:
-                          geminiResult.traceback || "No additional details",
-                        date: "Analysis failed",
-                      })
-                    )
-                  }
-                })
-                .catch((err) => {
-                  console.error("Error calling real Gemini:", err)
-                  resolve(
-                    NextResponse.json(
-                      {
-                        translation: "Gemini API call failed",
-                        characters: [],
-                        location: "Service unavailable",
-                      },
-                      { status: 500 }
-                    )
-                  )
-                })
-            } else {
-              console.log(`Module test failed: ${result.failure_reason}`)
-              resolve(
-                NextResponse.json({
-                  translation: "Python module import failed",
-                  characters: [],
-                  location: "Development environment",
-                  processing_time: `Module test failed with code ${result.api_call_duration}`,
-                  interesting_detail: result.failure_reason,
-                  date: "Import test failed",
-                })
-              )
-            }
-          })
-          .catch((err) => {
-            console.error("Error in module test:", err)
-            resolve(
-              NextResponse.json(
-                {
-                  translation: "System error during module test",
-                  characters: [],
-                  location: "Development environment",
-                },
-                { status: 500 }
-              )
-            )
-          })
+        resolve({
+          code: code || 0,
+          version: pythonVersion.trim(),
+          error: pythonError.trim(),
+        })
       })
     })
+
+    console.log(
+      `Python test result: code=${pythonVersionResult.code}, version="${pythonVersionResult.version}", error="${pythonVersionResult.error}"`
+    )
+
+    if (pythonVersionResult.code !== 0) {
+      console.error("Python is not available!")
+      return NextResponse.json(
+        {
+          translation: "Python environment error",
+          characters: [],
+          location: "Local development environment",
+          processing_time: "Python interpreter not found or not working",
+          interesting_detail:
+            "Please ensure Python is installed and accessible",
+          date: "Environment check failed",
+        },
+        { status: 500 }
+      )
+    }
+
+    console.log("Python available, testing our modules...")
+    const moduleTestResult = await testPythonModules()
+
+    if (moduleTestResult.failure_status !== "success") {
+      console.log(`Module test failed: ${moduleTestResult.failure_reason}`)
+      return NextResponse.json({
+        translation: "Python module import failed",
+        characters: [],
+        location: "Development environment",
+        processing_time: `Module test failed with code ${moduleTestResult.api_call_duration}`,
+        interesting_detail: moduleTestResult.failure_reason,
+        date: "Import test failed",
+      })
+    }
+
+    console.log("Module test successful!")
+    const geminiResult = await callRealGemini(imageBase64, speed, imageType)
+
+    if (geminiResult.failure_status === "success" && geminiResult.analysis) {
+      const analysis = geminiResult.analysis
+      console.log("SUCCESS! Real Gemini analysis completed!")
+      return NextResponse.json({
+        translation:
+          analysis.ancient_text_translation || "No ancient text detected",
+        characters: analysis.characters || [],
+        location: analysis.picture_location || "Location unknown",
+        processing_time: `Analysis completed in ${
+          geminiResult.api_call_duration?.toFixed(2) || "N/A"
+        }s`,
+        interesting_detail:
+          analysis.interesting_detail || "No notable details identified",
+        date: analysis.date || "Period unknown",
+      })
+    } else {
+      console.log(`Gemini analysis failed: ${geminiResult.failure_reason}`)
+      return NextResponse.json({
+        translation: "Gemini analysis failed",
+        characters: [],
+        location: "Service error",
+        processing_time: `Gemini error: ${geminiResult.failure_reason}`,
+        interesting_detail: geminiResult.traceback || "No additional details",
+        date: "Analysis failed",
+      })
+    }
   } catch (error: any) {
     console.error("Top-level error in API route:", error)
     return NextResponse.json(
