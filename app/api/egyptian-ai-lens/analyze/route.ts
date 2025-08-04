@@ -32,10 +32,7 @@ interface GeminiResult {
   traceback?: string
 }
 
-async function testPythonModules(
-  speed: string,
-  imageType: string
-): Promise<TestResult> {
+async function testPythonModules(): Promise<TestResult> {
   return new Promise((resolve) => {
     const testScript = `
 import sys
@@ -241,7 +238,6 @@ export async function POST(request: NextRequest) {
     )
 
     // First, test if python works at all
-    const { spawn } = require("child_process")
     const pythonTest = spawn("python", ["--version"])
 
     return new Promise((resolve) => {
@@ -281,7 +277,7 @@ export async function POST(request: NextRequest) {
         }
 
         console.log("Python available, testing our modules...")
-        testPythonModules(speed, imageType)
+        testPythonModules()
           .then((result) => {
             if (result.success) {
               console.log("Module test successful!")
