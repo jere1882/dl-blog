@@ -10,7 +10,7 @@ image:
 ---
 # Python: History, Relevance, and Role in Modern Computing
 
-![[Pasted image 20250629111836.png]]
+![Pasted image 20250629111836](/assets/Pasted%20image%2020250629111836.png)
 ## A Brief History
 
 Python was created in the late 1980s by Guido van Rossum and officially released in 1991. It was designed with code readability and developer productivity in mind, drawing inspiration from ABC, Modula-3, and C. Over time, Python has evolved through major versions—most notably the transition from Python 2 to Python 3, which brought cleaner syntax and better Unicode support.

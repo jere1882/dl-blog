@@ -273,33 +273,66 @@ export function EgyptianAIAnalyzer({
         ? `${apiBase}/analyze`
         : "/api/egyptian-ai-lens/analyze"
 
-      console.log("Calling API endpoint:", endpoint)
+      console.log("=== FRONTEND DEBUG START ===")
+      console.log("API Base:", apiBase || "(default)")
+      console.log("Endpoint:", endpoint)
+      console.log(
+        "Selected file:",
+        selectedFile?.name,
+        selectedFile?.size + " bytes"
+      )
+      console.log("Speed setting:", speed)
+      console.log("Image type:", imageType)
+      console.log("Environment:", process.env.NODE_ENV)
+      console.log("=== MAKING API CALL ===")
 
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       })
 
+      console.log("=== API RESPONSE RECEIVED ===")
+      console.log("Response status:", response.status, response.statusText)
+      console.log(
+        "Response headers:",
+        Object.fromEntries(response.headers.entries())
+      )
+      console.log("Response ok:", response.ok)
+
       // Stop progress simulation and complete
       progressCompleted = true
       clearInterval(progressInterval)
 
       if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`)
+        const errorText = await response.text()
+        console.error("API Error Response:", errorText)
+        throw new Error(
+          `Analysis failed: ${response.status} ${response.statusText}. Details: ${errorText}`
+        )
       }
 
       const analysisResult = await response.json()
+      console.log("=== API SUCCESS ===")
+      console.log("Result keys:", Object.keys(analysisResult))
+      console.log("Characters found:", analysisResult.characters?.length || 0)
+      console.log("Processing time:", analysisResult.processing_time)
+      console.log("=== FRONTEND DEBUG END ===")
 
       setProgress(100)
       setState("completed")
       setResult(analysisResult)
     } catch (error) {
-      console.error("Analysis error:", error)
+      console.error("=== FRONTEND ERROR ===")
+      console.error("Error type:", error?.constructor?.name)
+      console.error("Error message:", error?.message)
+      console.error("Full error:", error)
+      console.error("=== ERROR END ===")
+
       setState("error")
       setResult({
         error:
           error instanceof Error
-            ? error.message
+            ? `Detailed error: ${error.message}`
             : "An unexpected error occurred",
       })
     }

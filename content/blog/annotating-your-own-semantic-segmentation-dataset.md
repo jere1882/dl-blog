@@ -19,14 +19,14 @@ Before this project, I always took dataset annotations for granted, rarely consi
 
 Image classification, object detection, and semantic segmentation are increasingly challenging computer vision tasks, and their corresponding annotations also grow in complexity:
 
-![[compvision_tasks.png]]
+![compvision tasks](/assets/compvision_tasks.png)
 * Annotating samples for image classification is as simple as looking at an image and typing a label.
 * Object detection usually involves drawing bounding boxes and associating a class label with each box. This is more time-consuming but arguably still manageable if the number of objects per image is relatively small.
 * Semantic segmentation annotations, on the other hand, can be incredibly complex. It involves assigning a class label to each pixel on the image. This can be done by drawing polygons, shapes, using a brush to paint areas, etc..
 
 Take the following image from my SUIM dataset as an example:
 
-![[Pasted image 20240618221315.png]]
+![Pasted image 20240618221315](/assets/Pasted%20image%2020240618221315.png)
 *For the curious reader, this is Rangiroa Island in French Polynesia*
 
 Annotating the boundary of the coral reef and the ocean, as well as the outlines of the many small fish visible, is a daunting task.
@@ -45,12 +45,12 @@ The second step is to create a new project. Go to the Projects tab, click the "+
 
 This is what my underwater segmentation project looks like after adding all the labels:
 
-![[Pasted image 20240618222027.png]]
+![Pasted image 20240618222027](/assets/Pasted%20image%2020240618222027.png)
 
 3. **Create a new task** - within the newly created project. Here, you'll be asked to provide a name for the task and, most importantly, upload the images you want to annotate.
 4. **Create a new Job** - under the recently created task. Here, you can use the default settings, which primarily control the order in which the images are presented for annotation.
 5. **Open the new Job, and start annotating.** You will be presented with a first image to annotate, such as this one:
-![[Pasted image 20240618222150.png]]*A school of fish, 30 meters deep in the Tuamotu Islands*
+![Pasted image 20240618222150](/assets/Pasted%20image%2020240618222150.png)*A school of fish, 30 meters deep in the Tuamotu Islands*
 
 The annotation tools are available on the left panel:
 
@@ -59,11 +59,11 @@ The annotation tools are available on the left panel:
 - **Circles and squares:** These shapes are occasionally useful, although complex boundaries are more common in semantic segmentation.
 - **Magic wand:** We'll discuss this tool in the next section, as it's quite helpful!
 
-![[Pasted image 20240618222645.png]]
+![Pasted image 20240618222645](/assets/Pasted%20image%2020240618222645.png)
 
 Notice that all your annotations for a given image are listed on the right hand side. Annotations have a "z" integer value that determines how overlapping structures are displayed. For instance, if two polygons overlap, the one with the higher "z" value is supposed to occlude (cover) the one with the lower value.
 
-![[Pasted image 20240618223215.png]]
+![Pasted image 20240618223215](/assets/Pasted%20image%2020240618223215.png)
 *Objects on an annotation, sorted by Z value. You can modify the z value by using "send to background" and "send to foreground" actions.*
 
 
@@ -74,7 +74,7 @@ I use a combination of these tools depending on what works best for each individ
 
 CVAT offers AI tools to help you speed up the annotation process significantly. Currently, there are two options: "Segment Anything" and "EfficientViT Annotator." These tools suggest annotation boundaries, which you can refine by indicating points inside and outside the objects.
 
-![[ia_tools_annotation.gif]]
+![ia tools annotation](/assets/ia_tools_annotation.gif)
 *From CVAT blogpost*
 
 While not perfect, these AI tools can be a huge time saver. When trying to use them, I often encountered imprecise boundaries and needed to use the brush and polygon tools for refinement. However, they are generally accurate, so I always recommend trying them before resorting to manual annotation.
@@ -86,7 +86,7 @@ Several companies specialize in providing professional data labeling services, i
 
 For instance, [Google Data Labeling Service]([https://cloud.google.com/ai-platform/data-labeling/pricing](https://cloud.google.com/ai-platform/data-labeling/pricing)) offers tiered pricing based on the volume of data annotated. The following table shows the price per unit per human labeler, with "Tier 2" pricing applied after exceeding 50,000 annotations.\
 
-![[Pasted image 20240621192013.png]]
+![Pasted image 20240621192013](/assets/Pasted%20image%2020240621192013.png)
 A semantic segmentation mask has many “units” (for simplicity, let's think of units as polygons). So, my understanding is that an it costs e.g. $0.87 per polygon. Or if you need this task performed by multiple annotators (presumably for robustness), the cost would be multiplied by the number of annotators per image.
 
 Say we want to annotate an underwater image with 10 fish, plus a big coral reef. That would be 11 polygons. 11 units = 9.35 USD. That value, times the number of annotators per image (which may be 2-3) ; would be the final value of annotating a single image. (around $28).
@@ -109,7 +109,7 @@ That’s massive. 11M images, imagine the cost and effort of getting those annot
 Let's see what the authors said about the model itself:
 
 _A powerful image encoder computes an image embedding, a prompt encoder embeds prompts, and then the two information sources are combined in a lightweight mask decoder that predicts segmentation masks. We refer to this model as the Segment Anything Model, or SAM_
-![[Pasted image 20240623082253.png]]
+![Pasted image 20240623082253](/assets/Pasted%20image%2020240623082253.png)
 Let's dig a little more into the key components of this architecture. About the **image encoder**, the paper says:
 
 _we use an MAE pre-trained Vision Transformer (ViT) minimally adapted to process high resolution inputs. The image encoder runs once per image and can be applied prior to prompting the model._

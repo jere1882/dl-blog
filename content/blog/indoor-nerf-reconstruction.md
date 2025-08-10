@@ -28,7 +28,7 @@ In addition to these experiments, I’ll explore advanced NeRF variants that inc
 
 Let's quickly go over the two datasets that I collected for these experiments. Below you can see a plane of my apartment, where I collected video using an iPhone 14.
 
-![[Pasted image 20241124065520.png]]
+![Pasted image 20241124065520](/assets/Pasted%20image%2020241124065520.png)
 
 * For **dataset 1**, I walked around holding the phone in my forehead, capturing video for about 3 minutes from different viewpoints. I was always facing forward, meaning that the camera poses should roughly lie at `z=1.75` meters and at a fixed angle around the `x` and `y` axis.
 * For **dataset 2**, I attached the phone to a wheeled toy at a height 5 cm from the floor. I moved the camera around the home, capturing footage from a very low viewpoint. Again, there was no rotation along the `x` and `y` axis. 
@@ -53,7 +53,7 @@ Colmap can be **very finicky**, often failing without providing any hint of what
 
 If everything went fine, you should now have a **sparse model** specifying the camera poses of each image in your dataset, as well as the intrinsics of your camera. We are ready to train NeRFs!
 
-![[Pasted image 20241226200915.png]]
+![Pasted image 20241226200915](/assets/Pasted%20image%2020241226200915.png)
 *3D poses of my training dataset images estimated by Colmap*
 # Training NeRFs
 
@@ -74,7 +74,7 @@ As of metrics, I will mostly use pixel-wise rgb loss and PSNR (Peak Signal-to-No
 
 Tip: Use W&B to track and tag your experiments. NERFs can be trained very fast, and it is easy to lose track of each execution.
 
-![[Pasted image 20241124081607.png]]
+![Pasted image 20241124081607](/assets/Pasted%20image%2020241124081607.png)
 
 ## Nerfacto
 
@@ -96,26 +96,26 @@ The NeRFs from Dataset 1 struggle to generate views for z much higher or much lo
 
 As stated before, the training loss quickly converges, with only marginal improvements after the first thousand of iterations:
 
-![[Pasted image 20241124081805.png]]
+![Pasted image 20241124081805](/assets/Pasted%20image%2020241124081805.png)
 
 W&B provides a convenient way to inspect the rgb and depth reconstruction evolution of specific validation images at different iterations.
 
-![[Pasted image 20241124082030.png]]
+![Pasted image 20241124082030](/assets/Pasted%20image%2020241124082030.png)
 
 At times I am mesmerized by the details that the NeRF is able to encode in its weights:
 
-![[Pasted image 20241226204937.png]]
+![Pasted image 20241226204937](/assets/Pasted%20image%2020241226204937.png)
 *A NeRF trained on very low res images (430x760) is able to learn the mattress pattern, as well as details of individual books on a shelf.*
 
-![[Pasted image 20241226205713.png]]
+![Pasted image 20241226205713](/assets/Pasted%20image%2020241226205713.png)
 *A NeRF trained on low resolution images (540x960) is able to learn the wooden floor pattern in detail. Notice the accurate reconstruction of the TV screen and the map in the wall.*
 
-![[Pasted image 20241226205904.png]]
+![Pasted image 20241226205904](/assets/Pasted%20image%2020241226205904.png)
 *A NeRF trained on 540x960 images is able to perfectly learn the mirror reflection. The mirror reflection is adjusted as the viewpoint changes.
 
 A small fraction of the dataset is set aside for validation. Different status, such as PSNR, can be calculated on the reconstructed-original image pairs. PSNR was around 23 for Dataset 1 and 26 for Dataset 2 on their respective validation datasets.
 
-![[Pasted image 20241226215448.png]]
+![Pasted image 20241226215448](/assets/Pasted%20image%2020241226215448.png)
 ## Splatfacto
 
 A traditional yet much more efficient alternative to NeRF is Gaussian Splatting. It can be trained even faster than NeRFs, uses up considerably less memory, and occasionally produces better results. 
@@ -138,9 +138,9 @@ The following table summarizes a few key metrics, although comparing different c
 I spent quite a while playing with other NeRF variants, such as LERF (Language Embedded Radiance Fields). LERF introduced the **CLIP** concept to NeRFs, allowing the user to make text queries and producing an activation heatmap in response.
 
 For instance, the relevancy map for "sofa" is:
-![[Pasted image 20241226220346.png]]
+![Pasted image 20241226220346](/assets/Pasted%20image%2020241226220346.png)
 The relevancy map for "mirror":
-![[Pasted image 20241226220944.png]]
+![Pasted image 20241226220944](/assets/Pasted%20image%2020241226220944.png)
 
 Given the heavy memory requirements, I was only able to train a Lite version of LERF, which was capable of accurately handling queries for individual objects like "tv", "window", "shoes". However, the model struggled to understand more complex concepts like "a comfortable place to sit down".
 

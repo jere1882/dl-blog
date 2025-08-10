@@ -34,7 +34,7 @@ The following table provides an overview of the layers and elements that this po
 
 A fully connected (dense) layer, implemented in PyTorch as `nn.Linear`, is one of the most fundamental building blocks in neural networks. Each neuron in a fully connected layer is connected to every neuron in the preceding and following layers. This means that every output value is influenced by every input value, allowing for complex interactions.
 
-![[Pasted image 20240630182949.png]]
+![Pasted image 20240630182949](/assets/Pasted%20image%2020240630182949.png)
 
 Fully connected layers are excellent at combining features extracted from previous layers. For example, after a series of convolutional layers, a fully connected layer can combine these features to make a final prediction.
 
@@ -48,10 +48,10 @@ A word of caution: despite their versatility, fully connected layers are computa
 
 This is the most common convolution, implemented in PyTorch as `nn.Conv2d`, it performs a convolution operation on input data, typically images. This layer uses a set of learnable kernels that slide over the input data to extract features such as edges, textures, and shapes. Each kernels is convolved with the input, producing a feature map that highlights the presence of specific features at different spatial locations.
 
-![[2dconvolutions.gif]]
+![2dconvolutions](/assets/2dconvolutions.gif)
 The following animation from the paper [A guide to convolution arithmetic for deep learning](https://arxiv.org/pdf/1603.07285) exemplifies the application of a 3x3 filter to a single-channel feature map:
 
-![[2dconvolutions1.gif]]
+![2dconvolutions1](/assets/2dconvolutions1.gif)
 
 The words "kernel" and "filter" are often ambiguously used as synonyms, but the distinction becomes really important when the convolutional layer receives a multi-channel output and outputs a multi-channel output as well:
 
@@ -82,7 +82,7 @@ Transposed convolutions, implemented in Pytorch as `nn.ConvTranspose2d`, are use
 
 This great example from ["Understand Transposed Convolutions"](https://towardsdatascience.com/understand-transposed-convolutions-and-build-your-own-transposed-convolution-layer-from-scratch-4f5d97b2967) provides an intuition for a 2x2 single channel input, which is upsampled via a 3x3 transposed convolution to a 3x3 single channel output.
 
-![[Pasted image 20240630185517.png]]
+![Pasted image 20240630185517](/assets/Pasted%20image%2020240630185517.png)
 
 First, each element in the input layer is multiplied by each value in the kernel (green). Then, the resulting layers (in blue) are added element-wise to produce a 3x3 output. Naturally, the exact same numbers are not restored. The kernel parameters are learned to get better results.
 
@@ -97,27 +97,27 @@ Transposed convolutions are often called deconvolutions, and are implemented in 
 
 > 💡 **Example:** Popular architectures like ResNet and Inception extensively utilize 1x1 convolutions for their efficiency and ability to transform feature dimensions.
 
-![[Pasted image 20240701001036.png]]
+![Pasted image 20240701001036](/assets/Pasted%20image%2020240701001036.png)
 *Image from ["A Comprehensive Introduction to Different Types of Convolutions in Deep Learning"](https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215)*
 
 ### Atrous Convolutions
 
 Also known as dilated convolutions, these convolutions expand the effective receptive field by inserting holes between kernel elements, controlled by a dilation rate parameter. This technique enables the network to capture spatially distant features more effectively without downsampling through pooling operations.
 
-![[atrous.gif]]
+![atrous](/assets/atrous.gif)
 ### 3D Convolutions
 
 2D convolutions do perform convolution on 3D inputs, but a key distinction here is that each filter depth is the same as the input layer depth (depth being the number of channels).
 
 A 3D convolution is a generalization of a 2D convolution, where the filter depth is smaller than the input layer depth, and the filter slides in all 3 dimentions (height, width and channels of the image)
 
-![[Pasted image 20240630190526.png]]
+![Pasted image 20240630190526](/assets/Pasted%20image%2020240630190526.png)
 *Image from ["A Comprehensive Introduction to Different Types of Convolutions in Deep Learning"](https://towardsdatascience.com/a-comprehensive-introduction-to-different-types-of-convolutions-in-deep-learning-669281e58215)*
 ## Pooling Layers
 
 Like convolutional layers, pooling operators use a fixed-shape window that slides over the input regions based on its stride, computing a single output for each location covered by the window (often referred to as the pooling window). However, unlike convolutional layers, which perform cross-correlation between inputs and kernels, pooling layers contain no parameters (no kernel). Instead, pooling operators are deterministic, typically computing either the maximum or average value of the elements within the pooling window. These operations are known as maximum pooling (max-pooling) and average pooling, respectively.
 
-![[Pasted image 20240701001340.png]]
+![Pasted image 20240701001340](/assets/Pasted%20image%2020240701001340.png)
 *Image from [Deep Neural Networks on Chip - A Survey](https://www.researchgate.net/publication/340812216_Deep_Neural_Networks_on_Chip_-_A_Survey)*
 
 When handling multi-channel input data, the pooling layer processes each input channel independently, unlike convolutional layers that sum the inputs across channels. As a result, the number of output channels in the pooling layer remains the same as the number of input channels.
@@ -134,7 +134,7 @@ Note: Global Average/Max Pooling is a type of layer often used to reduce the dat
 
 Activation layers introduce non-linearity into the network, enabling it to learn complex patterns. Without activation functions, the network would essentially behave like a linear regression model, regardless of its depth. Here are some of the most commonly used activation functions in deep learning:
 
-![[Pasted image 20240701002235.png]]
+![Pasted image 20240701002235](/assets/Pasted%20image%2020240701002235.png)
 
 In Pytorch, convolutional layers do not apply activation function by default. One has to manually add activation layers (`nn.ReLU` / `nn.Sigmoid` / `nn.Tanh`) typically applied after each convolutional layer and fully connected layer. They are not applied after pooling layers.
 
@@ -297,10 +297,10 @@ The following table summarises the key points:
 I also find the illustration for the post [Build Better Deep Learning Models with Batch and Layer Normalization](https://www.pinecone.io/learn/batch-layer-normalization/) to be of great help when it comes to understanding the differences:
 
 
-![[Pasted image 20240702053918.png]]
+![Pasted image 20240702053918](/assets/Pasted%20image%2020240702053918.png)
 *Batch normalization*
 
-![[Pasted image 20240702053934.png]]
+![Pasted image 20240702053934](/assets/Pasted%20image%2020240702053934.png)
 *Layer normalization*
 
 ## Embedding layers

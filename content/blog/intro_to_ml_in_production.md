@@ -18,11 +18,11 @@ Here I'll post summaries from each section.
 ## The ML Project Lifecycle
 
 There is so much more around building machine learning systems in production than writing code to train and evaluate models:
-![[Pasted image 20241018034122.png]]
+![Pasted image 20241018034122](/assets/Pasted%20image%2020241018034122.png)
 
 The **ML project lifecycle**  shows us the steps involved in bringing a ML model to production:
 
-![[Pasted image 20241018034219.png]]
+![Pasted image 20241018034219](/assets/Pasted%20image%2020241018034219.png)
 
 1. ***Scoping**: Decide what do you want to apply ML to. What’s X and what’s Y.*
 2. *Collecting the **data**.*
@@ -48,7 +48,7 @@ The **ML project lifecycle**  shows us the steps involved in bringing a ML model
 *Deployment:*
 * *A structure like the following may be used*
 * Monitor and find issues, e.g. young people using the model more but the model trained in adults. Go back and fix it (concept/data drift).
-![[Pasted image 20241018034423.png]]
+![Pasted image 20241018034423](/assets/Pasted%20image%2020241018034423.png)
 
 ***MLOps* (Machine Learning Operations)** is an emerging discipline, and comprises a set of tools and principles to support progress through the ML project lifecycle.
 
@@ -99,12 +99,12 @@ Key ideas:
 - Monitor system and ramp up traffic gradually
 **Blue-Green development**
 * You have a router pointing at a blue model, and may change the model just by making the router point to the green model (prediction service)
-![[Pasted image 20241018040630.png]]
+![Pasted image 20241018040630](/assets/Pasted%20image%2020241018040630.png)
 * You can easily roll back by pointing back to the blue
 * You can use gradual version slowly sending traffic to the green one
 
 The idea is to move from left to right in terms of degree of automation
-![[Pasted image 20241018171600.png]]Human in the loop: AI assistance and partial automation (just ask human if model is undecided)
+![Pasted image 20241018171600](/assets/Pasted%20image%2020241018171600.png)Human in the loop: AI assistance and partial automation (just ask human if model is undecided)
 
 ## Monitoring
 
@@ -112,7 +112,7 @@ The idea is to move from left to right in terms of degree of automation
 
 Use a dashboard to track how it’s doing over time, tracking values indicative of things that can go wrong such as:
 
-![[Pasted image 20241018171633.png]]
+![Pasted image 20241018171633](/assets/Pasted%20image%2020241018171633.png)
 
 Tip: Set thresholds for alarms!
 
@@ -149,7 +149,7 @@ Let's delve into the modelling side of the ML cycle. The author insists on takin
 People tend to emphasize in the code, but for many (most) applications the model is a "solved" problem while the data is the variable part.
 
 Remember that developing a model is an iterative process:
-![[Pasted image 20241018062607.png]]
+![Pasted image 20241018062607](/assets/Pasted%20image%2020241018062607.png)
 
 ## Milestones during modelling
 
@@ -159,7 +159,7 @@ During the modelling phase, there are three increasingly complex **milestones** 
 2. Do well on the dev/test sets
 3. Do well on business metrics / project goals.
 
-![[Pasted image 20241018172809.png]]
+![Pasted image 20241018172809](/assets/Pasted%20image%2020241018172809.png)
 
 Often the last 2 are not the same. One has to deal and with the use case in detail to find this out, e.g.:
 - There may disproportionately important input sets for which the algorithm just cannot do wrong, such as
@@ -170,12 +170,12 @@ Often the last 2 are not the same. One has to deal and with the use case in deta
 - Rare cases. We may have a skewed data distribution, and we may care about being accurate in rare classes.
     - Medical diagnose.
 
-![[Pasted image 20241018062857.png]]
+![Pasted image 20241018062857](/assets/Pasted%20image%2020241018062857.png)
 ## Defining a baseline
 
 To tackle these challenges, it is important to establish a **baseline** on the level of **performance expected**. For example, on speech recognition, we may have certain groups of inputs and we may use human performance as a baseline to know how much we can aim to improve on each subset:
 
-![[Pasted image 20241018062752.png]]
+![Pasted image 20241018062752](/assets/Pasted%20image%2020241018062752.png)
 
 How to get a baseline:
 - Humans do very well on unstructured data (image audio text) , bad in structure (tabular) data. Human level performance (HLP) is a common baseline
@@ -204,7 +204,7 @@ General rule:
 
 Manually with a simple spreadsheet go over your dataset, see failures, identify groups or patterns that may be mispredicted, tag them.
 
-![[Pasted image 20241018063024.png]]
+![Pasted image 20241018063024](/assets/Pasted%20image%2020241018063024.png)
 
 The goal is to identify categories where you could productively improve the algorithm. Check for each tag (category) metrics such as:
 
@@ -215,7 +215,7 @@ The goal is to identify categories where you could productively improve the algo
 
 This can help you decide to **priorize what to work on.** More on that:
 
-![[Pasted image 20241018063101.png]]
+![Pasted image 20241018063101](/assets/Pasted%20image%2020241018063101.png)
 If we improve performance on clean speech by 1%, given that 60% of the set is clean speech, we’ll raise average accuraby by 0.6%, etc etc. So bear in mid that both the gap of potential improvement and the % of data of each class is relevant.
 
 Even though there is so much room for improvement in car noise, there’s larger potential for improvement in clean speech and people noise.
@@ -246,7 +246,7 @@ F1 = 2 / (1/P + 1/R
 
 In the context of multi-class this generalizes easily:
 
-![[Pasted image 20241018063327.png]]
+![Pasted image 20241018063327](/assets/Pasted%20image%2020241018063327.png)
 
 Instead of accuracy, you may use F1 and decide from here to improve your model in “Discoloration”.
 
@@ -254,25 +254,25 @@ Instead of accuracy, you may use F1 and decide from here to improve your model i
 
 Once you feel the model is done, it’s good to audit its performance one last time.
 
-![[Pasted image 20241018063415.png]]
+![Pasted image 20241018063415](/assets/Pasted%20image%2020241018063415.png)
 There are MLOps tools to do this automatically. E.g. tensorflow has a package for model analysis TFMA that computes metrics on different slices of data.
 
 Example:
-![[Pasted image 20241018063455.png]]
+![Pasted image 20241018063455](/assets/Pasted%20image%2020241018063455.png)
 
 ## Experiment tracking
 
 Having a system for tracking many experiments is crucial.
-![[Pasted image 20241018063509.png]]Big teams / complex experiments may require an experiment tracking system such as Weigths and Biases.
+![Pasted image 20241018063509](/assets/Pasted%20image%2020241018063509.png)Big teams / complex experiments may require an experiment tracking system such as Weigths and Biases.
 
-![[Pasted image 20241018063519.png]]**TL;DR : Do track your experiments!**
+![Pasted image 20241018063519](/assets/Pasted%20image%2020241018063519.png)**TL;DR : Do track your experiments!**
 # Week 3 - Data
 
 ## Data
 
 ### Data Definiton
 
-![[Pasted image 20241018063550.png]]
+![Pasted image 20241018063550](/assets/Pasted%20image%2020241018063550.png)
 
 Make sure there is no ambiguity in the labels. Reach an agreement between labellers or adjust labels if they come from different sources.
 
@@ -284,7 +284,7 @@ Data definition questions:
 
 The best practices for organizing data (according to Andrew) depend on which of the 4 categories the problem falls in:
 
-![[Pasted image 20241018220213.png]]
+![Pasted image 20241018220213](/assets/Pasted%20image%2020241018220213.png)
 
 * Humans are great at processing unstructured data, but not that good at processing structured data.
 * **Augmentation**: In unstructured data, data augmentation can be used to generate more data. In contrast, for structured data, it's hard to synthesize new data. It may also be harder to make humans label more data.
@@ -315,12 +315,12 @@ How much time should you spend obtaining data? Andrew suggests starting experime
 
 Make an inventory of where you can get data adn what is it you already have
 
-![[Pasted image 20241018222630.png]]
-![[Pasted image 20241018222711.png]]
+![Pasted image 20241018222630](/assets/Pasted%20image%2020241018222630.png)
+![Pasted image 20241018222711](/assets/Pasted%20image%2020241018222711.png)
 
 ### Misc
 
-![[Pasted image 20241018222751.png]]
+![Pasted image 20241018222751](/assets/Pasted%20image%2020241018222751.png)
 
 Train-dev-test: 60/20/20
 you may craft the division or even the batches to ensure certain slices are evenly represented.
@@ -329,13 +329,13 @@ you may craft the division or even the batches to ensure certain slices are even
 Let's use the example of an e commerce retailer looking to increase sales. If you were to sit down and brainstorm, you might come up with many ideas, such as maybe a better product recommendation system, or a better search so people can find what they're looking for, or you may want to improve
 quality of the catalogue data.
 
-![[Pasted image 20241018223156.png]]
+![Pasted image 20241018223156](/assets/Pasted%20image%2020241018223156.png)
 
-![[Pasted image 20241018223227.png]]get together with a business or private owner (someone that understands
+![Pasted image 20241018223227](/assets/Pasted%20image%2020241018223227.png)get together with a business or private owner (someone that understands
 the business) and brainstorm with them. What are their business or application problems?
 
 In order to assess technical feasibility: 
-![[Pasted image 20241018223542.png]]
+![Pasted image 20241018223542](/assets/Pasted%20image%2020241018223542.png)
 
 * HLP: Can a human given the same data perform the task?
 * Is this a new problem or has it already been tackled?
@@ -347,4 +347,4 @@ This is about having technical (MLE) and business teams to agree on metrics that
 **Milestones and Resourcing**
 The following need to be estimated
 
-![[Pasted image 20241018224303.png]]
+![Pasted image 20241018224303](/assets/Pasted%20image%2020241018224303.png)

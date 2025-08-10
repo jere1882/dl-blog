@@ -19,7 +19,7 @@ Let’s dive in!
 Transformer architectures have been in the spotlight for the last six years, ever since the groundbreaking paper "[Attention is All You Need](https://arxiv.org/abs/1706.03762)" introduced the Transformer model in 2017. Even though they were initially designed for natural language processes, transformers have made significant inroads into computer vision.
 
 A transformer is an attention-based encoder-decoder neural network architecture that was developed to deal with sequential data, as RNNs and LSTMs do.
-![[Pasted image 20240729043308.png]]
+![Pasted image 20240729043308](/assets/Pasted%20image%2020240729043308.png)
 *Image from the original paper*
 
 The encoder (left side) maps an input sequence into an abstract continuous representation that holds all the learned information of the input sequence.
@@ -34,7 +34,7 @@ Let's zoom into the details. This section is adapted from this great [post]([htt
 
 (1) The input layer of the encoder converts each word in the input sequence into a fixed-length **embedding** representation. This layer is learned.
 
-![[Pasted image 20240729043633.png]]
+![Pasted image 20240729043633](/assets/Pasted%20image%2020240729043633.png)
 
 (2) Positional information is injected into the embeddings. This is necessary because the transformer encoder doesn't have recurrence like RNNs, so we need to somehow specify the position of each word in the input.
 
@@ -42,7 +42,7 @@ This is done by a trick called **positional encoding**, which consists of adding
 
 (3) The encoder layer itself. Its function is to map input sequences into abstract output sequences that hold the learned information:
 
-![[Pasted image 20240729043918.png]]
+![Pasted image 20240729043918](/assets/Pasted%20image%2020240729043918.png)
 > 💡 **Remark:** In this example, you have an input sequence of size 4 and embedding size 3. Notice that the input of the encoder is thus a tensor of size 4x3, and the output of the encoder is a tensor of the exactly same size. The Multi-Headed Attention also returns a tensor of the same shape as the input.
 
 The **Multi Headed Attention** block applies a specific attention mechanism called **SELF-ATTENTION**. Self attention allows the models to associate each word in the input to other words in the input.
@@ -53,21 +53,21 @@ The **Multi Headed Attention** block applies a specific attention mechanism call
 
 To achieve self-attention, we take each embedding in the input sequence and map it (via Linear layers) to a **query**, **key** and **value** vectors.
 
-![[Pasted image 20240729044229.png]]
+![Pasted image 20240729044229](/assets/Pasted%20image%2020240729044229.png)
 
 All Q K V then go through the following module:
 
-![[Pasted image 20240729044300.png]]
+![Pasted image 20240729044300](/assets/Pasted%20image%2020240729044300.png)
 
 They get fed to a linear layer,  Q and K undergo a dot product to produce a **score** matrix. This matrix basically determines how much focus should a word put into another words.
 
-![[Pasted image 20240729044347.png]]
+![Pasted image 20240729044347](/assets/Pasted%20image%2020240729044347.png)
 
 The scores are scaled down to stabilize the gradients, and softmax is applied to map the scores to the range 0-1. The result are the **attention weights**, which tell you for each pair of words in the input sequence, their relative attention.
 
 Finally, the attention weights are multiplied by the values to get the attention block output.
 
-![[Pasted image 20240729044548.png]]
+![Pasted image 20240729044548](/assets/Pasted%20image%2020240729044548.png)
 
 > 💡 **Analogy**: Imagine you're in a library. You want to find a specific book (your query). You know the book's title and and author (your key). You search through the library catalog (a collection of keys and values). The value is the actual book.
 
@@ -98,7 +98,7 @@ Remember, the target output is a weighted sum of the values, where the weights a
 
  *If you have embedding size 32 and sequence length 10, Q and K have shape (10,32).  We calculate `Q x K.T`, obtaining a (10,10) matrix. Element i,j  gives you the "similarity" between the ith and jth elements of the sequence. *
 
-![[Pasted image 20240731010748.png]]
+![Pasted image 20240731010748](/assets/Pasted%20image%2020240731010748.png)
 2. Softmax normalization:  Converts raw similarity scorss into probabilities, ensuring that the weights sum up to 1 on each row.
 3. Multiplication of attention weights by V. This computes a weighted sum of the value vectors, where each weight is determined by the attention scores.
 
@@ -130,7 +130,7 @@ The job of the decoder is to generate text sequences, one token at a time. It en
 
 The decoder is **autoregresive**. It takes the encoder output as its intput, as well as all the previous decoder outptus generated so far (or just a start token if it's the first one). Then, it generates the next token (word).
 
-![[Pasted image 20240807141623.png]]
+![Pasted image 20240807141623](/assets/Pasted%20image%2020240807141623.png)
 
 E.g:
 1. Feed the encoder output and `start` token. Decoder outputs "I"
@@ -142,7 +142,7 @@ E.g:
 
 Now that we understand what are the encoder inputs and outputs, let's look at the decoder structure itself.
 
-![[Pasted image 20240807142031.png]]
+![Pasted image 20240807142031](/assets/Pasted%20image%2020240807142031.png)
 
 1. Just like the encoder, the decoder embeds the inputs (sequence generated so far) and applies positional encoding. 
 
@@ -170,7 +170,7 @@ In the second step of generation:
 
 How is it implemented?? Add this matrix M to the attention scores matrix
 
-![[Pasted image 20240807182958.png]]
+![Pasted image 20240807182958](/assets/Pasted%20image%2020240807182958.png)
 3. The second multi head attention layer. Here, the encoder’s outputs are the **keys** and the **values** ; while the first multi headed attention layer outputs are the **queries** .
 
 *Intuition: The encoder output serves as the "memory" that the decoder will refer to at each step of generating the output sequence. The K are used to match the Q from the decoder to find relevant information, and the V contain the actual contextual information that will be used by the decoder to generate the next token.*
@@ -195,7 +195,7 @@ I have just described the transformer architecture as introduced in the original
 
 There are many variations to the transformer block. The order of the various components is not set in stone; the important thing is to combine self-attention with a local feedforward, and to add normalization and residual connections.
 
-![[Pasted image 20240807185246.png]]
+![Pasted image 20240807185246](/assets/Pasted%20image%2020240807185246.png)
 
 A transformer architecture is defined roughly as an architecture to process  a connected set of units (being tokens in a sequence, pixels on an image, etc) such that the only interaction between units is through self-attention.
 
@@ -216,7 +216,7 @@ Data used for pretraining could be:
 
 **Purpose**: To learn comprehensive language representations, which can be fine-tuned for specific downstream tasks.
 
-![[Pasted image 20240807190541.png]]
+![Pasted image 20240807190541](/assets/Pasted%20image%2020240807190541.png)
 # A glimpse at modern transformer architectures 
 
 Many famous architectures can now be briefly described.

@@ -25,22 +25,7 @@ function createEgyptianArtPrompt(imageType?: string): string {
 - Well-documented temple reliefs from Karnak, Luxor, Abu Simbel
 - Famous Egyptian artworks
 
-Your task is to analyze what is depicted in the captured image. Provide a detailed analysis in JSON format with the following structure:
-
-{
-  "ancient_text_translation": "Translation of any hieroglyphs or ancient text visible",
-  "characters": [
-    {
-      "character_name": "Name of deity/person",
-      "reasoning": "Why you identified them as such",
-      "description": "Brief description and facts",
-      "location": "Position in image"
-    }
-  ],
-  "picture_location": "Best guess of where this was photographed",
-  "interesting_detail": "One fascinating detail an amateur might miss",
-  "date": "Historical period when artwork was created"
-}
+Your task is to analyze what is depicted in the captured image. Provide a detailed analysis in the specified JSON format.
 
 If there are characters depicted (e.g., gods, pharaohs, queens, officials, or other people), identify them by name. For each identified character, provide:
 1. **Character Name**: The name of the individual or deity.
@@ -56,7 +41,21 @@ Highlight one particularly interesting detail from the image that an amateur mig
 
 Finally, provide your best guess as to the historical period when the artwork was produced (e.g., "Old Kingdom", "Middle Kingdom", "New Kingdom", "Ptolemaic Period").
 
-IMPORTANT: Respond ONLY with valid JSON. Do not include any other text, explanations, or formatting.`
+Return your analysis as a JSON object with this exact structure:
+{
+  "ancient_text_translation": "Translation of any hieroglyphs or text",
+  "characters": [
+    {
+      "character_name": "Name of character/deity",
+      "reasoning": "Why you identified them this way",
+      "description": "Interesting facts about this character",
+      "location": "Position in image"
+    }
+  ],
+  "picture_location": "Likely location where photo was taken",
+  "interesting_detail": "Expert insight about the artwork",
+  "date": "Historical period estimate"
+}`
 
   if (imageType && imageType !== "unknown") {
     basePrompt += `\n\nHint: The image most likely belongs to a ${imageType}.`
@@ -65,150 +64,199 @@ IMPORTANT: Respond ONLY with valid JSON. Do not include any other text, explanat
   return basePrompt
 }
 
+// Egyptian AI Lens integration for production with enhanced debugging
 export async function POST(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(7)
+
+  console.log(`[${requestId}] === EGYPTIAN AI LENS API ROUTE START ===`)
+  console.log(`[${requestId}] Environment check:`)
+  console.log(`[${requestId}] - NODE_ENV: ${process.env.NODE_ENV}`)
+  console.log(`[${requestId}] - VERCEL: ${process.env.VERCEL}`)
+  console.log(
+    `[${requestId}] - GOOGLE_API_KEY exists: ${!!process.env.GOOGLE_API_KEY}`
+  )
+  console.log(
+    `[${requestId}] - GEMINI_API_KEY exists: ${!!process.env.GEMINI_API_KEY}`
+  )
+
   try {
-    console.log("Starting Gemini API analysis...")
+    console.log(`[${requestId}] Parsing form data...`)
     const formData = await request.formData()
     const image = formData.get("image") as File
     const speed = (formData.get("speed") as string) || "fast"
     const imageType = (formData.get("imageType") as string) || "unknown"
 
+    console.log(`[${requestId}] Request parameters:`)
+    console.log(`[${requestId}] - speed: ${speed}`)
+    console.log(`[${requestId}] - imageType: ${imageType}`)
+    console.log(
+      `[${requestId}] - image: ${
+        image ? `${image.name} (${image.size} bytes)` : "null"
+      }`
+    )
+
     if (!image) {
-      console.error("No image file provided")
+      console.error(`[${requestId}] ERROR: No image file provided`)
       return NextResponse.json(
-        { error: "No image file provided" },
+        {
+          translation: "Analysis failed",
+          characters: [],
+          location: "No image provided",
+          processing_time: "Error: No image file provided",
+          interesting_detail: "Error: No image file was uploaded",
+          date: "Request failed",
+        },
         { status: 400 }
       )
     }
 
-    console.log(`Settings: speed=${speed}, imageType=${imageType}`)
-
-    // Get API key
+    // Check for API key
     const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY
     if (!apiKey) {
-      console.error("No Google API key found")
+      console.error(`[${requestId}] ERROR: No API key found`)
       return NextResponse.json(
         {
-          translation: "API configuration error",
+          translation: "Analysis failed",
           characters: [],
-          location: "Unable to process request",
-          processing_time: "API key not found",
+          location: "API configuration error",
+          processing_time: "Error: No API key configured",
           interesting_detail:
-            "Please configure GOOGLE_API_KEY or GEMINI_API_KEY environment variable",
-          date: "Configuration required",
+            "Error: GOOGLE_API_KEY or GEMINI_API_KEY environment variable is not set in Vercel deployment",
+          date: "Request failed",
         },
         { status: 500 }
       )
     }
 
-    // Convert image to base64
+    console.log(`[${requestId}] Converting image to base64...`)
     const bytes = await image.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const base64Data = buffer.toString("base64")
 
-    console.log(
-      `Received image: ${bytes.byteLength} bytes, base64 length: ${base64Data.length}`
-    )
+    console.log(`[${requestId}] Image processing:`)
+    console.log(`[${requestId}] - Buffer size: ${buffer.length} bytes`)
+    console.log(`[${requestId}] - Image type: ${image.type}`)
 
-    // Initialize Gemini
+    // Initialize Google AI
+    console.log(`[${requestId}] Initializing Google Generative AI...`)
     const genAI = new GoogleGenerativeAI(apiKey)
 
     // Select model based on speed
+    const modelMap = {
+      regular: "gemini-1.5-pro",
+      fast: "gemini-1.5-flash",
+      "super-fast": "gemini-1.5-flash",
+    }
     const modelName =
-      speed === "regular"
-        ? "gemini-2.5-pro"
-        : speed === "super-fast"
-        ? "gemini-2.5-flash-lite"
-        : "gemini-2.5-flash"
+      modelMap[speed as keyof typeof modelMap] || "gemini-1.5-flash"
 
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: {
-        temperature: 0,
-        maxOutputTokens: 4096,
-      },
-    })
+    console.log(`[${requestId}] Using model: ${modelName}`)
 
-    console.log(`Using model: ${modelName}`)
+    const model = genAI.getGenerativeModel({ model: modelName })
+
+    // Create prompt
+    const prompt = createEgyptianArtPrompt(imageType)
+    console.log(`[${requestId}] Prompt length: ${prompt.length} characters`)
 
     // Prepare image data
-    const imageData = {
+    const imagePart = {
       inlineData: {
-        data: base64Data,
-        mimeType: image.type,
+        data: buffer.toString("base64"),
+        mimeType: image.type || "image/jpeg",
       },
     }
 
-    const prompt = createEgyptianArtPrompt(imageType)
-    console.log(`Prompt length: ${prompt.length} characters`)
-
-    // Make API call
+    console.log(`[${requestId}] Making API call to ${modelName}...`)
     const startTime = Date.now()
-    console.log("Calling Gemini API...")
 
-    const result = await model.generateContent([prompt, imageData])
+    const result = await model.generateContent([prompt, imagePart])
+
+    const duration = Date.now() - startTime
+    console.log(`[${requestId}] API call completed in ${duration}ms`)
+
     const response = await result.response
     const text = response.text()
 
-    const duration = (Date.now() - startTime) / 1000
-    console.log(`Gemini API call completed in ${duration.toFixed(2)}s`)
-    console.log(`Response length: ${text.length} characters`)
+    console.log(`[${requestId}] Response received:`)
+    console.log(`[${requestId}] - Response length: ${text.length} characters`)
+    console.log(`[${requestId}] - First 200 chars: ${text.substring(0, 200)}`)
 
     // Parse JSON response
-    let analysis: EgyptianArtAnalysis
+    let analysisData: EgyptianArtAnalysis
     try {
-      // Clean up the response text
-      let cleanedText = text.trim()
-
-      // Remove markdown code blocks if present
-      if (cleanedText.startsWith("```json")) {
-        cleanedText = cleanedText.slice(7)
-      }
-      if (cleanedText.endsWith("```")) {
-        cleanedText = cleanedText.slice(0, -3)
-      }
-      cleanedText = cleanedText.trim()
-
-      // Parse JSON
-      analysis = JSON.parse(cleanedText)
-      console.log("Successfully parsed Gemini response")
+      analysisData = JSON.parse(text)
+      console.log(`[${requestId}] JSON parsing successful`)
     } catch (parseError) {
-      console.error("Failed to parse Gemini response as JSON:", parseError)
-      console.error("Raw response:", text.substring(0, 500))
+      console.error(`[${requestId}] JSON parsing failed:`, parseError)
+      console.error(`[${requestId}] Raw response: ${text}`)
 
-      // Fallback response
-      return NextResponse.json({
-        translation: "Unable to parse hieroglyphs due to response format issue",
-        characters: [],
-        location: "Egyptian archaeological site (analysis partially failed)",
-        processing_time: `Analysis attempted in ${duration.toFixed(2)}s`,
-        interesting_detail:
-          "The response could not be properly parsed, but the image appears to contain Egyptian artwork",
-        date: "Ancient Egyptian period",
-      })
+      return NextResponse.json(
+        {
+          translation: "Analysis failed",
+          characters: [],
+          location: "Response parsing error",
+          processing_time: `Error: Failed to parse AI response after ${duration}ms`,
+          interesting_detail: `Error: The AI returned malformed JSON. Raw response: ${text.substring(
+            0,
+            500
+          )}...`,
+          date: "Request failed",
+        },
+        { status: 500 }
+      )
     }
 
-    // Return successful analysis
-    console.log("Analysis completed successfully")
-    return NextResponse.json({
+    console.log(`[${requestId}] Analysis complete:`)
+    console.log(
+      `[${requestId}] - Characters found: ${
+        analysisData.characters?.length || 0
+      }`
+    )
+    console.log(
+      `[${requestId}] - Location: ${analysisData.picture_location?.substring(
+        0,
+        50
+      )}...`
+    )
+
+    // Format the response to match the expected frontend format
+    const formattedResponse = {
       translation:
-        analysis.ancient_text_translation || "No ancient text detected",
-      characters: analysis.characters || [],
-      location: analysis.picture_location || "Location unknown",
-      processing_time: `Analysis completed in ${duration.toFixed(2)}s`,
+        analysisData.ancient_text_translation || "No ancient text detected",
+      characters: analysisData.characters || [],
+      location: analysisData.picture_location || "Location unknown",
+      processing_time: `${duration}ms`,
       interesting_detail:
-        analysis.interesting_detail || "No notable details identified",
-      date: analysis.date || "Period unknown",
-    })
+        analysisData.interesting_detail || "No specific details identified",
+      date: analysisData.date || "Period unknown",
+    }
+
+    console.log(`[${requestId}] === REQUEST COMPLETED SUCCESSFULLY ===`)
+    return NextResponse.json(formattedResponse)
   } catch (error: any) {
-    console.error("API route error:", error)
+    console.error(`[${requestId}] === ERROR OCCURRED ===`)
+    console.error(`[${requestId}] Error type: ${error.constructor.name}`)
+    console.error(`[${requestId}] Error message: ${error.message}`)
+    console.error(`[${requestId}] Error stack:`, error.stack)
+
+    // Check for specific error types
+    let errorDetail = error.message
+    if (error.message?.includes("API_KEY")) {
+      errorDetail = "API key is invalid or missing"
+    } else if (error.message?.includes("quota")) {
+      errorDetail = "API quota exceeded"
+    } else if (error.message?.includes("rate limit")) {
+      errorDetail = "Rate limit exceeded"
+    } else if (error.message?.includes("fetch")) {
+      errorDetail = "Network connection error"
+    }
+
     return NextResponse.json(
       {
         translation: "Analysis failed",
         characters: [],
-        location: "Unable to process request",
-        processing_time: `Error: ${error.message}`,
-        interesting_detail: "An error occurred while processing your request",
+        location: "Error occurred",
+        processing_time: `Error after ${Date.now()}ms`,
+        interesting_detail: `Detailed error: ${errorDetail}. Check Vercel function logs for more details.`,
         date: "Request failed",
       },
       { status: 500 }

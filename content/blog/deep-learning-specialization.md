@@ -45,17 +45,17 @@ The teaches introduced a well known, simple classification method: Linear Regres
 
 Given an input `x` (e.g. a dog-cat image), it is meant to predict `\hat(y)`  where `0 <= \hat(y) <= 1` by applying a linear function followed by a sigmoid function to squeeze the output of the linear function to `[0,1]`
 
-![[Pasted image 20240709193121.png]]
+![Pasted image 20240709193121](/assets/Pasted%20image%2020240709193121.png)
 The parameters of the model are `w` and `b`. Recall the shape of the sigmoid function here:
 
-![[Pasted image 20240709193224.png]]
+![Pasted image 20240709193224](/assets/Pasted%20image%2020240709193224.png)
 In order to use the training set of `m` labeled samples to tune the parameters `w` and `b` , a few concepts are introduced:
 
 * The **loss** (error) function **L**, which tells how different a model prediction is from its labelled ground truth. Since this is a binary classification problem, the **Binary Cross-Entropy Loss is introduced**
 
-![[Pasted image 20240709193651.png]]
+![Pasted image 20240709193651](/assets/Pasted%20image%2020240709193651.png)
 * The **cost** function **J** is the sum of the loss over the entire training set for any given choice of parameters
-![[Pasted image 20240709194013.png]]
+![Pasted image 20240709194013](/assets/Pasted%20image%2020240709194013.png)
 * **Gradient descent** is an iterative method used to find w and b that minimize J(w,b). It consists of updating w and b on each iteration by substracting the derivative of J with respect to the parameters. By moving the paremeters in the direction opposite to the gradient, the cost function value is driven down and the model should become better at predicting the training labels. A hyperparameter **alpha**, the learning rate, governs the strength of the parameter update on each iteration.
 
 Here, the teacher goes into A LOT of extra-boring examples trying to impress the meaning of a derivative without actually diving into the math. Having taking in-depth courses of calculus at university, this was a stump.
@@ -64,15 +64,15 @@ It's actually quite simple. `f'(a)` gives an approximation of how `f` changes if
  
 It becomes a little more interesting when we talk about derivatives in a computational graph. Here a system takes three inputs, `a`, `b` and `c` ; makes a few intermediate computations `u` and `v` and finally produces an output `J`
 
-![[Pasted image 20240709195439.png]]
+![Pasted image 20240709195439](/assets/Pasted%20image%2020240709195439.png)
 
 The key point here is that, if we want to know the derivative of `J` with respect to the inputs (e.g. `b` or `c`), we need to apply the **chain rule** and go through the intermediate nodes.
 
-![[Pasted image 20240709195647.png]]
+![Pasted image 20240709195647](/assets/Pasted%20image%2020240709195647.png)
 
 In the context of logistic regression, we can calculate the derivative of the loss L by writing it as a computational graph:
 
-![[Pasted image 20240709195909.png]]
+![Pasted image 20240709195909](/assets/Pasted%20image%2020240709195909.png)
 
 This example has inputs with size 2 (thus two weights). We need the derivative of `L` wrt to the parameters `w_1`, `w_2` and `b`.
 
@@ -88,13 +88,13 @@ After calculating the final derivative, we can update
 And do the same for the other parameters.
 
 To scale this up to `m` examples, we need to calculate the derivatives of the cost function `J`. Since the derivative of a sum is the sum of the derivatives, this is quite straightforward.
-![[Pasted image 20240709203724.png]]
+![Pasted image 20240709203724](/assets/Pasted%20image%2020240709203724.png)
 
 This section concludes with a snippet of code that makes an iteration of gradient descent, calculating the cumulative gradient over the entire training set. Notice that this would have to be repeated iteratively until convergence.
 
 Also notice that n=2 meaning that x is just x1 and x2. If n is large, this code is inefficient. Vectorization would have to be used to get rid of for loops.
 
-![[Pasted image 20240709211734.png]]
+![Pasted image 20240709211734](/assets/Pasted%20image%2020240709211734.png)
 
 ##### Vectorization
 Replacing explicit `for` loops by matrix/vector built in operations can considerable speed up your algorithms both in GPU and CPU.
@@ -115,14 +115,14 @@ There's a very verbose intro here just to explain the concept of a fully connect
 
 Basically it is a sequence of layers, each all consecutive layers are fully connected by parameters `w`.
 
-![[Pasted image 20240717163408.png]]
+![Pasted image 20240717163408](/assets/Pasted%20image%2020240717163408.png)
 *A neuron computes a weighted sum using a parameter `w` of all its parameters, adds a bias parameter `b` and then applies a non-linear activation function such as sigmoid*
 
 We are introduced to different choices of activation functions. The rule of thumb is: use ReLu, unless you're on the last output layer of a binary classification task, there you can use Sigmoid.
 
 Non-linearities are crucial to represent complex functions, otherwise the entire network collapses into a single linear function!
 
-![[Pasted image 20240717164234.png]]
+![Pasted image 20240717164234](/assets/Pasted%20image%2020240717164234.png)
 
 Here's a FCN with two layers (the input layer doesn't count). The notation is defined as follows:
 * `**z^\[i\]\_j**`: The output of the jth neuron at the ith layer.
@@ -136,12 +136,12 @@ These values are stacked together to form matrixes that allow for efficient vect
  
 Thus we can rewrite the equations in vectorized form, where the (i) superscript means sample number `i`. We can stack all samples together to vectorize this as well.
 
-![[Pasted image 20240717165639.png]]
+![Pasted image 20240717165639](/assets/Pasted%20image%2020240717165639.png)
 ##### Gradient Descent for Neural Netoworks
 
 The author presents pseudocode for a single-hidden-layer neural network, and we can see it's quite similar to logistic regression:
 
-![[Pasted image 20240717221009.png]]
+![Pasted image 20240717221009](/assets/Pasted%20image%2020240717221009.png)
 The derivatives of the activation functions are:
 
 * Sigmoid:
@@ -178,14 +178,14 @@ dW1 = (dZ1 * A0.T) / m   # A0 = X
 db1 = Sum(dZ1) / m
 ```
 
-![[Pasted image 20240717223618.png]]
+![Pasted image 20240717223618](/assets/Pasted%20image%2020240717223618.png)
 
 Mira el video de la intuition por que:
 * no entiendo por que involucra ms si la loss no es la J
 * no entiendo por que transpuestas, asumo que algo de calculo de matrices
 * no entiendo por que Sum en las derivadas de las bs
 
-![[Pasted image 20240717223809.png]]
+![Pasted image 20240717223809](/assets/Pasted%20image%2020240717223809.png)
 *Left: single sample - Right: All training set at once*
 
 So basically you are calculating the direction you have to go to reduce the error for each training sample, and the you average out that direction to update the weights.
@@ -227,7 +227,7 @@ composing them together in the later layers of a neural network so that it can l
 
 This is the typical intuition for hierarchical feature extraction in CNNs (I don't actually think it applies to dense layers though)
 
-![[Pasted image 20240718162825.png]]
+![Pasted image 20240718162825](/assets/Pasted%20image%2020240718162825.png)
 
 Another example with speech recognition. The first level of a NN may detect low lavel audio wave forms and basic phonemes. Later layers may compose this together.
 
@@ -294,7 +294,7 @@ If size of the dataset is greater than 1M we may use 98/1/1 or even 99.5/0.25/0.
 * It is ok to only have validation set without testing set if you don't need an unbiased estimation of performance. People call the validation set "test set" in this setup (although it is misleading).
 #### Bias and Variance
 
-![[Pasted image 20240725143318.png]]
+![Pasted image 20240725143318](/assets/Pasted%20image%2020240725143318.png)
 * A model that underfits has high bias
 	* e.g. training error doesn't go down near the optimal classifier error
 * A model that overfits has high variance
@@ -359,7 +359,7 @@ How does weight decay helps?
 
 Imagine fitting a polynomial to data points:
 
-![[Pasted image 20240725185046.png]]
+![Pasted image 20240725185046](/assets/Pasted%20image%2020240725185046.png)
 ##### Dropout
 
 The dropout regularization eliminates some neurons (along with all their incoming and outgoing edges) on each iteration based on a probability.
@@ -412,7 +412,7 @@ These steps should be applied to training, dev, and testing sets (but using mean
 
  If we don't normalize the inputs our cost function will be deep and its shape will be inconsistent (elongated) then optimizing it will take a long time.
 
-![[Pasted image 20240725190901.png]]
+![Pasted image 20240725190901](/assets/Pasted%20image%2020240725190901.png)
 
 Normalized inputs allow for a larger learning rate and optimization will thus be faster.
 
@@ -437,21 +437,21 @@ Solutions:
 
 Xavier initialization achieves this balance by setting the initial weights according to the size of the previous layer. Specifically, it uses a distribution with a variance that is inversely proportional to the number of input neurons in the layer.
 
-![[Pasted image 20240725191655.png]]
+![Pasted image 20240725191655](/assets/Pasted%20image%2020240725191655.png)
 
 Pytorch uses a similar approach by default for linear and convolutional layers.
 
-![[Pasted image 20240725191803.png]]
+![Pasted image 20240725191803](/assets/Pasted%20image%2020240725191803.png)
 
 **Others:**
 - Batch normalization
 - Gradient clipping
 - Residual networks
 - Auxiliary heads
-![[Pasted image 20240725191925.png]]
+![Pasted image 20240725191925](/assets/Pasted%20image%2020240725191925.png)
 *Skip connections*
 
-![[Pasted image 20240725191944.png]]
+![Pasted image 20240725191944](/assets/Pasted%20image%2020240725191944.png)
 *Auxiliary heads*
 
 #### Gradient checking
@@ -469,7 +469,7 @@ Instead of calculating the gradient over the entire dataset (which could be HUGE
 * **Batch gradient descent**: Calculate the gradient over the entire dataset (what we have done so far)
 * **Mini-batch gradient descent**: Run gradient descent on mini batches. Works much faster in large datasets.
 
-![[Pasted image 20240727142119.png]]
+![Pasted image 20240727142119](/assets/Pasted%20image%2020240727142119.png)
 *MBGD has ups and downs, but the updates are much more frequent.*
 
 Definitions:
@@ -505,7 +505,7 @@ The exponential average `v(t)` at time `t` of series `theta` is given by:
 
 `beta` is the smoothing factor, and `(1-beta)` controls the rate at which the influence of past observations decays.
 
-![[Pasted image 20240727143945.png]]
+![Pasted image 20240727143945](/assets/Pasted%20image%2020240727143945.png)
 *Example of a time series and its EWAs*
 
 The average starts at `v(0)=0` which gives a bias and shifts the average at the beginning, making it inaccurate. We can correct this bias by using the following equation:
@@ -542,10 +542,10 @@ So instead of updating via the last weight, we use the EWA, which is smoother an
 
 Root Mean Square Prop, is another technique to speed up gradient descent. It keeps a rolling average of the square gradients:
 
-![[Pasted image 20240727150150.png]]
+![Pasted image 20240727150150](/assets/Pasted%20image%2020240727150150.png)
 
 This square average is used to normalize the learning rate on each weight update:
-![[Pasted image 20240727150354.png]]
+![Pasted image 20240727150354](/assets/Pasted%20image%2020240727150354.png)
 In pseudocode:
 
 ```
@@ -650,7 +650,7 @@ Usually we try random values, often we cannot use grid search because it's intra
 
 It's beneficial to search parameters in an appropriate scale, if the range of search is `[a,b]` use a logarithmic scale.
 
-![[Pasted image 20240802133542.png]]
+![Pasted image 20240802133542](/assets/Pasted%20image%2020240802133542.png)
 *On a linear scale (the scale you're familiar with), moving a fixed distance along an axis is equivalent to adding a fixed number to your starting point. On a log scale, moving a fixed distance along an axis is equivalent to multiplying the starting point by a fixed number.*
 
 e.g. a parameters goes from 0.0000001 to 1 and we want to try out 5 hyperparameter choices, here are the resulting values:
@@ -698,7 +698,7 @@ Additionally, two learnable parameters (not hyperparameters) `gamma` and `beta` 
 `Z_batch_norm[i] = gamma * Z_norm[i] + beta`
 
 The following schema summarizes the transformations:
-![[Pasted image 20240727202324.png]]
+![Pasted image 20240727202324](/assets/Pasted%20image%2020240727202324.png)
 
 WHY is batch normalization useful?
 * The distribution of inputs to each layer can change as the parameters of the previous layers change. This is called internal covariate shift. Batch normalization ensures that the inputs to each layer are stable, within the same range. This **stabilizes training** and keeps **gradients stable and consistent**.
@@ -758,7 +758,7 @@ The **Softmax** is used for multi class classification. If we have four classes 
 
 If C is the number of classes, each of the C values in the output layer will contain a probability of the example belonging to each class. The last layer will have a Softmax activation instead of sigmoid, which does the following:
 
-![[Pasted image 20240727230405.png]]
+![Pasted image 20240727230405](/assets/Pasted%20image%2020240727230405.png)
 
 Example:
 
@@ -770,12 +770,12 @@ So we basically turned a vector of pre-activations into a vector of probabilitie
 
 The categorical loss function now is:
 
-![[Pasted image 20240727230716.png]]
+![Pasted image 20240727230716](/assets/Pasted%20image%2020240727230716.png)
 Notice that `\hat(y_i)` is going to be in `[0,1]`; thus its logarithm will be between `[-inf,0]`.
 
 For each sample, only the correct class term `y_k * log(yhat_k)` is going to add to the loss, the rest of the `y_i` will be zero. If the model is predicting a low probability to the correct class, the log is going to be a large negative number, and the `-1` multiplier will make it be a large loss. Vice versa.
 
-![[Pasted image 20240727230959.png]]
+![Pasted image 20240727230959](/assets/Pasted%20image%2020240727230959.png)
 
 Using the new loss, we need to readjust a few derivatives:
 
@@ -942,7 +942,7 @@ e.g. cat vs dog classification with 10% validation error
 
 You can evaluate multiple error analysis ideas in parallel and choose the best idea. Create a spreadsheet to do that and decide, e.g.:
 
-![[Pasted image 20240815110851.png]]
+![Pasted image 20240815110851](/assets/Pasted%20image%2020240815110851.png)
 
 This can help identify a specific subset of images (e.g. blurry cat images) that is worth improving. This quick counting procedure, which you can often do in, at most, small numbers of hours can really help you make much better prioritization decisions, and understand how promising different approaches are to work on.
 
@@ -968,7 +968,7 @@ Build your first system quickly, then iterate:
 
 Sometimes the training set comes from a different distribution than the validation/test sets. 
 
-![[Pasted image 20240815111126.png]]
+![Pasted image 20240815111126](/assets/Pasted%20image%2020240815111126.png)
 There are many strategies:
 
 | Strategy                                                          | Advantages                                                                  | Disadvantages                                                                                        |
@@ -1069,7 +1069,7 @@ Use a Sigmoid on each unit to map it to 0-1. A softmax implies that just one can
 ## Course 4 
 ### Week 1 - CNNs
 
-![[Pasted image 20240819173901.png]]
+![Pasted image 20240819173901](/assets/Pasted%20image%2020240819173901.png)
 #### Intuition and edge detection example
 "Computer vision is a field of artificial intelligence (AI) that enables computers and systems to interpret and make decisions based on visual data from the world."
 
@@ -1077,15 +1077,15 @@ One of the challenges of computer vision tasks is that images are very high dime
 
 The convolution operation just uses a small filter/kernel (e.g. 3x3), so the number of parameters is way smaller. It's very good at detecting edges, etc ; that subsequent convolutional layers can combine to identify more sophisticated structured.
 
-![[Pasted image 20240815124530.png]]
+![Pasted image 20240815124530](/assets/Pasted%20image%2020240815124530.png)
 
-![[Pasted image 20240815124723.png]]Other filters are well known, used to detect other type of structures:
+![Pasted image 20240815124723](/assets/Pasted%20image%2020240815124723.png)Other filters are well known, used to detect other type of structures:
 
 * **Sobel Filter:** Detects changes in the horizontal/vertical direction
-![[Pasted image 20240815125024.png]]
+![Pasted image 20240815125024](/assets/Pasted%20image%2020240815125024.png)
 * **Scharr Filter:** similar to the Sobel filter, but it provides better rotational symmetry and more accurate gradient approximation, especially when detecting edges in images.
 
-![[Pasted image 20240815125155.png]]
+![Pasted image 20240815125155](/assets/Pasted%20image%2020240815125155.png)
 Notes:
 *  In TensorFlow you will find the function `tf.nn.conv2d`. In Keras you will find `Conv2d` function.
 #### Padding
@@ -1094,7 +1094,7 @@ Notes:
 
 If we don't want to shrink the image of we don't want to lose information from the edges, we can pad the input image by adding zeros around it. The padding amount `p` is how many columns/rows we insert at the top, bottom, left and right.
 
-![[Pasted image 20240819174651.png]]
+![Pasted image 20240819174651](/assets/Pasted%20image%2020240819174651.png)
 The output size of a convolution with padding `p` is `n+2p-f+1,n+2p-f+1`
 
 * "same" convolution is the one that produces an output the same size as the input. they use padding `p=(f-1)/2`
@@ -1105,7 +1105,7 @@ The output size of a convolution with padding `p` is `n+2p-f+1,n+2p-f+1`
 * Add a parameter `s` and to govern the stride when sliding the filter.
 * The output of a filter of size `f` and padding `p` is `(n+2p-f)/s + 1 , (n+2p-f)/s + 1` . If fractional, we take the floor.
 
-![[Convolution_arithmetic_-_Padding_strides.gif]]
+![Convolution arithmetic   Padding strides](/assets/Convolution_arithmetic_-_Padding_strides.gif)
 #### Convolutions over feature maps
 
 The examples so far dealt with single channel inputs. If we want to convolve a multi-channel input, such as a RGB image, each filter will have to have the same number of channels.
@@ -1134,7 +1134,7 @@ If this last example was the layer of a CNN, it would have `10x3x3x3 + 10` param
 - *The bias in a convolutional layer is equivalent to adding a constant value (the bias term) to each element in the output feature map generated by a filter.*
 
 
-![[Pasted image 20240815232246.png]]
+![Pasted image 20240815232246](/assets/Pasted%20image%2020240815232246.png)
 
 ```
 Hyperparameters of layer l
@@ -1159,7 +1159,7 @@ bias:  (1, 1, 1, nc[l])
 #### Pooling layer
 
 We reduce spatial resolution by averaging or calculating the max value on each sub-matrix. There's also stride, padding and filter size involved.
-![[Pasted image 20240816082531.png]]
+![Pasted image 20240816082531](/assets/Pasted%20image%2020240816082531.png)
 * No learnable parameters
 * Max pooling is more popular than avg pooling
 * Effect: Summarise information
@@ -1167,9 +1167,9 @@ We reduce spatial resolution by averaging or calculating the max value on each s
 #### Simple CNN
 
 Similar to LeNet-5, one of the very first CNNs:
-![[Pasted image 20240816082909.png]]
+![Pasted image 20240816082909](/assets/Pasted%20image%2020240816082909.png)
 
-![[Pasted image 20240819223524.png]]
+![Pasted image 20240819223524](/assets/Pasted%20image%2020240819223524.png)
 Why does softmax have parameters in this table? something is off.
 
 it is actually referring to the parameters of the FC4 -> Softmax connection.
@@ -1188,12 +1188,12 @@ CV researchers have spent years studying how to put the layers we have studied (
 #### Classic Architectures I : LeNet-5 (1998)
 
 Used to identify grayscale handwritten digits (`32x32x1`)
-![[Pasted image 20240817230511.png]]
+![Pasted image 20240817230511](/assets/Pasted%20image%2020240817230511.png)
 * Used Sigmoid and Tanh back then, nowadays it'd use RELU
 #### Classic Architectures II: AlexNet
 Designed for the task of ImageNet with 1k classes:
 
-![[Pasted image 20240817230710.png]]
+![Pasted image 20240817230710](/assets/Pasted%20image%2020240817230710.png)
 * The ordering of layers is similar to LeNet, but larger
 * 60M parameters
 * Uses RELU
@@ -1204,7 +1204,7 @@ Designed for the task of ImageNet with 1k classes:
 Similar to AlexNet with certain simplifications. All convolutions are `3x3` stride 1; while all poolings are `2x2` with stride 1.
 
 
-![[Pasted image 20240817230935.png]]
+![Pasted image 20240817230935](/assets/Pasted%20image%2020240817230935.png)
 * 138 M parameters, mostly concentrated in the fully connected layers
 * Uses 96 MB of memory per image just to do the forward pass - Relatively large, even for today standards.
 * Shrinking is done only via pooling
@@ -1216,10 +1216,10 @@ ResNets try to address the difficulty of training very deep neural networks (van
 
 More concretely, ResNet introduces the "Residual Block":
 
-![[Pasted image 20240817231503.png]]
+![Pasted image 20240817231503](/assets/Pasted%20image%2020240817231503.png)
 Then, the "Residual Network" architecture consists of many residual blocks stacked together. This allows for deeper networks.
 
-![[Pasted image 20240817231737.png]]
+![Pasted image 20240817231737](/assets/Pasted%20image%2020240817231737.png)
 The heuristic is that deeper networks can do better (provided they have enough data). This is actually problem-dependant. In practice no one goes deeper than hundreds.
 
 *Why do residual connectons work?*
@@ -1228,7 +1228,7 @@ The heuristic is that deeper networks can do better (provided they have enough d
 * The network can learn to approximate more complex mappings because it has the flexibility to modify or skip over parts of the input signal while retaining the integrity of the original signal.
 
 ResNet-34
-![[Pasted image 20240817232002.png]]
+![Pasted image 20240817232002](/assets/Pasted%20image%2020240817232002.png)
 Notes:
 * Only uses 3x3 convs
 * Spatial resolution keeps being halved, channels doubled
@@ -1238,12 +1238,12 @@ There are two types of ResNet, depending on whether the input/output dimensions 
 
 * **Identity block**: Dimensions are the same, so we can perform *elementwise addition* of the activations of layer `l` to the pre-activations of later layer `l=n`.
 
-![[Pasted image 20240820015207.png]]
+![Pasted image 20240820015207](/assets/Pasted%20image%2020240820015207.png)
 
 * ****
 * **Dimension matching**: If the dimensions do not match, ResNet uses a projection (typically a 1x1 convolution) to transform the activations from layer `l` to the correct shape before performing the addition. The 1x1 conv can easily change the number of output channels to make the number of channels match, whereas the choice of stride can be used to downsample the activations of layer `l`  to make them match.
 
-![[Pasted image 20240820015918.png]]
+![Pasted image 20240820015918](/assets/Pasted%20image%2020240820015918.png)
 here "conv2d" usually is a 1x1 conv.
 
 #### 1x1 Convolutions
@@ -1259,16 +1259,16 @@ here "conv2d" usually is a 1x1 conv.
 ##### Motivation
 Instead of picking a specific filter size, which can be tricky to optimize, use them all in this Inception module:
 
-![[Pasted image 20240822114548.png]]Basically we let the network decide what convolution it wants to use most. However, notice that the module has quite a high computational cost.
+![Pasted image 20240822114548](/assets/Pasted%20image%2020240822114548.png)Basically we let the network decide what convolution it wants to use most. However, notice that the module has quite a high computational cost.
 
 Let's consider a 5x5 convolution with same padding and 32 filters applied to a 28x28x192 input. This needs 120M multiplications.
 
 As an alternative, we could first apply a 1x1 convolution that drastically reduces the number of channels, followed by a 5X5 convolution. If the 1x1 convolution has 16 filters, that adds up to 12.4 M multiplications.
 ##### The inception module and Inception Network
 
-![[Pasted image 20240823234142.png]]
+![Pasted image 20240823234142](/assets/Pasted%20image%2020240823234142.png)
 Aka "GoogleNet"
-![[Pasted image 20240823234348.png]]
+![Pasted image 20240823234348](/assets/Pasted%20image%2020240823234348.png)
 * Concatenated blocks of the Inception module
 * There are auxiliary heads
 
@@ -1284,12 +1284,12 @@ Say we go from a 6x6x3 volume to 4x4x5 using a 3x3 convolution. This implies a t
 
 In contrast, a depthwise-separable convolution can achieve the same output shape with significantly fewer computations. Instead of using a full 3D filter, the depthwise convolution applies a single filter of size `3x3x1` to each channel separately. This produces an intermediate volume with the same number of channels as the input. A pointwise convolution (using a `1x1` kernel) then maps this volume to the desired number of output channels. In our example, this approach requires only 672 multiplications—roughly one-third of the computations needed for the standard convolution.
 
-![[Pasted image 20240824001812.png]]
+![Pasted image 20240824001812](/assets/Pasted%20image%2020240824001812.png)
 The authors of the paper point out that the cost of a depthwise separable convolution relative to a standard convolution is `1/num_out_channels + 1/f^2`. For `f=3` and `num_out_channels=5`, we get 0.31 the one third improvement we just discussed.
 ##### v2
 Version two introduces the "Bottleneck module", which expands the number of channels of the input using 1x1 convolutions ; then performs depthwise convolution ; and finally projects back to fewer channels.
-![[Pasted image 20240824111035.png]]
-![[Pasted image 20240824111159.png]]
+![Pasted image 20240824111035](/assets/Pasted%20image%2020240824111035.png)
+![Pasted image 20240824111159](/assets/Pasted%20image%2020240824111159.png)
 #### EfficientNet
 
 EfficientNet is a family of convolutional neural networks (CNNs) designed by Google researchers to achieve state-of-the-art performance while being computationally efficient. The key innovation of EfficientNet lies in its approach to scaling up neural networks in a balanced and systematic way.
@@ -1301,7 +1301,7 @@ EfficientNet is a family of convolutional neural networks (CNNs) designed by Goo
 *EfficientNet uses a simple but effective formula (**compount scaling**) to scale up the network. If you want to scale up the model, you increase the depth, width, and resolution by fixed scaling factors.* 
 
 
-![[Pasted image 20240824113025.png]]
+![Pasted image 20240824113025](/assets/Pasted%20image%2020240824113025.png)
 * (phi): This is the **compound coefficient**. It’s a global scaling factor that controls how much to scale the depth, width, and resolution simultaneously.
 * (alpha): This is a constant that controls how much to scale the depth of the network.
 * (beta): This is a constant that controls how much to scale the width of the network.
@@ -1320,7 +1320,7 @@ The key idea is that by adjusting phi, you can uniformly scale the network’s d
 | EfficientNet-B6 | 6      | 3.1                               | 1.8                              | 1.8                                    | 528 x 528        | 138         | 43M             | 19.0            |
 | EfficientNet-B7 | 7      | 3.6                               | 2.0                              | 2.0                                    | 600 x 600        | 150         | 66M             | 37.0            |
 
-![[Pasted image 20240824114424.png]]
+![Pasted image 20240824114424](/assets/Pasted%20image%2020240824114424.png)
 MBConv: Similar to the blocks of MobileNetv2
 #### Transfer Learning
 
@@ -1339,26 +1339,26 @@ Consists of augmenting the data by:
 * Photometric distortion
 #### Takeaways from the Lab - Resnets
 
-![[Pasted image 20240829144813.png]]
+![Pasted image 20240829144813](/assets/Pasted%20image%2020240829144813.png)
 Vanishing Gradient: The magnitude of the gradient decreases significantly for earlier layers as the network trains. We solve this via shortcuts or skip connections.
 
-![[Pasted image 20240829145044.png]]
+![Pasted image 20240829145044](/assets/Pasted%20image%2020240829145044.png)
 On that note, there is also some evidence that the ease of learning an identity function accounts for ResNets' remarkable performance even more than skip connections help with vanishing gradients.
 
 Two main types of blocks are used in a ResNet, depending mainly on whether the input/output dimensions are the same or different. You are going to implement both of them: the "identity block" and the "convolutional block."
 
 The identity block corresponds to the case where the activations of layer `l` and `l+n` have the same dimension. The (+) denotes **elementwise addition**.
 
-![[Pasted image 20240829145348.png]]
+![Pasted image 20240829145348](/assets/Pasted%20image%2020240829145348.png)
 
 The convolutional block corresponds to the case where the activations don't match, thus we use convolutions to adjust the shape of the shortcut.
-![[Pasted image 20240829151119.png]]
+![Pasted image 20240829151119](/assets/Pasted%20image%2020240829151119.png)
 These ID and CONV blocks can be combined to build a large ResNet50 :)
 
-![[Pasted image 20240829152243.png]]
+![Pasted image 20240829152243](/assets/Pasted%20image%2020240829152243.png)
 #### Takeaways from the labs - MobileNetv2
 
-![[Pasted image 20240829154400.png]]
+![Pasted image 20240829154400](/assets/Pasted%20image%2020240829154400.png)
 MobileNetV2 uses depthwise separable convolutions as efficient building blocks. Traditional convolutions are often very resource-intensive, and depthwise separable convolutions are able to reduce the number of trainable parameters and operations and also speed up convolutions in two steps:
 
 1. The first step calculates an intermediate result by convolving on each of the channels independently. This is the depthwise convolution.
@@ -1372,7 +1372,7 @@ The lab is very interesting, you load a MobileNetv2 trained on Imagenet, freeze 
 
 #### Object Localization
 
-![[Pasted image 20240830162029.png]]
+![Pasted image 20240830162029](/assets/Pasted%20image%2020240830162029.png)
 
 Image classification: predict softmax vector of classes out of an input image.
 Image classification with localization: Given an image with at most a single object, predict:
@@ -1389,7 +1389,7 @@ Where:
 
 The loss is:
 
-![[Pasted image 20240830162900.png]]
+![Pasted image 20240830162900](/assets/Pasted%20image%2020240830162900.png)
 
 Where we use (check):
 * logistic regression loss for `p`.
@@ -1418,10 +1418,10 @@ Then we may slide a window across the input image, and apply the auxiliary class
 This can be implemented convolutionally using the very same weights and filters. E.g
 
 Say this is your model trained to predict on cropped images whether there is an object or not and where (image classification with localization):
-![[Pasted image 20240830163202.png]]
+![Pasted image 20240830163202](/assets/Pasted%20image%2020240830163202.png)
 You can take the larger image, convolve the same filters (turning the FCs into convolutions to allow for arbitrary input shapes). The result is a feature map that gives, for each crop in your entire input image, the result of the image localization and classification model:
 
-![[Pasted image 20240830163421.png]]
+![Pasted image 20240830163421](/assets/Pasted%20image%2020240830163421.png)
 
 Hopefully the crops that DO contain the car will produce the relevant bounding boxes :) 
 
@@ -1430,7 +1430,7 @@ Hopefully the crops that DO contain the car will produce the relevant bounding b
 Let's refine this previous intuition into the popular YOLO (You Only Look Once) object detection model.
 
 We divide the input image into SxS cells (a realistic value would be 19x19, for this silly example it's 3x3). Then the target output for each cell is the same as for image classification with localization. If we have 3 classes, that'd be a 8-valued vector:
-![[Pasted image 20240830165042.png]]
+![Pasted image 20240830165042](/assets/Pasted%20image%2020240830165042.png)
 
 How do we come up with the labels for training? The training set usually describes a list of bounding boxes+class for each image, it doesn't have this concept of "SxS cells" each one predicting 8 values.
 
@@ -1449,20 +1449,20 @@ A note on the values of the target vectors that describe the bboxes.
 
 Let's tackle one of the issues of the algorithm as presented so far. The same object can be detected by different cells. Each bbox will have its own center, width, height, class probability, etc.
 
-![[Pasted image 20240830165755.png]]
+![Pasted image 20240830165755](/assets/Pasted%20image%2020240830165755.png)
 non-max suppression is basically an algorithm to get rid of duplicated bboxes by keeping "the best one" for each object.
 
-![[Pasted image 20240830170458.png]]
+![Pasted image 20240830170458](/assets/Pasted%20image%2020240830170458.png)
 #### Anchor Boxes
 
 Anchor boxes are an addition to the YOLO algorithm as described above. Instead of predicting just one box per cell, we predict B boxes per cell. Additionally, each of the boxes has a predefined shape or shape ratio, so that each box can "specialize" into different types of boxes. For example, anchor box 1 may be a vertical shape, box 2 may be a horizontal shape. Then, the model is going to predict for each anchor box on each cell modifications to that predefined box to make it better fit the detected object, if any.
 
-![[Pasted image 20240830171449.png]]
+![Pasted image 20240830171449](/assets/Pasted%20image%2020240830171449.png)
 This also allows us to detect multiple objects in a single cells.
 
 It introduces an extra complexity when we build the target ground truth labels to calculate the loss tough. We now need to assign each ground truth bbox not only a cell, but also a specific bbox. We assign the anchor whose IoU with the ground truth box is highest.
 
-![[Pasted image 20240830171652.png]]
+![Pasted image 20240830171652](/assets/Pasted%20image%2020240830171652.png)
 
 If you have multiple class, perform non-class suppression for each class separately.
 
@@ -1484,17 +1484,17 @@ Variants are R-CNN, Fast R-CNN, Faster R-CNN.
 
 The course introduces the task of semantic segmentation, in which we predict the class of each pixel of the input image.
 
-![[Pasted image 20240830214128.png]]
+![Pasted image 20240830214128](/assets/Pasted%20image%2020240830214128.png)
 Unlike image classification and object detection, where we needed to reduce the spatial dimension of the data progressively until we reached the final result; for semantic segmentation we usually need to upsample the spatial dimension back to produce an output whose resolution matches the input.
 
-![[Pasted image 20240830214249.png]]
+![Pasted image 20240830214249](/assets/Pasted%20image%2020240830214249.png)
 To increase spatial resolution we use **transposed convolutions**:
 
-![[Pasted image 20240830214705.png]]
+![Pasted image 20240830214705](/assets/Pasted%20image%2020240830214705.png)
 
 The U-Net architecture makes extensive use of skip connections, convolutions, pooling to downsample and transposed convolutions to upsample:
 
-![[Pasted image 20240830214839.png]]Notice how the skip connections concatenate channels instead of adding like other skip connections we've seen.
+![Pasted image 20240830214839](/assets/Pasted%20image%2020240830214839.png)Notice how the skip connections concatenate channels instead of adding like other skip connections we've seen.
 
 ### Week 5 - Special Applications
 
@@ -1516,12 +1516,12 @@ Architectures to solve this issue are:
 
 This can be achieved by a **siamese network**, where a single network is trained to produce an embedding of the objects (faces in this case), and then the embeddings are used to compute the difference:
 
-![[Pasted image 20240907232021.png]]
+![Pasted image 20240907232021](/assets/Pasted%20image%2020240907232021.png)
 The optimization of this network is achieved via the **triplet loss**, which aims at getting embeddings that are very distant for different persons and close for the same person.
 
 We pick an anchor image on the dataset, and then a positive image (another sample of the same object) and a negative image (another sample of a different object). Then, for this triplet, we optimize, we define the loss as:
 
-![[Pasted image 20240907232353.png]]
+![Pasted image 20240907232353](/assets/Pasted%20image%2020240907232353.png)
 * The alpha is going to encourage the embeddings to not predict something trivial like all embeddings are 0. 
 * The max is a way to encode that the left side is >= 0
 * During training, we pick triplets that are "hard", for instance negative images that are somewhat similar to the anchor image rather than random sampling.
@@ -1529,7 +1529,7 @@ We pick an anchor image on the dataset, and then a positive image (another sampl
 
 A more general case is where the output vector from the twin network is passed through additional network layers implementing non-linear distance metrics:
 
-![[Pasted image 20240908030554.png]]
+![Pasted image 20240908030554](/assets/Pasted%20image%2020240908030554.png)
 #### Neural Style Transfer
 
 ##### What are Deep Networks learning?
@@ -1537,7 +1537,7 @@ This section build intuitions necessary to understand neural style transfer bett
 
 Let's thing of a regular convolutional architecture for image classification such as this one:
 
-![[Pasted image 20240908031132.png]]
+![Pasted image 20240908031132](/assets/Pasted%20image%2020240908031132.png)
 The paper provides a way to understand and visualize what is it that each feature map is learning on each layer, one channel at a time.
 
 For example, let's think about layer 1. The feature map has 96 channels. We can (randomly) pick 9 of those channels, and for each of those channes identify the 9 input patches (from the training images) that maximize the activation of such channel.
@@ -1546,21 +1546,21 @@ The activation of a channel would be the average or the max or the sum of the ac
 
 In the context of training ImageNet, this is what we would come up with:
 
-![[Pasted image 20240908031536.png]]
+![Pasted image 20240908031536](/assets/Pasted%20image%2020240908031536.png)
 Layer 1: The first filter (channel) seems to detect diagonal edges. In general, earlier layer detect low level features.
 
 The paper provides a method to trace back the activations of each layer to see what patches on the training dataset are activating those feature maps most.
 
-![[Pasted image 20240908031756.png]]
+![Pasted image 20240908031756](/assets/Pasted%20image%2020240908031756.png)
 Layer 2 (left) starts to detect more complex patterns and shapes, while layer 3 already increase abstraction further.
-![[Pasted image 20240908031933.png]]
+![Pasted image 20240908031933](/assets/Pasted%20image%2020240908031933.png)
 Layers 4 and 5.
 
 The paper is very interesting and provides several visualizations and insights into the CNN black box. It's fascinating.
 
 ##### Neural Style Transfer
 
-![[Pasted image 20240908030649.png]]
+![Pasted image 20240908030649](/assets/Pasted%20image%2020240908030649.png)
 
 Neural Style Transfer (NST) is a fascinating technique in deep learning that combines the style of one image with the content of another to create a new, blended image. This is done by using a convolutional neural network (CNN), typically a pre-trained model like VGG-19.
 
@@ -1588,16 +1588,16 @@ The **content cost function** This measures how similar the output image is to t
 The **style cost function** is a bit more complex. 
 * We will pick a layer `l` on the VGG to measure style. We will define style as **correlation** between activations across channels
 
-![[Pasted image 20240908033219.png]]
+![Pasted image 20240908033219](/assets/Pasted%20image%2020240908033219.png)
 
 This is, if channels 2 and 4 activations are correlated in the style image S ; we want channel 2 and channel 4 activations to also be correlated in the generated image G.
 
 To this purpose, we will calculate a style matrix `G`:
 
-![[Pasted image 20240908033500.png]]
+![Pasted image 20240908033500](/assets/Pasted%20image%2020240908033500.png)
 `G^[l]` is going to measure the correlation for each pair of channels in layer `l` ; it's the Gram matrix. We can thus try to enforce correlation across channels between the style input S and the generated output G by trying to make the Gram matrixes match:
 
-![[Pasted image 20240908033709.png]]
+![Pasted image 20240908033709](/assets/Pasted%20image%2020240908033709.png)
 
 And actually, as shown in the last equation, for the style cost we calculate the style loss across several layers, not just one as we did for content.
 
@@ -1657,17 +1657,17 @@ Standard networks (fully connected and CNNs), are unsuitable for sequential data
 * No concept of "order" in the inputs.
 
 Thus, **recurrent neural networks (RNNs)** are introduced. 
-![[Pasted image 20240912192949.png]]
+![Pasted image 20240912192949](/assets/Pasted%20image%2020240912192949.png)
 
 RNNs process input data one time step at a time. At each time step `t`, the RNN takes the current input `x_t`​ and combines it with the **hidden state** `h_{t−1}`​ from the previous time step.
 
 The hidden state `h_t`​ serves as the memory of the network, storing information about past inputs. It is updated at each time step using the formula
 
-![[Pasted image 20240912193426.png]]
+![Pasted image 20240912193426](/assets/Pasted%20image%2020240912193426.png)
 
 The output at each time step `y_t`​ can be computed from the hidden state: 
 
-![[Pasted image 20240912193438.png]]
+![Pasted image 20240912193438](/assets/Pasted%20image%2020240912193438.png)
 
 Where `W_y`​ is the output weight matrix, `c` is the bias, and `g` is an activation function (often softmax or sigmoid).
 
@@ -1695,21 +1695,21 @@ RNNs allow for:
 
 Backpropagation now is more complicated:
 
-![[Pasted image 20240912194304.png]]
+![Pasted image 20240912194304](/assets/Pasted%20image%2020240912194304.png)
 
 The gradients have to flow back in time. 
 
-![[Pasted image 20240912194350.png]]
+![Pasted image 20240912194350](/assets/Pasted%20image%2020240912194350.png)
 The loss is going to be the addition of the individual loss at each output sequence element. Assuming this is a binary classification task, we could use binary cross entropy loss.
 
 #### Variations in the architecture
 
 The architecture just presented is suitable for a many-to-many sequence problem. Sometimes we'd only need to output a single value for the entire input sequence (sentiment classification) ; or output a sequence based on a single intput element (music generation).
 
-![[Pasted image 20240912194709.png]]
+![Pasted image 20240912194709](/assets/Pasted%20image%2020240912194709.png)
 
 Notice the second many-to-many which has encoder-decoder parts. The encoder encodes the input sequence into one matrix and feed it to the decoder to generate the outputs. Encoder and decoder have different weight matrices.
-![[Pasted image 20240912224557.png]]
+![Pasted image 20240912224557](/assets/Pasted%20image%2020240912224557.png)
 #### Language Model
 
 A **language model** is a model that learns the statistical properties of a language and predicts the probability of a sequence of words (or tokens). More specifically, it assigns probabilities to sequences of words in a way that reflects how likely a sequence is to occur in natural language.
@@ -1726,7 +1726,7 @@ How do we build a language model using RNNs?
 
 Example, given the sentence "Cats average 15 hours of sleep a day `<EOS>`", we use this sample to train as follows:
 
-![[Pasted image 20240912225055.png]]
+![Pasted image 20240912225055](/assets/Pasted%20image%2020240912225055.png)
 Each `y_t` being the probability of the next word.
 
 Once this is trained:
@@ -1741,7 +1741,7 @@ Which is just feeding the sentence into the RNN and multiplying the outputs.
 
 After a language model is trained, we can sample new sentences by:
 
-![[Pasted image 20240912225854.png]]
+![Pasted image 20240912225854](/assets/Pasted%20image%2020240912225854.png)
 1. Pass `a^<0> = 0` and `x^<1> = 0` 
 2. Choose a prediction randomly from the distribution `\hat(y)^<1>`. This gives us a random beginning for the sequence.
 3. Pass the last predicted word and the hidden state to the RNN. Get a new prediction (presumably the most probable one from the distribution)
@@ -1761,7 +1761,7 @@ Remark: The naive RNN is not very good at capturing very long-term dependencies,
 
 * If sequences are very long, the calculation of the gradients involves many many multiplications. Thus the vanishing gradient problem can arise.
 * Exploding gradients can be easily seen when your weight values become `NaN`. 
-![[Pasted image 20240912230617.png]]
+![Pasted image 20240912230617](/assets/Pasted%20image%2020240912230617.png)
 
 Solve exploding gradients:
 * Apply *gradient clipping*: if your gradient is more than some threshold - re-scale some of your gradient vector so that is not too big. So there are clipped according to some maximum value.
@@ -1775,10 +1775,10 @@ Solve vanishing gradients:
 More complex version of a RNN that can help solve vanishing gradients and can remember longer dependencies.
 
 Basic RNN:
-![[Pasted image 20240912231259.png]]
+![Pasted image 20240912231259](/assets/Pasted%20image%2020240912231259.png)
 
 GRU:
-![[Pasted image 20240912232434.png]]
+![Pasted image 20240912232434](/assets/Pasted%20image%2020240912232434.png)
 
 **INTUITION**
 Gates are introduced to control what information should be kept, updated or forgotten. The gates help the GRU decide, at each time step, how much of the past information should be passed forward and how much of the current input should be used.
@@ -1822,7 +1822,7 @@ Because the GRU has this selective memory ability, it can maintain relevant info
 
 Another type of recurrent unit, a little more complex than GRU. A third gate is added, called the **output gate**. This can make LSTM capable or learning more complex patterns, but also more prone to overfitting.
 
-![[Pasted image 20240913013049.png]]
+![Pasted image 20240913013049](/assets/Pasted%20image%2020240913013049.png)
 
 An LSTM unit receives three vectors: 
 * Two vectors from the LSTM itself at the previous instante: the cell state (C) and the hidden state (H)
@@ -1836,14 +1836,14 @@ All three gates receive as inputs `X_t` and `H_{t-1}`.
 
 The **forget gate** first decides what information to remove from the cell state.
 
-![[Pasted image 20240913014034.png]]
+![Pasted image 20240913014034](/assets/Pasted%20image%2020240913014034.png)
 
 After removing some information from `C_{t-1}` , we can insert new information. 
 * The **candidate memory** generates a candidate vector: a vector of information that is candidate to be added to the cell state.
 * The **input gate** generates a selector vector that is elementwise multiplied with the candidate vector. The result is added to the cell state vector.
 The resulting cell state vector is passed to the next LSTM unit.
 
-![[Pasted image 20240913015143.png]]
+![Pasted image 20240913015143](/assets/Pasted%20image%2020240913015143.png)
 
 Finally, the **output gate** is used to generate a hidden state for the LSTM from the cell state. 
 
@@ -1860,14 +1860,14 @@ The hidden state represents the **short term, immediate output** of the unit, wh
 The two layers operate independently and have their own hidden states at each time step. After processing the sequence in both directions, the hidden states from both directions are combined (usually by concatenation or summation) to form the final output at each time step.
 
 
-![[Pasted image 20240913022622.png]]
+![Pasted image 20240913022622](/assets/Pasted%20image%2020240913022622.png)
 Bidirectional RNNs are ideal for tasks where the entire sequence is available and where both past and future contexts are important. However, if you're dealing with real-time data (like live speech recognition), a **unidirectional RNN** may be more appropriate because it processes data as it arrives without needing to wait for future inputs.
 
 The blocks here can be any RNN block including the basic RNNs, LSTMs, or GRUs.
 #### Deep RNNs
 In some problems its useful to stack some RNN layers to make a deeper network.
 
-![[Pasted image 20240913023147.png]]
+![Pasted image 20240913023147](/assets/Pasted%20image%2020240913023147.png)
 In deep RNN stacking, 3 layers is already considered deep and expensive to train. 
 
 In some cases you might see some feed-forward network layers connected after recurrent cells.
@@ -1895,14 +1895,14 @@ This one provides more insight into how RNNs are actually trained.
 After training in many samples, the model learns to distribute these probabilities reasonably.
 
 After we have already trained this mode, at each step the model predicts a probability distribution over characters and we sample from that distribution (instead of picking the most likely character each time). Otherwise, we'd always predict the same names given a starting letter.
-![[Pasted image 20240913140429.png]]
+![Pasted image 20240913140429](/assets/Pasted%20image%2020240913140429.png)
 ### Week 2: NLP and Word Embeddings
 
 #### Word Embeddings
 
 So far we have defined a fixed-length vocabulary, an represented words as one-hot sparse vectors that identify the word in the vocabulary.
 
-![[Pasted image 20240923151507.png]]
+![Pasted image 20240923151507](/assets/Pasted%20image%2020240923151507.png)
 
 Weaknesses:
 - High dimensionality
@@ -1911,18 +1911,18 @@ Weaknesses:
 - Mathematically, inner products are always 0 and distances are always the same.
 
 Solution: Learn a **featurized** representation of each of the words. E.g:
-![[Pasted image 20240923151947.png]]
+![Pasted image 20240923151947](/assets/Pasted%20image%2020240923151947.png)
 
 This representation is a **word embedding**, usually the features do not have such straightforward interpretation, but still are meaningful to establish relationships between different words. Modern word embeddings could use 50 to 1000 features to represent each word.
 
 We can try to visualize this using e.g. t-SNE algorithm to reduce features to 2 dimensions, and the expectation is that related concepts are clustered together:
 
-![[Pasted image 20240923152213.png]]
+![Pasted image 20240923152213](/assets/Pasted%20image%2020240923152213.png)
 #### Using word embeddings
 
 Let's consider the task of "named entity recognition" 
 
-![[Pasted image 20240923153243.png]]
+![Pasted image 20240923153243](/assets/Pasted%20image%2020240923153243.png)
 The model should be able to extrapolate from this training sentence and because of the closeness of word embeddings to produce the proper outputs for "Mahmoud Badry is a durian cultivator".
 
 The algorithmos used to learn word embeddings can examine billions of words of unlabeled text and learn the representation from them. It is possible to use learned embeddings from these large corpuses (available for download pretrained) and then fine-tune with a smaller set set of ~100k words.
@@ -1931,7 +1931,7 @@ Properties of word embeddings:
 
 * Lower dimension than one hot encoding, but not sparse
 * Similarities between word embeddings are usually calculated via the **cosine similarity**, which will be large if the verctors are very similar. Euclidian distance could also be used as dissimilarity metric.
-![[Pasted image 20240923153719.png]]
+![Pasted image 20240923153719](/assets/Pasted%20image%2020240923153719.png)
 
 *A note on this: Cosine similarity:* 
 
@@ -1948,7 +1948,7 @@ We can subtract the respective embeddings:
 Since we know that the distance between king and queen is approximately the distance between man and woman. To solve analogies like this one, we can calculate `argmax_w(e_w, e_king-e_man+e_woman)`.
 
 * The word embedding is usually implemented via an **embedding matrix** (which could be entirely learned). This matrix has one column of each word in the vocabulary  `(embedding_size , vocabulary_size)`
-![[Pasted image 20240923160325.png]]
+![Pasted image 20240923160325](/assets/Pasted%20image%2020240923160325.png)
 You can basically multiply the one hot embedding of a given word by E and obtain its embedding.
 
 * Usually we initialise `E` randomly and then try to learn all the parameters of the matrix. 
@@ -1960,7 +1960,7 @@ Learning algorithms for word embeddings have gone from being more complex to bei
 
 Let's consider a model called "bag of words", which is used to learn embeddings. The (self-supervised) task is "next word prediction on a sentence", in other words, a language model. 
 
-![[Pasted image 20240923165405.png]]
+![Pasted image 20240923165405](/assets/Pasted%20image%2020240923165405.png)
 
 In this setting, we have to optimize:
 * E: the embedding matrix
@@ -1992,7 +1992,7 @@ The network learns to adjust the weights so that, given the input (target word),
 
 If we have a 10k-word vocabulary, the output of the network is a softmax over the 10k words.
 
-![[Pasted image 20240923171423.png]]
+![Pasted image 20240923171423](/assets/Pasted%20image%2020240923171423.png)
 This can be a problem if we have a huge vocabulary like 1M, because it becomes very slow. In this case, we can use a Hierarchical softmax classifier. 
 
 Before: A standard softmax layer is used to calculate the probability distribution over the entire vocabulary, which involves a dot product between the input vector and the weight matrix of size `V×D` (where `V` is the vocabulary size and `D` is the embedding dimension) and then normalizing these using a softmax function.
@@ -2062,7 +2062,7 @@ We will have a ratio of k negative examples to 1 positive ones in the data we ar
 
 The idea is to train the model to distinguish the true context words (positive samples) from random words (negative samples). Instead of computing a full softmax, the model is trained using a simplified objective function. For a positive pair `(w_t, w_c)` and a set of negative pairs `(w_t, w_n)`, the objective is to maximize:
 
-![[Pasted image 20240924055044.png]]
+![Pasted image 20240924055044](/assets/Pasted%20image%2020240924055044.png)
 where `sigma` is the sigmoid function.
 * The first term maximizes the similarity (dot product) between the target word and its actual context word
 * The second term minimizes the similarity between target and negative samples
@@ -2086,7 +2086,7 @@ Moreover, the "model" is just going to take the word `i` and a context word `j`,
 
 The cost function optimized via gradient descent is just a squared error with a weighting factor `f(X_ij)` which just makes unfrequent combinations weigh less.
 
-![[Pasted image 20240924155238.png]]
+![Pasted image 20240924155238](/assets/Pasted%20image%2020240924155238.png)
 Notice that we will use two different embedding matrixes, one for the target word and another for the content word. The final embedding for word `i`, having optimized the entire model, is going to be the average of `c_i` and `w_i`.
 
 This word embedding will learn vector representations of words by leveraging global co-occurrence statistics from a corpus. The key idea behind GloVe is to learn word vectors such that the relationships between words in the vector space reflect the statistical relationships between words in the corpus. 
@@ -2106,7 +2106,7 @@ For example, words like "king" and "queen" would have a relatively high dot prod
 
 We can then do e.g. sentiment classification using a recurrent architecture and inputing the embeddings:
 
-![[Pasted image 20240924161235.png]]
+![Pasted image 20240924161235](/assets/Pasted%20image%2020240924161235.png)
 
 Word embeddings can be "biased" e.g. gender, ethnicity. For instance the analogies "father is to doctor as mother is to nurse" are generated.
 
@@ -2126,25 +2126,25 @@ The bottom line:
 
 Let's dive into the task of translating French to English, as concrete example of many-to-many recurrent task. Here's an example:
 
-![[Pasted image 20240926064915.png]]
+![Pasted image 20240926064915](/assets/Pasted%20image%2020240926064915.png)
 We'll work with a recurrent architecture based on RNN (LSTM or GRU included). The left part is the **encoder** RNN, which takes the input sequence one token at a time. It outputs a vector that encodes the entire input. The right part is the **decoder** RNN (a different RNN with separate weights), which takes the output of the encoder as the context and generates (one token at a time) the translated sentence.
 
-![[Pasted image 20240926065313.png]]
+![Pasted image 20240926065313](/assets/Pasted%20image%2020240926065313.png)
 
 Notice that the output of the decoder on each step is a softmax across the vocabulary in English.  Also instead of starting with an empty/zero context as in vanilla RNN, we pass the output of the encoder as the context of the decoder RNN.
 
 A similar architecture can be used for image captioning, where a CNN encodes an image which is then fed as context input to a RNN.
 
-![[Pasted image 20240926070100.png]]
+![Pasted image 20240926070100](/assets/Pasted%20image%2020240926070100.png)
 ##### Picking the most likely sentence
 
 Notice that the decoder is going to predict a probability distribution over words in the vocabulary. In the language model setting, when we tried to generate text (e.g. shakespeare poems), we would generate text by sampling from the distribution and feeding it to the network recursively.
 
-![[Pasted image 20240926070636.png]]
+![Pasted image 20240926070636](/assets/Pasted%20image%2020240926070636.png)
 
 However, for e.g. machine translation, we want the **best** translation, we don't want to risk sampling something sub optimal:
 
-![[Pasted image 20240926070919.png]]
+![Pasted image 20240926070919](/assets/Pasted%20image%2020240926070919.png)
 
 One may be tempted to go for a greedy approach to pick the final translation:
 1. Input the French sentence to the encoder, and pass the encoder output as initial context to the decoder
@@ -2156,7 +2156,7 @@ In practise, this doesn't really work well. E.g:
 
 Instead of the greedy approach, we need to get a better solution. The optimal translation would be the one that maximizes the conditional probability (which is the learned softmax):
 
-![[Pasted image 20240926185223.png]]
+![Pasted image 20240926185223](/assets/Pasted%20image%2020240926185223.png)
 
 This is a huge space of options to explore and it's impossible to find the optimal. Greedy search is a bit of a bad search heuristic, but there is a better alternative: **beam search**.
 
@@ -2185,17 +2185,17 @@ In industry standards, perhaps k=10 is a normal result ; in academia they may us
 ##### Length optimization
 
 **Length optimization**: Recall that the cumulative probability that we keep and try to optimize is the product of the conditional probability of each word:
-![[Pasted image 20240926185756.png]]
+![Pasted image 20240926185756](/assets/Pasted%20image%2020240926185756.png)
 `P(y<1> | x) * P(y<2> | x, y<1>) * ... * P(y<t> | x, y<y(t-1)>)`
 
 Since probabilities are almost always lower than 1, this makes longer sequence have smaller probabilities and thus (1) cause numerical instability (2)  benefits shorter translations. 
 
 To solve (1)  we sum the logs, and optimize the log probabilties.
 
-![[Pasted image 20240926190145.png]]
+![Pasted image 20240926190145](/assets/Pasted%20image%2020240926190145.png)
 
 To solve (2) we normalize by the number of elements in the sequence (powered to a hyperparameter that actually governs how much we normalize... people use 0.7)
-![[Pasted image 20240926190310.png]]
+![Pasted image 20240926190310](/assets/Pasted%20image%2020240926190310.png)
 
 To optimize k (called B sometimes) we may look into the errors:
 * Look at a bunch of samples that were mistranslated
@@ -2231,12 +2231,12 @@ E.g. if the prediction is "the the the the", the unigram precision is 1/4 insead
 
 BLEU also implements a BP penalty (brevity penalty) to penalize too short sentences:
 
-![[Pasted image 20240926215934.png]]
+![Pasted image 20240926215934](/assets/Pasted%20image%2020240926215934.png)
 
 
 Putting it all together, the final BLEU score is the product of the geometric mean of the n-gram precisions, times the brevity penalty.
 
-![[Pasted image 20240926220953.png]]
+![Pasted image 20240926220953](/assets/Pasted%20image%2020240926220953.png)
 `BLEU = BP * P_n`
 
 Strengths:
@@ -2280,27 +2280,27 @@ Here’s how attention helps:
     - At each step `t` of decoding, the decoder generates a hidden state `s_t`​ (its internal representation at time step `t`, based on the words generated so far).
     - The attention mechanism then computes **attention scores** for each encoder hidden state `h_i`​, determining how much attention to give to each input word.
     - The attention score `e_{t,i}`​ between the decoder hidden state `s_t`​ and the encoder hidden state `h_i`​ is calculated, typically using a **similarity function** such as dot product, general linear transformation, or learned neural network function (e.g., a small feed-forward neural network):
-        ![[Pasted image 20240926225537.png]]
+        ![Pasted image 20240926225537](/assets/Pasted%20image%2020240926225537.png)
         *e stands for energies*
     - These scores are then normalized to form **attention weights** `\alpha_{t,i}` using the softmax function:
-        ![[Pasted image 20240926225609.png]]
+        ![Pasted image 20240926225609](/assets/Pasted%20image%2020240926225609.png)
     - The attention weights `\alpha_{t,i}`​ represent the importance of each encoder hidden state `h_i`​ for the current decoding step `t`.
 - **Context Vector**:
     - Using the attention weights, the model computes a **context vector** for the current decoding step. The context vector `c_t`​ is a weighted sum of the encoder hidden states `h1,h2,…,hn`:
-        ![[Pasted image 20240926225755.png]]
+        ![Pasted image 20240926225755](/assets/Pasted%20image%2020240926225755.png)
     - This context vector `c_t`​ contains information about the parts of the input sentence most relevant to generating the current output word.
 - **Generating the Output Word**:
     
     - The decoder uses both its current hidden state `s_t`​ and the context vector ctc_tct​ to predict the next word in the output sequence:
-        ![[Pasted image 20240926225912.png]]
+        ![Pasted image 20240926225912](/assets/Pasted%20image%2020240926225912.png)
     - This step generates the probability distribution over the target vocabulary, from which the next word is chosen.
 
 
-![[Pasted image 20240927163550.png]]
+![Pasted image 20240927163550](/assets/Pasted%20image%2020240927163550.png)
 
 Here we can zoom into what a single "Attention" block is doing:
 
-![[Pasted image 20240927163655.png]]
+![Pasted image 20240927163655](/assets/Pasted%20image%2020240927163655.png)
 
 To sum up: When generating output token t, we do it by combining all hidden states from the encoder, weighed by attention coefficients. Then we pass on a context. Notice that the encoder may be a bidirectional RNN.
 
@@ -2310,7 +2310,7 @@ Notes:
 * There are variants where the post-attention LSTM at time t' only takes the hidden state `s_t` and the cell state `c_t`, but not the prediction at the previous time-step;  this may be suitable for applications where there isn't a strong dependency between previous character and next character (unlike language translation)
 
 
-![[Pasted image 20240927160946.png]]
+![Pasted image 20240927160946](/assets/Pasted%20image%2020240927160946.png)
 simplified view
 ##### The complexity of attention
 
@@ -2322,7 +2322,7 @@ This means the computational cost grows **quadratically** as the sequence gets l
 
 ##### Visualising attention weights
 
-![[Pasted image 20240927000009.png]]
+![Pasted image 20240927000009](/assets/Pasted%20image%2020240927000009.png)
 The image shows which words in the English sentence are most important for predicting each word in the French sentence according to the attention mechanism.
 
 ##### Speech recognition
@@ -2333,7 +2333,7 @@ You can build an accurate speech recognition system using the attention model th
 
 Notice, that the number of inputs and number of outputs are the same here, but in speech recognition problem input X tends to be a lot larger than output Y.
 
-![[Pasted image 20240927000933.png]]
+![Pasted image 20240927000933](/assets/Pasted%20image%2020240927000933.png)
 
 The CTC cost function allows the RNN to output something like this:
 
@@ -2344,7 +2344,7 @@ The CTC cost function allows the RNN to output something like this:
 
 There is an interesting assignment where we predict 1 in a sound clip if the word "activate" has just been said. Similar to what an alexa would do when someone says alexa.
 
-![[Pasted image 20240928195640.png]]
+![Pasted image 20240928195640](/assets/Pasted%20image%2020240928195640.png)
 #### Week 4: Transformers
 ##### Self-Attention
 
@@ -2354,15 +2354,15 @@ Transformers overcome this limitation by processing the entire input **at once**
 
 E.g. for `l'Afrique` in the following sentence, it will produce a "contextualized representation" of the word. It actually does this in parallel for all words.
 
-![[Pasted image 20241003195526.png]]
+![Pasted image 20241003195526](/assets/Pasted%20image%2020241003195526.png)
 
 The actual calculation of `A^<i>` bears some resemblance to the attention mechanism we studied before, in the sense that a softmax is calculated. 
 
-![[Pasted image 20241003195756.png]]
+![Pasted image 20241003195756](/assets/Pasted%20image%2020241003195756.png)
 
 However, there are a lot of new terms. For instance, in order to calculate the self-attention representation `A^<3>` of `l'Afrique`, we proceed as follows:
 
-![[Pasted image 20241003202542.png]]
+![Pasted image 20241003202542](/assets/Pasted%20image%2020241003202542.png)
 
 (1) *for each input element* Calculate three vectors `q<3>, k<3>` and `v<3>` (query, key and value) using a learned projection `W^Q`, `W^K`, `W^V`. 
 
@@ -2379,7 +2379,7 @@ However, there are a lot of new terms. For instance, in order to calculate the s
 
 We can actually compute everything at once:
 
-![[Pasted image 20241003202639.png]]
+![Pasted image 20241003202639](/assets/Pasted%20image%2020241003202639.png)
 * `d_k` is a scale to the dot product to prevent convergence issues
 
 ##### Multi-Head Self-Attention
@@ -2390,7 +2390,7 @@ Given an input `X`, each of the N heads will calculate its own `K_h`, `Q_h`, `V_
 
 The output of each head will be a tensor of the same dimensionality than `X`.
 
-![[Pasted image 20241004165302.png]]
+![Pasted image 20241004165302](/assets/Pasted%20image%2020241004165302.png)
 
 Since we have `n` heads, we'll have `n` attention outputs that will be concatenated along the feature dimension.
 
@@ -2402,19 +2402,19 @@ Intuition: Each head can focus on different parts of the sequence or capture dif
 
 Practical tips: The number of heads usually ranges between 8 (original transformer) and 24 (GPT-3).
 
-![[Pasted image 20241004170021.png]]
+![Pasted image 20241004170021](/assets/Pasted%20image%2020241004170021.png)
 
 ##### The transformer architecture
 
 Let's study the original architecture, designed for sequence-to-sequence tasks.
-![[Pasted image 20241004170134.png]]
+![Pasted image 20241004170134](/assets/Pasted%20image%2020241004170134.png)
 **Positional encoding:** Used to give the model a sense of the order of the input tokens, since the self-attention mechanism is inherently **order-agnostic** (unliKe RNNS). Self-attention treats the input sequence as a set and has no notion of token position unless explicitly provided.
 
 In the original Transformer, positional encoding is added to the input embeddings:
 
-![[Pasted image 20241004170359.png]]
+![Pasted image 20241004170359](/assets/Pasted%20image%2020241004170359.png)
 
-![[Pasted image 20241004222153.png]]
+![Pasted image 20241004222153](/assets/Pasted%20image%2020241004222153.png)
 Each row represents a positional encoding - notice how none of the rows are identical! 
 
 Note: modern systems use learned positional embedding instead of sine-cosine-based ones. In this approach, the positional encodings become trainable parameters, similar to the word embeddings.
@@ -2439,4 +2439,4 @@ During training in a Transformer model, the **loss is calculated** using the pre
 
 The total loss for the entire sequence is computed by summing the loss across all time steps.
 
-![[Pasted image 20241018033436.png]]
+![Pasted image 20241018033436](/assets/Pasted%20image%2020241018033436.png)

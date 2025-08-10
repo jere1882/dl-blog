@@ -36,9 +36,10 @@ All models share a **decoder-only transformer foundation**, although key archite
 
 The GPT-4 family (including GPT-4, GPT-4 Turbo, and GPT-3.5 Turbo) is **not open-source**. OpenAI has **not publicly disclosed**:
 - The exact **parameter count** 
-- The **training data sources**
 - The **precise architecture** (e.g., confirmation of Mixture-of-Experts, layer counts, tokenizers, etc.)
-![[Pasted image 20250629152728.png]]
+
+![GPT Architecture Diagram](/assets/Pasted%20image%2020250629152728.png)
+
 OpenAI did publish a full technical paper on GPT-3 in 2020: *Language Models are Few-Shot Learners (Brown et al., 2020)*
 ## Training
 
