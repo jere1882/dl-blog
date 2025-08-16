@@ -21,7 +21,7 @@ Design goals:
 - Runs a room-type recognition model
 - Allows A/B testing
 - Have a clear invocation+return payload schema defined through code in protobuf spec
-![Pasted image 20241220133121](/assets/Pasted%20image%2020241220133121.png)Design:
+![[Pasted image 20241220133121.png]]Design:
 - ML inference service provides a REST API service that IoT cloud components can use to provide ML features to our customers.
 - Service also collects metrics that can be combined with customer feedback and robot data for creating KPI dashboards
 - A REST API service that takes input data serialized as Protocol Buffer and returns inference result as a json

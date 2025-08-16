@@ -36,7 +36,7 @@ The following table provides an overview of the architectures that will be devel
 
 With the exception of the transformer based methods, the overwhelming majority of semantic segmentation architectures follow an **encoder-decoder** structure:
 
-![Pasted image 20240605063627](/assets/Pasted%20image%2020240605063627.png)
+![[Pasted image 20240605063627.png]]
 
 In this setup, the network is split in two main components:
 
@@ -67,7 +67,7 @@ FCNs were a breakthrough architecture for semantic segmentation tasks. While not
 FCNs replaced fully-connected layers with convolutional layers. This allowed them to process images of varying sizes and output a pixel-wise classification, matching the input image dimensions.
 
 
-![Pasted image 20240606055901](/assets/Pasted%20image%2020240606055901.png)
+![[Pasted image 20240606055901.png]]
 *Illustration from the original paper*
 
 The encoder path progressively downsamples the input image via convolutions and pooling. Any backbone could be used here (VGG, ResNet, etc);  the choice also depending on the desired size of the network.
@@ -83,7 +83,7 @@ The original FCN relied on simply upsampling the feature maps in the decoder pat
 _Original paper:_ [U-Net: Convolutional Networks for Biomedical Image Segmentation](https://arxiv.org/pdf/1505.04597) -  Olaf Ronneberger, Philipp Fischer, and Thomas Br 
 _Original use case:_ Biomedical image segmentation
 
-![Pasted image 20240607055016](/assets/Pasted%20image%2020240607055016.png)
+![[Pasted image 20240607055016.png]]
 
 Quoting the very clear explanation of the paper:
 
@@ -99,7 +99,7 @@ The crucial innovation here is the introduction of **skip connections** from the
 
  Original Paper: SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation - Vijay Badrinarayanan, Alexander Kendall, Animabadi Ramesh
 
-![Pasted image 20240607060140](/assets/Pasted%20image%2020240607060140.png)
+![[Pasted image 20240607060140.png]]
 
 In the paper, the authors describe how the encoder part is quite standard:
 
@@ -111,7 +111,7 @@ The key difference with UNet is that skip connections do not share entire featur
 
 The decoder progressively upsamples the image in a peculiar way. It makes use of the memorized max-pooling indexes to produce sparse maps, which are in then convolved to produce dense (non sparte) feature maps:
 
-![Pasted image 20240607060812](/assets/Pasted%20image%2020240607060812.png)
+![[Pasted image 20240607060812.png]]
 *This image compares the upsampling procedure of SegNet (left), in contrast to the standard deconvolution used by other models like FCN and UNet*
 
 
@@ -124,7 +124,7 @@ Original paper: "Pyramid Scene Parsing Network" by Hengshuang Zhao, Jianping Shi
 
 The core innovation of PSPNet is the Pyramid Pooling Module. This module is designed to capture contextual information at multiple scales. It achieves this by applying pooling operations at several grid scales, such as 1x1, 2x2, 3x3, and 6x6. These pooled features are then upsampled to the original size and concatenated together to form a robust global feature representation.
 
-![Pasted image 20240720043714](/assets/Pasted%20image%2020240720043714.png)
+![[Pasted image 20240720043714.png]]
 
 The first step in a PSPNet is the CNN block, quoting the paper:
 
@@ -156,15 +156,15 @@ Perhaps the central innovation of v1 was the introduction of **atrous (aka dilat
 * They are very useful for semantic segmentation, where maintaining spatial dimensions and fine details is crucial. Thus, they offer a simple and powerful alternative to deconvolutions. You don't reduce the spatial resolution in the first place, so you don't need to upsample it.
 
 
-![Pasted image 20240720045947](/assets/Pasted%20image%2020240720045947.png)
+![[Pasted image 20240720045947.png]]
 *Atrous convolutions*
 
-![Pasted image 20240720050524](/assets/Pasted%20image%2020240720050524.png)
+![[Pasted image 20240720050524.png]]
 *How atrous convolutions are comparable to pooling+regular convolution*
 
 The **Atrous Spatial Pyramid Pooling (ASPP)** introduced in v2 has a resemblance to PSPNet's Pyramid Pooling Module. It applies multiple dilated convolutions with different dilation rates, capturing multi-scale context by probing the incoming feature map with filters at multiple sampling rates. This enables the network to capture both local and global context effectively.
 
-![Pasted image 20240720050124](/assets/Pasted%20image%2020240720050124.png)
+![[Pasted image 20240720050124.png]]
 
 The next version, v3, further improves the architecture by:
 - Enhancing the ASPP with image-level global features and more dilation rates
@@ -176,7 +176,7 @@ Finally, v3+ incorporates a decoder module to refine the segmentation results, p
 * The encoder remains similar to v3: A backbone (e.g. ResNet) followed by the ASPP module.
 * The newly added decoder refines the segmentation output by upsampling and concatenation with corresponding low-level features from earlier layers of the encoder (like the skip connections of the U-Net)
 
-![Pasted image 20240720051926](/assets/Pasted%20image%2020240720051926.png)
+![[Pasted image 20240720051926.png]]
 
 ## Vision Transformers
 
@@ -184,7 +184,7 @@ The Vision Transformer architecture (ViT) was introduced in the paper "[An Image
 
 Recall the original transformer architecture, designed for natural language processing:
 
-![Pasted image 20240928223011](/assets/Pasted%20image%2020240928223011.png)
+![[Pasted image 20240928223011.png]]
 
 Originally designed for NLP, it works like this:
 * An input piece of text would get tokenized, then each token embedded into dense vectors and positional information added. An extra token that does not correspond to any of the inputs, the `[CLS]` token, is also added. This forms the input to the Encoder (left side).
@@ -196,7 +196,7 @@ The decoder is very task-dependant, e.g.:
 
 ViT explore how to reuse this architecture for images. The solution is quite elegant: let's find a way to encode images as sequences of embeddings, and the rest of the architecture can be reused without any modification.
 
-![Pasted image 20240928225150](/assets/Pasted%20image%2020240928225150.png)
+![[Pasted image 20240928225150.png]]
 The image is split into small patches. Each patch is flattened, encoded into an embedding of the desired size, and positional embedding is added to preserve structural information. Ingenious!
 
 Again, depending on the actual task at hand, the decoder is going to be different. For image classification, the special `[CLS]` token can be added to the sequence, or the representation from a specific patch (often the first one) is used for the final classification task. This specific contexctualized output from the encoder can be passed through a fully connected layer with softmax activation to predict the class labels.
@@ -210,7 +210,7 @@ a) **SETR Naive**: This approach simply reshapes the sequence of embeddings (fro
 b) **SETR-PUP (Progressive Upsampling Decoder)**: In this approach, the patch embeddings are progressively upsampled in stages using transposed convolutions. Each stage doubles the resolution of the feature map until it reaches the original resolution. Allows for smoother and more refined upsampling, improving the ability to capture finer details in the segmentation map.
 c) **SETR-MLA (Multi-Level Aggregation Decoder)**: This decoder aggregates features from multiple layers of the Transformer encoder. It captures hierarchical information from different depths of the encoder, combining features of varying granularity. The combined features are then upsampled to the final resolution.
 
-![Pasted image 20240929023037](/assets/Pasted%20image%2020240929023037.png)
+![[Pasted image 20240929023037.png]]
 One key issue with ViT is the loss of spatial information every time that an image patch gets flattened and embedded into a 1D vector: we lose the intra-patch spatial structure.
 ## Swin Transformer
 
@@ -230,7 +230,7 @@ To capture interactions **across windows**, Swin shifts the windows by a few pix
 
 Because Swin Transformer only computes self-attention within windows, the **computational cost scales linearly** with image size, compared to the quadratic scaling in standard ViTs.
 
-![Pasted image 20240929032947](/assets/Pasted%20image%2020240929032947.png)
+![[Pasted image 20240929032947.png]]
 
 Swin Transformer acts as a **backbone**—it extracts features from the input image, reducing the spatial dimensions and increasing the number of channels. By the end of the encoder (the Swin Transformer backbone), you have a feature map that’s smaller in spatial size (e.g., `1/16` or `1/32` of the original input) but with more channels (e.g., `768` or `1024` channels).
 
@@ -249,7 +249,7 @@ The key difference between Segmenter and other transformer-based models like ViT
 
 Segmenter directly predicts **segmentation masks for each patch**. It does this by adding a **mask token** for each class of interest to the patch tokens and learning how to predict the class label for each patch.
 
-![Pasted image 20240929034749](/assets/Pasted%20image%2020240929034749.png)
+![[Pasted image 20240929034749.png]]
 For each patch embedding output from the ViT encoder, Segmenter predicts a **probability distribution over the segmentation classes** (for each pixel within that patch). These probabilities are predicted for every patch at the same resolution they were initially embedded.
 
 Instead of progressively upsampling feature maps as you would in traditional convolutional networks or U-Net, Segmenter directly outputs **per-patch segmentation** predictions.

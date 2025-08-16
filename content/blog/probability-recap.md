@@ -163,7 +163,7 @@ Binomial distribution:
 * $\mu$ is the probability of success of each trial
 * m is the number of successes
 
-![Pasted image 20241218093510](/assets/Pasted%20image%2020241218093510.png)
+![[Pasted image 20241218093510.png]]
 
 Poisson distribution: Models the number of events occurring within a fixed interval of time or space, given that these events occur with a known constant rate and are independent of each other.
 
@@ -172,7 +172,7 @@ The **Poisson distribution** is **skewed** when $\lambda$ is small, because the 
 
 ## Continuous
 
-![Pasted image 20241218094716](/assets/Pasted%20image%2020241218094716.png)
+![[Pasted image 20241218094716.png]]
 The **Normal distribution**, also known as the **Gaussian distribution**:
 
 * The Normal distribution is **symmetric** around its mean.
@@ -212,7 +212,7 @@ Common choices for $\alpha$ are 0.05 or 0.01, which means you are willing to acc
 
 3. **Choose the Test Statistic:** The test statistic is a value that helps decide whether to reject the null hypothesis. It depends on the type of data and the distribution. e.g. z-test
 
-![Pasted image 20241218100129](/assets/Pasted%20image%2020241218100129.png)
+![[Pasted image 20241218100129.png]]
 
 4. **Calculate the p-value:** The **p-value** tells you the probability of observing the data you have (or something more extreme) assuming the null hypothesis is true. Usually you can lookup the p-value form the z value.
 
@@ -231,10 +231,10 @@ A **confidence interval (CI)** provides a range of values that is likely to cont
 
 4. Calculate the confidence interval
 
-![Pasted image 20241218100450](/assets/Pasted%20image%2020241218100450.png)
+![[Pasted image 20241218100450.png]]
 
 
-![Pasted image 20241218100542](/assets/Pasted%20image%2020241218100542.png)
+![[Pasted image 20241218100542.png]]
 
 ## Types of error
 
@@ -325,14 +325,14 @@ represents the proportion of the variance in yyy that is explained by the indepe
 
 Cross entropy:
 
-![Pasted image 20241218103938](/assets/Pasted%20image%2020241218103938.png)
+![[Pasted image 20241218103938.png]]
 
 -y * log(p) - (1-y) * log(1-p)
 
 may not be severe enough if it is too imbalanced
 you could use weights.
 
-![Pasted image 20241218104000](/assets/Pasted%20image%2020241218104000.png)
+![[Pasted image 20241218104000.png]]
 
 Soft voting: average of probabilities
 Hard voting: majority

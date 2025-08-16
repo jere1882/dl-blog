@@ -42,14 +42,14 @@ Measures how well a model predicts a sequence of words. Lower perplexity means b
 
 In theoretical cross entropy, we compare two full distributions:
 
-![Pasted image 20250616231326](/assets/Pasted%20image%2020250616231326.png)
+![[Pasted image 20250616231326.png]]
 But in practice p is not known, all we know is that the next correct token at position j. Thus we define p to be 0 in all components except p_j=1
 
 Then, the sum simplifies just to -log q(x_j)
 
 If we calculate this over N data points (a dataset), we get:
 
-![Pasted image 20250616231526](/assets/Pasted%20image%2020250616231526.png)
+![[Pasted image 20250616231526.png]]
 We finally define:
 
 Perplexity = e^(H(p,q))
@@ -107,7 +107,7 @@ It measures **n-gram overlap** between generated text and reference texts.
 3. Apply precision: What fraction of the hypothesis n-grams were correct?
 4. Apply brievety penalty: Punish very short hypotheses (e.g. just one correct word)
 
-![Pasted image 20250609200452](/assets/Pasted%20image%2020250609200452.png)
+![[Pasted image 20250609200452.png]]
 
 *Example:*
 

@@ -97,7 +97,7 @@ Example of compatibility matrix:
 
  The website with the [official instructions](https://pytorch.org/get-started/locally/) is quite handy. You may select your desired settings and it will provide you with the install command:
  
-![Pasted image 20240704160732](/assets/Pasted%20image%2020240704160732.png)
+![[Pasted image 20240704160732.png]]
 The key takeaway here is: Select a CUDA version that is lower or equal than the version reported by `nvidia-smi`
 
 This is how you may set up `PyTorch` in your `conda` environment:
@@ -162,7 +162,7 @@ My particular struggle was to set up an environment where I could run `mmsegment
 
 `mmsegmentation`, as of today requires to have `mmcv >= 2.0.0` but `mmcv < 2.2.0`. Here it is important again to make sure your installation is compatible with all the previous installations by carefully following the package installation [instructions](https://mmcv.readthedocs.io/en/latest/get_started/installation.html):
 
-![Pasted image 20240704161653](/assets/Pasted%20image%2020240704161653.png)
+![[Pasted image 20240704161653.png]]
 
 Or alternatively, I was able to use `mim` without messing up my `torch` environment. I first tried 2.0.0, encountered too many errors, and ended up settling for 2.1.0
 

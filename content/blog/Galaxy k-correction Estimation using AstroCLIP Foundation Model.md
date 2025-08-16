@@ -20,7 +20,7 @@ This project bridges the gap between astrophysics and modern machine learning by
 
 To my knowledge, this is the first approach to accurately predict k-corrections from galaxy **images**. My model achieved a $R^2$  score of `0.87` on a 150,000-galaxy dataset from DESI-EDR, surpassing the SOTA estimates calculated by Blanton's method. 
 
-![Pasted image 20241115155237](/assets/Pasted%20image%2020241115155237.png)
+![[Pasted image 20241115155237.png]]
 # Data and task definition
 
 Astronomy is a field rich with data, and modern surveys like [DESI](https://data.desi.lbl.gov/) generate vast datasets from countless celestial objects. In this project, we'll focus on galaxies and explore how machine learning can help address a long-standing challenge in astronomy: calculating K-corrections.
@@ -32,17 +32,17 @@ Galaxies can be studied through three primary types of measurements:
 - **Photometry:** This refers to the total light collected from a galaxy in each band, offering a simpler but less detailed view than spectra.
 
 
-![Pasted image 20241116192853](/assets/Pasted%20image%2020241116192853.png)
+![[Pasted image 20241116192853.png]]
 ***Images in different bands** of Galaxy NGC 5055* 
 
-![Pasted image 20241116193115](/assets/Pasted%20image%2020241116193115.png)*A galaxy **spectrum** (black line) with three overlaid band response functions (colored curves). Each band has an associated **photometric measurement**. *
+![[Pasted image 20241116193115.png]]*A galaxy **spectrum** (black line) with three overlaid band response functions (colored curves). Each band has an associated **photometric measurement**. *
 ## What is the K correction?
 
 Given a specific photometric band R, the **K-Correction** `K_{R,R}` is a real number that adjusts for the effect of the universe's expansion on the light we observe from galaxies. 
 
 When spectra are available, K-corrections can be calculated analytically, see [Hogg's 2002 paper](https://arxiv.org/abs/astro-ph/0210394):
 
-![Pasted image 20241116193727](/assets/Pasted%20image%2020241116193727.png)
+![[Pasted image 20241116193727.png]]
 
 However, spectra are often expensive or hard to get. In such cases, astronomers rely on photometry-based methods like [Blanton's K-correction](https://arxiv.org/abs/astro-ph/0606170), which, while standard, can be inaccurate—particularly for distant galaxies.
 
@@ -69,25 +69,25 @@ The original dataset, downloaded from DESI-edr release and exported by AstroCLIP
 
 This is what the spectrum and images of an individual sample in our dataset look like:
 
-![Pasted image 20241116201730](/assets/Pasted%20image%2020241116201730.png)
+![[Pasted image 20241116201730.png]]
 It is informative to inspect the distribution of the column redshift (`z`) across our galaxies:
 
-![Pasted image 20241116235811](/assets/Pasted%20image%2020241116235811.png)
+![[Pasted image 20241116235811.png]]
 This gives us an idea of the distance of the galaxies we are working with. The bulk of the galaxies are at `z <= 0.6`, which can be considered "nearby" at cosmological distances. Only a handful (~800 samples) are at redshift `>1`.
 
 As a final sanity check, let's validate that the redshifts are equally balanced across the training and test split:
 
-![Pasted image 20241117015818](/assets/Pasted%20image%2020241117015818.png)
+![[Pasted image 20241117015818.png]]
 
 ## CInspecting the Target Labels
 
 The original DESI data release does not provide K-corrections. However, since the release includes galaxy spectra, K-corrections can be calculated analytically, as done by the Value Added Catalog "FastSpecFit". For the purposes of this blogpost, I will focus on predicting the K correction at band `sdss_r` with band shift 0.1. Thus, the distribution of our target variable for regression looks like this:
 
-![Pasted image 20241117004541](/assets/Pasted%20image%2020241117004541.png)
+![[Pasted image 20241117004541.png]]
 
 It is also informative to visualize the distribution of the target variable discriminating by galaxy redshift.
 
-![Pasted image 20241117021053](/assets/Pasted%20image%2020241117021053.png)
+![[Pasted image 20241117021053.png]]
 
 Looking at this plot reveals a clear discontinuity at z ~ 0.38. Interestingly, this is caused by the [Balmer jump](https://en.wikipedia.org/wiki/Balmer_jump), and shows us that for galaxies beyond z ~ 0.38 the K correction at band `sdss_r` is very hard of impossible to predict.
 
@@ -103,8 +103,8 @@ I leveraged the trained model and mapped every galaxy image from my dataset into
 
 A straightforward approach is to apply K-nearest neighbors in the latent space. This does not require training any additional layers on top of AstroCLIP and works surprisingly well: 0.025 mean absolute error and 0.87 `R^2` score for using number of neighbors k=64.
 
-![Pasted image 20241117025006](/assets/Pasted%20image%2020241117025006.png)
-![Pasted image 20241117045212](/assets/Pasted%20image%2020241117045212.png)
+![[Pasted image 20241117025006.png]]
+![[Pasted image 20241117045212.png]]
 
 The distribution of the error is neatly centered in zero, with a mean squared error of `0.0427`. As shown in a posterior section, this predictor surpasses the `R^2` and MSE achieved by the SOTA, non-ML based tool of choice for this task, KCorrect.
 

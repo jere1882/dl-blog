@@ -24,7 +24,7 @@ The following metrics are commonly used to assess the performance of classificat
 
 The receiver operating characteristic (ROC) curve plots TPR versus FPR by varying the threshold. These metrics are summarized below:
 
-![Pasted image 20241220174613](/assets/Pasted%20image%2020241220174613.png)
+![[Pasted image 20241220174613.png]]
 
 | **Metric**                    | **Formula**            | **Equivalent**           |
 | ----------------------------- | ---------------------- | ------------------------ |
@@ -141,7 +141,7 @@ Cross-entropy answers:
 
 For classification, let's say there are K possible classes. Then the cross entropy is:
 
-![Pasted image 20250616215344](/assets/Pasted%20image%2020250616215344.png)
+![[Pasted image 20250616215344.png]]
 For a single model prediction q and ground truth probability p. 
 
 E.g. 
@@ -154,7 +154,7 @@ H(p,q) = - log 0.8
 
 Observations:
 * The log in machine learning is always `ln` base e because the gradient is simple: `1/x`
-![Pasted image 20250616220050](/assets/Pasted%20image%2020250616220050.png)
+![[Pasted image 20250616220050.png]]
 * the log is applied to the model prediction:
 	* p * q ->linear, the penalty is directly proportional to how good the prediction is
 	* -p * log(q) -> non linear. it explodes when the model is wrong! applies thus a stronger penalty - this is because   `x << -log(x)` when x is small
@@ -175,7 +175,7 @@ Is simply averaging the cross entropy for each sample in the dataset.
 ## Empirical cross-entropy (Data entropy)
 
 Given a probability distribution, entropy is a measure of uncertainty or surprise in a probability distribution:
-![Pasted image 20250616230214](/assets/Pasted%20image%2020250616230214.png)
+![[Pasted image 20250616230214.png]]
 * if the distribution `p` is uniform (`p(x_i) = 1/N`) the entropy is maximized. Every outcome is equally likely, maximum uncertainty.
 * if the distribution is peaked (one outcome has all probability), entropy is zero - There is no uncertainty.
 * Entropy is a property of the distribution itself.

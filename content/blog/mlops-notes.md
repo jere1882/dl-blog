@@ -632,7 +632,7 @@ Git. Github. Bitbucket.
 # AWS Lambda deployment and API Gateway (no Flask  / FastAPI)
 
 There are several AWS alternatives to deploying and running ML models.
-![Pasted image 20241220125805](/assets/Pasted%20image%2020241220125805.png)
+![[Pasted image 20241220125805.png]]
 **AWS Lambda** is a **serverless compute service** that runs your code in response to events without requiring you to provision or manage servers. You upload your code, and Lambda handles the execution, scaling, and management.
 
 - Fast inference for small model
@@ -839,7 +839,7 @@ With **AWS EKS**, you deploy machine learning models as **containers** inside Ku
 
 ## Redis and Memcached
 
-![Pasted image 20241220134109](/assets/Pasted%20image%2020241220134109.png)
+![[Pasted image 20241220134109.png]]
 **Redis** and **Memcached** are **not exclusive to AWS**. They can be run on any infrastructure, whether on-premises, on virtual machines, or in the cloud. However, AWS provides managed services for both of them, making it easier to set them up and scale in a cloud environment
 
 **AWS ElastiCache**: This is a fully managed service for both Redis and Memcached provided by AWS. You can use it to set up, operate, and scale these data stores without worrying about managing servers and other infrastructure details.

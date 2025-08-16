@@ -22,22 +22,22 @@ Join me as I delve into the details of this project.
 
 In essence, the task involves assigning a class to each pixel in an input image. 
 
-![Pasted image 20240716181748](/assets/Pasted%20image%2020240716181748.png)
+![[Pasted image 20240716181748.png]]
 
 The eight classes defined in the original paper, which I have adhered to, are:
 
-![Pasted image 20240715154933](/assets/Pasted%20image%2020240715154933.png)
+![[Pasted image 20240715154933.png]]
 
 The underwater nature of these images introduces a host of unique challenges:
 
 1. **Variable Visibility**: Water composition and weather conditions significantly impact visibility. Depth also plays a critical role, as colors, especially reds, fade the deeper you go.
 
-![Pasted image 20240715171157](/assets/Pasted%20image%2020240715171157.png)
+![[Pasted image 20240715171157.png]]
 *Demonstration of color degradation at different depths - [Source]([https://youtu.be/AAJjdA6b4Ts](https://youtu.be/AAJjdA6b4Ts))*
 
 2. **Diverse Natural Landscapes**: Aquatic environments vary dramatically by geographic location. A good model must learn high-level concepts, such as the general appearance of fish, as it is impractical to provide training samples for all existing species.
 
-![Pasted image 20240715171445](/assets/Pasted%20image%2020240715171445.png)
+![[Pasted image 20240715171445.png]]
 *This chart showcases common species in French Polynesia, from [Franko Maps](https://frankosmaps.com/products/tahiti-fish-id). Notice the wide variety of shapes, colors and patterns. It would be impossible to provide training data for all existing species.*
 
 3. **Complex Scenery**: Underwater landscapes can be difficult to interpret even for humans. Many species have evolved to blend seamlessly with their surroundings.
@@ -48,16 +48,16 @@ In order to solve this task, we cast this problem as a supervised learning seman
 
 Let's look at a few of the new images that I introduced to the dataset, and discuss the challenges they pose in the semantic segmentation task:
 
-![clownfish2](/assets/clownfish2.png)
+![[clownfish2.png]]
 *A cute anemonefish hiding in an anemone. A good model should be able to understand that the fish belongs to the `fish` class whereas the anemone is an `invertebrate`.*
 
-![porcupinefish](/assets/porcupinefish.png)
+![[porcupinefish.png]]
 *A porcupinefish hiding in the shadows, easily overlooked.*
 
-![Sixbar wrasse2](/assets/Sixbar%20wrasse2.png)
+![[Sixbar wrasse2.png]]
 *A complex underwater scene involving `aquatic plants`, `fish`, `sea floor`, `reefs` and `bodywater` classes. A good model has the challenge to understand the many actors involved in this scene.*
 
-![sea turtle3](/assets/sea_turtle3.png)
+![[sea_turtle3.png]]
 *A sea turtle at 30 meters depth. The loss of color at great depths is very noticeable in this picture. A good model should be able to handle color degradation.*
 
 In order to enhance the pre-existing dataset, I took the following actions:
@@ -95,7 +95,7 @@ The original paper reports results on similar architectures, which I will use as
 ### Results of the original paper (Baseline)
 
 Recall the list of classes defined by the original authors:
-![Pasted image 20240715154933](/assets/Pasted%20image%2020240715154933.png)
+![[Pasted image 20240715154933.png]]
 The authors of the original SUIM paper reported results **only** for classes HD, WR, FV, RI and RO:
 
 | Model      | HD    | WR    | FV    | RI    | RO    |
@@ -134,14 +134,14 @@ The results are summarised in the following table:
 
  💡 **Interpretation of results:** The extra data gives all models a boost of ~1 point of mIoU. Moreover, the SWIN ViT is able to surpass all CNN-based architectures by an extra ~1.5 mIoU.
 
-![Pasted image 20240719061154](/assets/Pasted%20image%2020240719061154.png)
+![[Pasted image 20240719061154.png]]
 *Training loss of Swin ViT. The loss function decreases quickly in the first 20k iterations, and gradually plateaus.*
 
 ### Optimizing ViT hyperparameters
 
 After observing that the Swin ViT had a high potential, I spent quite a lot of time further tuning the hyperparameters of the model.
 
-![Pasted image 20240903002945](/assets/Pasted%20image%2020240903002945.png)
+![[Pasted image 20240903002945.png]]
 *The swin transformer architecture. The number of swin transformer blocks at each stage, number of channels at each stage and the window size are hyperparameters of the architecture.*
 
 First, I tried increasing the size of the model. More complex models were able of raise the validation IoU: 
@@ -178,12 +178,11 @@ Let's have a look at the results:
 
 I used Weights&Biases to track the different experiments and quickly compare key stats like mIoU
 
-![Pasted image 20241120043743](/assets/Pasted%20image%2020241120043743.png)
+![[Pasted image 20241120043743.png]]
 
 You can inspect pretty much any details of interest of your runs, from stats to actual predictions. For instance, here we can see how the prediction of a given validation sample changes as the number of iterations increases:
 
-{/* Training progression animation temporarily unavailable - semseg.gif missing */}
-*[Training progression visualization will be added in a future update]*
+![[semseg.gif]]
 
 ## Segment Anything 2 (SAM2)
 For the sake of comparison, I ran [SAM2](https://github.com/facebookresearch/sam2) on the dolphin video shown in the intro. To be more specific, I used the `SAM2AutomaticMaskGenerator` model with default parameters.

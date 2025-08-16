@@ -20,7 +20,7 @@ Using the benchmark dataset **Cityscapes**, I will provide a step-by-step guide 
 
 **Semantic Segmentation** is a computer vision task that consists of categorizing each pixel of an input image into one of a finite set of classes:
 
-![20240525232715](/assets/20240525232715.png)
+![[20240525232715.png]]
 
 This sample belongs to [Cityscapes](https://www.cityscapes-dataset.com/), one of the most popular benchmark datasets for semantic segmentation.  This dataset contains about 25k street-view pictures of European cities, along with pixel-level classification for 29 classes such as `road`, `bike`, `sidewalk` and `sky`.
 
@@ -33,12 +33,12 @@ Semantic segmentation is extremely useful to help computer systems understand an
 
 **Healthcare**: In medical diagnostics, semantic segmentation is revolutionizing patient care by providing precise measurements and analyses of medical imagery..
 
-![Pasted image 20240525233152](/assets/Pasted%20image%2020240525233152.png)
+![[Pasted image 20240525233152.png]]
 *Early detection of brain tumours -  [Source](https://github.com/naldeborgh7575/brain_segmentation)*
 
 **Aerial image processing:** Applicable to a wide variety of tasks such as surveillance, agriculture monitoring, urbane planning, forest management, etc.
 
-![Pasted image 20240525233402](/assets/Pasted%20image%2020240525233402.png)
+![[Pasted image 20240525233402.png]]
 *Segmentation of satellite imagery - [Source](https://www.semanticscholar.org/paper/Deep-Fusion-of-Imaging-Modalities-for-Semantic-of-Sundelius/59cbe15b43e6ca172fce40786be68340f50be541)*
 
 ## Solving Semantic Segmentation
@@ -49,7 +49,7 @@ State-of-the-art semantic segmentation models require a substantial amount of an
 
 I compare popular segmentation architectures, including UNet, PSPNet and DeepLab, in [this separate post](undefined_yet).
 
-![Pasted image 20240526030407](/assets/Pasted%20image%2020240526030407.png)
+![[Pasted image 20240526030407.png]]
 *Pyramid Scene Parsing Network (PSPNet) - Source: [Original paper](https://arxiv.org/abs/1612.01105)*
 
 In this post, I will introduce MMSegmentation as a convenient and reliable way to train these models, using Cityscapes as the running example.
@@ -64,7 +64,7 @@ In this post, I will introduce MMSegmentation as a convenient and reliable way t
 
 Mmsegmentation is part of [OpenMMLAB](https://github.com/open-mmlab), a broader toolkit that provides support for virtually all mainstream computer vision tasks.
 
-![Pasted image 20240526040427](/assets/Pasted%20image%2020240526040427.png)
+![[Pasted image 20240526040427.png]]
 
 ## Setting up MMSegmentation
 
@@ -197,10 +197,10 @@ Intersection over Union (IoU) is a standard metric for semantic segmentation, wh
 
 To monitor and visualize training stats, I like to use [TensorBoard](https://mmsegmentation.readthedocs.io/en/main/user_guides/visualization.html), which will make handy plots such as:
 
-![tensorboard](/assets/tensorboard.png)
+![[content/assets/tensorboard.png]]
 *The smoothed loss value as a function of the number of iterations*
 
-![val iou](/assets/val_iou.png)
+![[val_iou.png]]
 *The validation performance (avg. IoU) as a function of the number of iterations*
 
 > 💡 **Tip:**  From this plot, we can see that the model may still keep improving if we let it train for more than 80k iterations. Training must be allowed to go on until improvement stagnates.
@@ -213,10 +213,10 @@ I also like to save the model predictions as images during validation to see wha
 
 This will save images in your `mmsegmentation/work_dirs` . For example, let's see what our model was predicting early in training:
 
-![Pasted image 20240708022408](/assets/Pasted%20image%2020240708022408.png)
+![[Pasted image 20240708022408.png]]
 *4000 iterations. left: ground truth - right: model prediction*
 
-![Pasted image 20240528065915](/assets/Pasted%20image%2020240528065915.png)
+![[Pasted image 20240528065915.png]]
 *40k iterations. left: ground truth - right: model prediction*
 
 Notice that the segmentation after 40k iterations is clearly better than the prediction after only 4k iterations.
@@ -253,28 +253,28 @@ inferencer(image_folder, out_dir='outputs', img_out_dir='vis', pred_out_dir='pre
 
 I opted for option (2) to generate predictions on the test set of images that I compiled from my hometown. I was pleasantly surprised to find that the trained segmentor makes sensible predictions in this unfamiliar setting, given that I devoted very little time to tuning the model. Let's go over a handful of predictions:
 
-![Pasted image 20240707215948](/assets/Pasted%20image%2020240707215948.png)
+![[Pasted image 20240707215948.png]]
 *The model managed to understand this complex scene quite accurately.*
 
-![Pasted image 20240707215926](/assets/Pasted%20image%2020240707215926.png)
+![[Pasted image 20240707215926.png]]
 *The model managed to understand this scene quite accurately*.
 
-![Pasted image 20240707220056](/assets/Pasted%20image%2020240707220056.png)
+![[Pasted image 20240707220056.png]]
 *The model managed to understand this scene quite accurately*.
 
-![Pasted image 20240707220127](/assets/Pasted%20image%2020240707220127.png)
+![[Pasted image 20240707220127.png]]
 *Notice how the model inaccurately predicts part of the bike lane as "sidewalk" and part of the sky as "buildings". The untidy aerial hanging wires in the sky do confuse the model, something that is not likely seen in many European cities.* 
 
-![Pasted image 20240707220337](/assets/Pasted%20image%2020240707220337.png)
+![[Pasted image 20240707220337.png]]
 *Accurate prediction. I'm particularly impressed by the precise detection of vegetation.*
 
-![Pasted image 20240707220402](/assets/Pasted%20image%2020240707220402.png)
+![[Pasted image 20240707220402.png]]
 *This instance is quite a failure. The road and sidewalk in front of "Teatro El Circulo" are partially classified as `building`, and the left side of the road is considered to be `sidewalk`. The materials, textures and colors of this scene are relatively uniform, which may play a role in misleading the model. Notice the ghost `person` predictions on the left, another funny artifact.*
 
-![13](/assets/13.png)
+![[13.png]]
 *The input image of the last prediction.*
 
-![Pasted image 20240707220714](/assets/Pasted%20image%2020240707220714.png)
+![[Pasted image 20240707220714.png]]
 *This prediction exemplifies the often puzzling back-box nature of neural networks. Overall, this scene is well segmented, except for the sky, which for some reason has been predicted as being `motorcycle` and `bicycle` classes. It is usually not possible to get an explanation from the trained model of what prompted it to make such far-fetched choices for the sky area.*
 ## Conclusion
 
@@ -286,8 +286,8 @@ Furthermore, I explained how to perform inference with a trained model and intro
 
 This post serves as an introduction to the concepts and framework utilized in my ongoing project, **semantic segmentation for underwater scenery**. Feel free to explore it further!
 
-![Pasted image 20240708041516](/assets/Pasted%20image%2020240708041516.png)
+![[Pasted image 20240708041516.png]]
 *Pictures I took during my diving trip in Rangiroa, French Polynesia*
 
-![Pasted image 20240708041540](/assets/Pasted%20image%2020240708041540.png)
+![[Pasted image 20240708041540.png]]
 *Segmentation mask of the underwater scenery dataset I developed*

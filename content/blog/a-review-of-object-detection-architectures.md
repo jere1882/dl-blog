@@ -16,11 +16,11 @@ After spending several days understanding the details of the popular YOLO family
 
 Let's start by defining **object detection** as a computer vision task where you try to predict bounding boxes containing objects within an input image, from a predefined set of interesting objects.
 
-![Pasted image 20240830215401](/assets/Pasted%20image%2020240830215401.png)
+![[Pasted image 20240830215401.png]]
 
 This is one of the most fundamental tasks in computer vision, one step up in complexity to image classification and one step down to image segmentation. Recent advances in deep learning have yielded extraordinarily accurate object detection models with countless practical applications.
 
-![Pasted image 20240830220153](/assets/Pasted%20image%2020240830220153.png)
+![[Pasted image 20240830220153.png]]
 
 In this post I will summarize and discuss the most important architectures for tackling object detection with deep learning.
 
@@ -67,12 +67,12 @@ Since the original release, YOLO has undergone several iterations, each bringing
 ### YOLO Step by Step
 
 1.  YOLO divides the input image into an `S×S` grid (for example, `7x7`). Each grid cell is responsible for detecting objects whose center falls inside the cell.
-				![Pasted image 20240928203437](/assets/Pasted%20image%2020240928203437.png)
+				![[Pasted image 20240928203437.png]]
 2. For each grid cell, YOLO predicts several bounding boxes (usually 2 to 5), along with a **confidence score** for each box. This confidence score reflects:
 	* How confident the model is that a box contains an object.
 	* How accurate the predicted bounding box is relative to the actual object’s position.
 
-![Pasted image 20240928203332](/assets/Pasted%20image%2020240928203332.png)
+![[Pasted image 20240928203332.png]]
 
 Each bounding box consists of five predictions:  
 	- x: x-coordinate of the center of the box (relative to the grid cell).
@@ -111,18 +111,18 @@ YOLO uses a **multi-part loss function** that includes terms for:
 
 The actual loss looks a little more daunting, but the base ideas I just shared stand:
 
-![Pasted image 20240928214054](/assets/Pasted%20image%2020240928214054.png)
+![[Pasted image 20240928214054.png]]
 Notes:
 * Non-max suppresion doesn't take part of the loss calculation, it's a post-processing step
 * Advanced version of YOLO keep being released every year
 
-![Pasted image 20240928220343](/assets/Pasted%20image%2020240928220343.png)
+![[Pasted image 20240928220343.png]]
 ## Misc
 
 ### Benchmarks
 The most popular benchmark is the [Microsoft COCO dataset](https://cocodataset.org/). 
 
-![Pasted image 20240830223641](/assets/Pasted%20image%2020240830223641.png)
+![[Pasted image 20240830223641.png]]
 The most popular benchmark datasets for object detection include:
 1. **COCO (Common Objects in Context)**: A widely used dataset that contains over 330,000 images with 80 object categories. It includes annotations for object detection, segmentation, and keypoint detection.
 2. **PASCAL VOC (Visual Object Classes)**: This dataset has been influential in object detection research, containing images from 20 object categories. The challenges associated with this dataset have been used to evaluate various detection algorithms since 2007.

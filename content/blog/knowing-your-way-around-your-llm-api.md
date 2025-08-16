@@ -4,10 +4,10 @@ tags:
   - LLM
 aliases: 
 publish: true
-slug: llm-api-guide
-title: Knowing Your Way Around Your LLM API
-description: A practical guide to effectively using LLM APIs like Gemini in production
-date: 2025-06-05
+slug: promt-engineering
+title: Prompt Engineering Notes
+description: Notes from my experience working with LLMs
+date: 2025-06-06
 image: /thumbnails/pick_architecure.jpeg
 ---
 LLMs are arguably one of the most powerful tool in a machine learning engineer's toolkit. When faced with requirements for an AI/ML solution, perhaps the first question an engineer needs to ask is whether a simple Gemini or Claude API request is enough to solve the problem.
@@ -74,7 +74,7 @@ While there may be some benefit in using them both, the increse in tuning comple
 
 
 I do not entirely agree with this flowchart, but I find it interesting at least as food for thought:
-![Pasted image 20250614232415](/assets/Pasted%20image%2020250614232415.png)
+![[Pasted image 20250614232415.png]]
 
 
 * response type (text, json, enum) 
