@@ -67,11 +67,23 @@ IMPORTANT: Respond ONLY with valid JSON. Do not include any other text, explanat
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting Gemini API analysis...")
+    console.log("=== EGYPTIAN AI LENS DEBUG ===")
+    console.log("Environment variables check:")
+    console.log("- GOOGLE_API_KEY exists:", !!process.env.GOOGLE_API_KEY)
+    console.log("- GEMINI_API_KEY exists:", !!process.env.GEMINI_API_KEY)
+    console.log("- NODE_ENV:", process.env.NODE_ENV)
+
     const formData = await request.formData()
     const image = formData.get("image") as File
     const speed = (formData.get("speed") as string) || "fast"
     const imageType = (formData.get("imageType") as string) || "unknown"
+
+    console.log(`Request received: speed=${speed}, imageType=${imageType}`)
+    console.log(
+      `Image: ${image ? "YES" : "NO"}, type: ${image?.type}, size: ${
+        image?.size
+      }`
+    )
 
     if (!image) {
       console.error("No image file provided")
