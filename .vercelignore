@@ -10,6 +10,16 @@ content/.obsidian/
 .env*.local
 .DS_Store
 
+# Exclude large local assets and local Python env from upload
+public/assets/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
 # Large development files
 .contentlayer/
 .next/cache/

@@ -72,3 +72,6 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Public assets synced with script
+public/assets/
