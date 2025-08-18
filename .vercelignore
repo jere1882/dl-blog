@@ -12,6 +12,10 @@ content/.obsidian/
 
 # Exclude large local assets and local Python env from upload
 public/assets/
+.*/public/assets/**
+public/sample-egyptian-images/
+public/driving.gif
+node_modules/
 .venv/
 venv/
 __pycache__/
