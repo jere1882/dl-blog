@@ -267,11 +267,10 @@ export function EgyptianAIAnalyzer({
         setProgress(currentProgress)
       }, 1000) // Update every 1 second (1% per second)
 
-      // Allow switching between local Python server and Next.js API
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE || ""
-      const endpoint = apiBase
-        ? `${apiBase}/analyze`
-        : "/api/egyptian-ai-lens/analyze"
+      // Use Python Vercel Function by default; allow override via NEXT_PUBLIC_API_BASE
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_BASE ?? "/api/egyptian_ai_lens"
+      const endpoint = `${apiBase}/analyze`
 
       console.log("Calling API endpoint:", endpoint)
 

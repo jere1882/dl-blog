@@ -1,7 +1,7 @@
 {
   "functions": {
-    "app/api/egyptian-ai-lens/analyze/route.ts": {
-      "maxDuration": 30
+    "api/**/*.py": {
+      "maxDuration": 60
     }
   },
   "build": {

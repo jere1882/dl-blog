@@ -8,14 +8,7 @@ from .gemini_strategy import analyze_egyptian_art_with_gemini
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            # Set CORS headers
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            
+            # Do not send headers yet; decide status after parsing
             # Parse multipart form data manually
             content_type = self.headers.get('Content-Type', '')
             if not content_type.startswith('multipart/form-data'):
@@ -109,13 +102,14 @@ class handler(BaseHTTPRequestHandler):
                     "interesting_detail": None,
                     "date": None
                 }
-                        
+                self._send_json_response(500, response_data)
+                return
         except Exception as e:
             print(f"Error processing request: {str(e)}")
             import traceback
             error_details = f"Server error: {str(e)}\n\nDebug trace:\n{traceback.format_exc()}"
             
-            response_data = {
+            self._send_json_response(500, {
                 "error": error_details,
                 "translation": None,
                 "characters": [],
@@ -123,16 +117,12 @@ class handler(BaseHTTPRequestHandler):
                 "processing_time": "Processing failed",
                 "interesting_detail": None,
                 "date": None
-            }
-        
-        try:
-            # Send JSON response
-            response_json = json.dumps(response_data, indent=2)
-            self.wfile.write(response_json.encode('utf-8'))
-            print("Response sent successfully!")
-            
-        except Exception as e:
-            print(f"Error sending response: {str(e)}")
+            })
+            return
+
+        # Success path
+        self._send_json_response(200, response_data)
+        print("Response sent successfully!")
     
     def do_OPTIONS(self):
         # Handle CORS preflight requests
@@ -146,11 +136,6 @@ class handler(BaseHTTPRequestHandler):
     def _send_error_response(self, message: str):
         """Helper method to send error responses"""
         try:
-            self.send_response(400)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            
             error_response = {
                 "error": f"Request processing failed: {message}",
                 "translation": None,
@@ -160,10 +145,18 @@ class handler(BaseHTTPRequestHandler):
                 "interesting_detail": None,
                 "date": None
             }
-            
-            response_json = json.dumps(error_response, indent=2)
-            self.wfile.write(response_json.encode('utf-8'))
+            self._send_json_response(400, error_response)
             print(f"Error response sent: {message}")
-            
         except Exception as e:
-            print(f"Error sending error response: {str(e)}") 
+            print(f"Error sending error response: {str(e)}")
+
+    def _send_json_response(self, status_code: int, data: dict):
+        """Helper to send a JSON response with CORS headers"""
+        self.send_response(status_code)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        response_json = json.dumps(data, indent=2)
+        self.wfile.write(response_json.encode('utf-8'))

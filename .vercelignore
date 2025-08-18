@@ -1,9 +1,14 @@
-# Python files (not needed for Node.js deployment)
-*.py
-requirements.txt
-api/
-.venv/
-__pycache__/
+# Allow Python API to be deployed
+# (Python ignore rules removed)
+
+# Keep other helpful ignores
+.contentlayer/
+.next/cache/
+node_modules/.cache/
+content/.obsidian/
+*.log
+.env*.local
+.DS_Store
 
 # Large development files
 .contentlayer/
