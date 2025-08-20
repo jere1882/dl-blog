@@ -35,4 +35,7 @@ public/assets/large-files/
 # Development and cache files
 *.log
 .env*.local
-.DS_Store 
+.DS_Store
+
+.next/cache/
+.next/cache/** 
