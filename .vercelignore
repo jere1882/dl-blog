@@ -1,19 +1,37 @@
-# Allow Python API to be deployed
-# (Python ignore rules removed)
+# Git history (this is huge!)
+.git/
+.gitignore
 
-# Keep other helpful ignores
-.contentlayer/
+# Node modules (Vercel installs these)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js cache and build artifacts
 .next/cache/
-node_modules/.cache/
-content/.obsidian/
+.next/cache/**
+.vercel/
+
+# Contentlayer generated files
+.contentlayer/
+
+# Development and cache files
 *.log
 .env*.local
 .DS_Store
+.env
 
-# Exclude large local assets and local Python env from upload
-public/assets/
-.*/public/assets/**
-node_modules/
+# Large development files
+node_modules/.cache/
+.obsidian/
+
+# Large assets that aren't needed
+content/.obsidian/
+public/assets/large-files/
+
+# Python files (if any)
 .venv/
 venv/
 __pycache__/
@@ -22,20 +40,6 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-# Large development files
-.contentlayer/
-.next/cache/
-node_modules/.cache/
-.obsidian/
-
-# Large assets that aren't needed
-content/.obsidian/
-public/assets/large-files/
-
-# Development and cache files
-*.log
-.env*.local
-.DS_Store
-
-.next/cache/
-.next/cache/** 
+# Exclude large local assets and local Python env from upload
+public/assets/
+.*/public/assets/** 
