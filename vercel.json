@@ -1,71 +1,12 @@
 {
   "functions": {
     "api/**/*.py": {
-      "maxDuration": 60
+      "maxDuration": 120
     }
   },
   "build": {
     "env": {
       "DISABLE_DB": "true"
     }
-  },
-  "includeFiles": [
-    "content/**/*",
-    "app/**/*",
-    "components/**/*",
-    "lib/**/*",
-    "config/**/*",
-    "styles/**/*",
-    "types/**/*",
-    "scripts/**/*",
-    "public/favicon.ico",
-    "public/favicon.svg",
-    "public/site.webmanifest",
-    "public/android-chrome-*.png",
-    "public/apple-touch-icon.png",
-    "public/robots.txt",
-    "public/sitemap.xml",
-    "public/opengraph-image.jpg",
-    "public/feed",
-    "public/thumbnail",
-    "public/posts",
-    "public/og",
-    "next.config.js",
-    "contentlayer.config.js",
-    "tailwind.config.cjs",
-    "postcss.config.js",
-    "tsconfig.json",
-    "package.json",
-    "pnpm-lock.yaml",
-    ".eslintrc.js",
-    "prettier.config.js",
-    ".lintstagedrc.js",
-    ".nvmrc",
-    ".editorconfig",
-    ".prettierignore",
-    "README.md",
-    "LICENSE.md",
-    "CONTRIBUTING.md"
-  ],
-  "excludeFiles": [
-    "node_modules/**/*",
-    ".next/**/*",
-    ".git/**/*",
-    ".vercel/**/*",
-    ".contentlayer/**/*",
-    "public/assets/**/*",
-    "public/sample-egyptian-images/**/*",
-    "public/driving.gif",
-    "content/.obsidian/**/*",
-    "*.log",
-    ".env*",
-    ".DS_Store",
-    "*.pyc",
-    "__pycache__/**/*",
-    ".pytest_cache/**/*",
-    ".mypy_cache/**/*",
-    ".ruff_cache/**/*",
-    ".venv/**/*",
-    "venv/**/*"
-  ]
+  }
 }
