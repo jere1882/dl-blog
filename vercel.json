@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/**/*.py": {
-      "maxDuration": 120
-    }
-  },
   "build": {
     "env": {
       "DISABLE_DB": "true"

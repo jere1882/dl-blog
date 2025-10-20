@@ -25,6 +25,7 @@ The argument made is that as of 2025, the latest versions of LLM models are so s
 While I tend to agree with this opinion, I do consider that a non-trivial degree of familiarity with good practices, tricks and techniques are still necessary for many applications that involve prompting an LLM. In other words, we are not yet at a stage where prompt engineering can be so easily disregarded. 
 
 Perhaps soon. At this point, gemini 2.5 shows dramatic improvements in accuracy for many of my projects when I iterate and refine my prompts, and it can be extremely sensitive to formatting and wording.
+
 ## Prompt design fundamentals
 
 Generative language models work like an advanced auto completion tool. When you provide partial content, the model can provide the rest of the content or what it thinks is a continuation of that content as a response. When doing so, if you include any examples or context, the model can take those examples or context into account.
@@ -132,7 +133,9 @@ This technique can be extremely powerful at preventing overconfident presentatio
 
 ### **Chain of Thought Prompts**
 
-CoT prompting encourages the model to break down complex reasoning into a series of intermediate steps, leading to a more comprehensive and well-structured final output
+Chain of Thought (CoT) prompting encourages the model to break down complex reasoning into a series of intermediate steps, resulting in more thorough and well-structured final outputs.
+
+A simple way to implement this is by having the LLM explicitly explain its reasoning in the response. For example, in a recent application using Gemini 2.5 with structured output, I added a `reasoning` field to the JSON. I forced the model to generate this field first, and instructed it to document its thought process step by step—breaking the problem into smaller, logical components before producing the final answer.
 
 ## Avoid imprecisiseness
 

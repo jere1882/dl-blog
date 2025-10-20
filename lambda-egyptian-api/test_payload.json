@@ -1,0 +1,4 @@
+{
+  "httpMethod": "POST",
+  "body": "{\"image\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\", \"speed\": \"fast\", \"imageType\": \"unknown\"}"
+}

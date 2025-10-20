@@ -5,7 +5,7 @@ import json
 import google.generativeai as genai
 import io
 import PIL.Image
-from .schemas import EgyptianArtAnalysis
+from schemas import EgyptianArtAnalysis
 import sys
 
 DEFAULT_THINKING_BUDGET = 2000
