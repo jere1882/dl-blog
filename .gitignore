@@ -75,3 +75,8 @@ __pycache__/
 
 # Public assets synced with script
 public/assets/
+
+# AWS Lambda environment files
+lambda-egyptian-api/.env
+lambda-egyptian-api/.env.local
+lambda-egyptian-api/env.local

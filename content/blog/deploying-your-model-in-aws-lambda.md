@@ -708,15 +708,15 @@ curl -X POST \
 
 Recap:
 
-|Component|Created By|Description|
-|---|---|---|
-|**ECR**|`aws ecr create-repository`|Stores your Docker image|
-|**Lambda**|`aws lambda create-function`|Runs the model inside the Docker image|
-|**IAM Role**|`aws iam create-role`|Gives Lambda permissions to log|
-|**API Gateway**|`aws apigateway create-rest-api`|Exposes Lambda via HTTP|
-|**API Key + Usage Plan**|`aws apigateway create-api-key`, `create-usage-plan`|Secures and throttles API|
-|**Stage**|`aws apigateway create-deployment`|Deploys API version|
-|**Test**|`curl`|Invokes the endpoint with a valid key|
+| Component                | Created By                                           | Description                            |
+| ------------------------ | ---------------------------------------------------- | -------------------------------------- |
+| **ECR**                  | `aws ecr create-repository`                          | Stores your Docker image               |
+| **Lambda**               | `aws lambda create-function`                         | Runs the model inside the Docker image |
+| **IAM Role**             | `aws iam create-role`                                | Gives Lambda permissions to log        |
+| **API Gateway**          | `aws apigateway create-rest-api`                     | Exposes Lambda via HTTP                |
+| **API Key + Usage Plan** | `aws apigateway create-api-key`, `create-usage-plan` | Secures and throttles API              |
+| **Stage**                | `aws apigateway create-deployment`                   | Deploys API version                    |
+| **Test**                 | `curl`                                               | Invokes the endpoint with a valid key  |
 ## Step 7 - How to invoke the lambda from client code
 
 ### What are CORS?
@@ -803,26 +803,14 @@ Secrets:
 
 This setup leaves the lambda API url and API key accessible to anyone if they look for it. Therefore, we rely on usage limits for the API key, and we'll update the CORS config so that only requests from the domain jeremiasrodriguez.com are allowed.
 
-
-
-
 ## AWS Lambda Monitoring
 
-if browser => read the chat, u need to allow cross-domain requests and support OPTION method
+# Gemini Monitoring
+https://aistudio.google.com/u/0/usage
 
-security is super often and handled only by usage plan - document that clearly and that it's a sensible decision
+# MFA
 
-then document monitoring tools
-them check the diff and deploy
-
-we're ALMOST there dude
-
-
-
-Suggested:
-* Set up MFA (Multi Factor Authentication)
-
-### Budget
+# Budget
 
 * Set up a budget alarm
 	- Login as root user - Go to **Billing and Cost Management > Budgets**.
@@ -832,13 +820,10 @@ Suggested:
 ![[Pasted image 20250921104302.png]]
 ###  Monitoring
 
-gemini side: https://aistudio.google.com/u/0/usage?timeRange=last-hour&project=gen-lang-client-0106468159
+gemini side: 
 aws: document
 
-
-
-
-FAQs:
+# FAQs:
 * Recap: Gateway API, HTTP
 * Roles vs Users:
 
@@ -849,6 +834,7 @@ FAQs:
 | Example use                | You using CLI                  | Lambda reading from S3, EC2 accessing S3 |
 | Assigned to                | Person/app                     | Service (Lambda, EC2, etc.)              |
 |                            |                                |                                          |
+# ECR
 
 * **Amazon Elastic Container Registry (ECR)** is AWS’s **fully-managed Docker container registry**. Think of it like Docker Hub, but hosted on AWS and integrated with Lambda, ECS, and Fargate.
 	* - You **push your Docker images** (your Lambda packaged as a container) to ECR.
