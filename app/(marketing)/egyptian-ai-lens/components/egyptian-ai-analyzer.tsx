@@ -102,6 +102,21 @@ export function EgyptianAIAnalyzer({
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [selectedSample, setSelectedSample] = useState<string | null>(null)
 
+  // Helper function to convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        const result = reader.result as string
+        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64 = result.split(",")[1]
+        resolve(base64)
+      }
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
   // Sample images for demo
   const sampleImages = [
     {
@@ -240,12 +255,6 @@ export function EgyptianAIAnalyzer({
 
       if (!fileToUpload) return
 
-      // Upload image
-      const formData = new FormData()
-      formData.append("image", fileToUpload)
-      formData.append("speed", speed)
-      formData.append("imageType", imageType)
-
       setProgress(30)
       setState("analyzing")
 
@@ -267,16 +276,42 @@ export function EgyptianAIAnalyzer({
         setProgress(currentProgress)
       }, 1000) // Update every 1 second (1% per second)
 
-      // Use Python Vercel Function by default; allow override via NEXT_PUBLIC_API_BASE
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_BASE ?? "/api/egyptian_ai_lens"
-      const endpoint = `${apiBase}/analyze`
+      // AWS Lambda API expects JSON with base64 image
+      const imageBase64 = await fileToBase64(fileToUpload)
 
-      console.log("Calling API endpoint:", endpoint)
+      const lambdaUrl = process.env.NEXT_PUBLIC_LAMBDA_API_URL
 
-      const response = await fetch(endpoint, {
+      if (!lambdaUrl) {
+        throw new Error(
+          "Lambda API URL not configured. Please contact the administrator."
+        )
+      }
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY
+
+      if (!apiKey) {
+        throw new Error(
+          "API key not configured. Please contact the administrator."
+        )
+      }
+
+      console.log("Environment check:", {
+        lambdaUrl: process.env.NEXT_PUBLIC_LAMBDA_API_URL ? "SET" : "NOT SET",
+        apiKey: process.env.NEXT_PUBLIC_API_KEY ? "SET" : "NOT SET",
+      })
+
+      console.log("Calling AWS Lambda API:", lambdaUrl)
+
+      const response = await fetch(lambdaUrl, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          image: imageBase64,
+          speed: speed,
+          imageType: imageType,
+        }),
       })
 
       // Stop progress simulation and complete
