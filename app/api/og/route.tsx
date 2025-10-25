@@ -5,10 +5,6 @@ import { ogImageSchema } from "@/lib/validations/og"
 
 export const runtime = "edge"
 
-const interBold = fetch(
-  new URL("../../../assets/fonts/Inter-Bold.ttf", import.meta.url)
-).then((res) => res.arrayBuffer())
-
 function PlainLogo({ size }) {
   const viewBoxSize = 136.51
   const scaleFactor = size / viewBoxSize
@@ -86,7 +82,9 @@ function PlainLogo({ size }) {
 
 export async function GET(req: Request) {
   try {
-    const fontBold = await interBold
+    const fontBold = await fetch(
+      new URL("/fonts/Inter-Bold.ttf", req.url)
+    ).then((res) => res.arrayBuffer())
 
     const url = new URL(req.url)
     const values = ogImageSchema.parse(Object.fromEntries(url.searchParams))

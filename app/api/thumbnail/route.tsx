@@ -7,13 +7,11 @@ import { thumbnailImageSchema } from "@/lib/validations/thumbnail"
 
 export const runtime = "edge"
 
-const interBold = fetch(
-  new URL("../../../assets/fonts/OpenSans-ExtraBold.ttf", import.meta.url)
-).then((res) => res.arrayBuffer())
-
 export async function GET(req: Request) {
   try {
-    const fontBold = await interBold
+    const fontBold = await fetch(
+      new URL("/fonts/OpenSans-ExtraBold.ttf", req.url)
+    ).then((res) => res.arrayBuffer())
 
     const url = new URL(req.url)
 
