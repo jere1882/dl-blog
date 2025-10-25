@@ -32,9 +32,10 @@ content/assets/
 public/assets/
 public/sample-egyptian-images/
 public/driving.gif
-assets/
 
-# Allow required fonts inside assets for build/runtime
+# Ignore large assets by default, but allow fonts
+!assets/
+assets/*
 !assets/fonts/
 !assets/fonts/**
 
