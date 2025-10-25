@@ -31,7 +31,6 @@ content/.obsidian/
 content/assets/
 public/assets/
 public/sample-egyptian-images/
-public/driving.gif
 
 # Ignore large assets by default, but allow fonts
 !assets/
