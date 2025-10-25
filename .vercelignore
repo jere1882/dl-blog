@@ -34,6 +34,10 @@ public/sample-egyptian-images/
 public/driving.gif
 assets/
 
+# Allow required fonts inside assets for build/runtime
+!assets/fonts/
+!assets/fonts/**
+
 # Python virtual environments and cache (exclude everything)
 .venv/
 .venv/**
