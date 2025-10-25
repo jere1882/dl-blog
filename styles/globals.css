@@ -41,11 +41,11 @@
   }
 
   .dark {
-    --background: 216, 86%, 3%;
+    --background: 216 86% 3%;
     --foreground: 213 31% 91%;
 
     --muted: 223 47% 11%;
-    --muted-foreground: 217, 21%, 76%;
+    --muted-foreground: 217 21% 76%;
 
     --accent: 216 34% 17%;
     --accent-foreground: 210 40% 98%;
@@ -55,6 +55,9 @@
 
     --border: 216 34% 17%;
     --input: 216 34% 17%;
+
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
 
     --primary: 00 91 140;
     --primary-foreground: 210 40% 98%;
