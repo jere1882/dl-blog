@@ -26,13 +26,12 @@ yarn-error.log*
 node_modules/.cache/
 .obsidian/
 
-# Large assets that aren't needed
+# Obsidian-synced assets (not used in deployed site)
 content/.obsidian/
 content/assets/
 public/assets/
-public/sample-egyptian-images/
 
-# Ignore large assets by default, but allow fonts
+# Keep source assets out, but include fonts needed at build time
 !assets/
 assets/*
 !assets/fonts/
