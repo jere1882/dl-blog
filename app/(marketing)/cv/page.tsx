@@ -188,7 +188,7 @@ export default function CVPage() {
                 <div className="flex items-start space-x-3">
                   <span className="text-lg">☕</span>
                   <p>
-                    I deeply enjoy working from coffee shops, somehow ambient
+                    I deeply enjoy working from coffee shops; somehow, ambient
                     noise helps me focus in ways that no fancy office desk can
                     match.
                   </p>
@@ -268,9 +268,9 @@ export default function CVPage() {
                 <div>
                   <h3 className="mb-2 font-semibold">Software Engineering</h3>
                   <p>
-                    Extensive experience in object oriented programming,
+                    Extensive experience in object-oriented programming,
                     particularly in robotics. 6+ years coding in C++ on Linux.
-                    Very familiar with design patterns, unit testing and good
+                    Very familiar with design patterns, unit testing, and good
                     code practices. Go, Python.
                   </p>
                 </div>
@@ -353,8 +353,8 @@ export default function CVPage() {
                     Magnitudes from Galaxy Images
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Fine tuning AstroCLIP foundation model. Paris workshop on
-                    Bayesian Deep Learning for Cosmology and Time Domain
+                    Fine-tuning the AstroCLIP foundation model. Paris workshop
+                    on Bayesian Deep Learning for Cosmology and Time Domain
                     Astrophysics. Rodriguez, Dominguez. 2025
                   </p>
                 </div>

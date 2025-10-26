@@ -3,7 +3,6 @@ import Link from "next/link"
 import { Post } from "@/.contentlayer/generated"
 
 import { formatDate } from "@/lib/utils"
-import { PostViews } from "@/components/post-views"
 
 import { Badge } from "./ui/badge"
 
@@ -37,10 +36,11 @@ export function PostCard({
       {post.description && (
         <p className="line-clamp-3 text-muted-foreground">{post.description}</p>
       )}
-      <div className="flex space-x-4 text-sm text-muted-foreground">
-        {post.date && <p className="text-sm">{formatDate(post.date)}</p>}
-        <PostViews slug={post.slug} />
-      </div>
+      {post.date && (
+        <div className="text-sm text-muted-foreground">
+          <p className="text-sm">{formatDate(post.date)}</p>
+        </div>
+      )}
       <Link href={post.routepath} className="absolute inset-0">
         <span className="sr-only">View Article</span>
       </Link>

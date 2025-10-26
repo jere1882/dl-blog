@@ -1,41 +1,56 @@
-import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { allPosts, allTags, Tag } from "contentlayer/generated"
+import { allPosts, allTags } from "contentlayer/generated"
 import { compareDesc } from "date-fns"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import BlogPostList from "@/components/blog-post-list"
-import { GitHubStars } from "@/components/github-stars"
 import { getTagsItems, TagGroup } from "@/components/tag-group"
 import { TechCard } from "@/components/tech-card"
 
-const TECHNOLOGIES = [
-  "computer-vision",
-  "view-synthesis",
-  "foundation-models",
-  "egyptian-ai-lens",
+// Spotlight projects with full details
+const SPOTLIGHT_PROJECTS = [
+  {
+    name: "Semantic Segmentation of Underwater Scenery",
+    description:
+      "Application of Vision Transformer and other architectures to semantic segmentation in underwater imagery.",
+    link: "/blog/semantic-segmentation-of-underwater-scenery",
+    tags: ["Computer Vision", "PyTorch"],
+  },
+  {
+    name: "Document Hyper Resolution",
+    description:
+      "High-resolution document enhancement using deep learning to improve readability and preserve details.",
+    link: "#", // TBD
+    tags: ["Computer Vision", "PyTorch", "AWS EC2"],
+  },
+  {
+    name: "View Synthesis: Indoor Scene Reconstruction",
+    description:
+      "Training Neural Radiance Field models on indoor images for realistic 3D scene reconstruction.",
+    link: "/blog/indoor-nerf-reconstruction",
+    tags: ["NeRF"],
+  },
+  {
+    name: "Foundation Models for Astronomy",
+    description:
+      "Fine-tuning the AstroCLIP foundation model for galaxy k-correction estimation with image and spectral data.",
+    link: "/blog/k-correction-via-foundation-model",
+    tags: ["PyTorch", "Multimodal", "Foundation Models"],
+  },
+  {
+    name: "Egyptian AI Lens",
+    description:
+      "AI-powered analysis of ancient Egyptian art using Google's Gemini to identify characters and translate hieroglyphs.",
+    link: "/egyptian-ai-lens",
+    tags: ["LLM", "Gemini", "AWS Lambda"],
+  },
 ]
-
-const TECHNOLOGY_POSTS = {
-  "computer-vision": "semantic-segmentation-of-underwater-scenery",
-  "view-synthesis": "indoor-nerf-reconstruction",
-  "foundation-models": "k-correction-via-foundation-model",
-  "egyptian-ai-lens": "egyptian-ai-lens", // Points to the project page
-}
 
 export default async function IndexPage() {
   const tagsItems = await getTagsItems(allTags)
-
-  const technologiesTags = TECHNOLOGIES.map((value) => {
-    const tag = allTags.find((obj) => obj.slug === value)
-    return {
-      ...tag,
-      postSlug: TECHNOLOGY_POSTS[value],
-    }
-  }) as Tag[]
 
   const posts = allPosts
     .filter((post) => post.publish)
@@ -68,6 +83,14 @@ export default async function IndexPage() {
             >
               Github
             </Link>
+            <Link
+              href="https://www.linkedin.com/in/jere-rodriguez/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
+            >
+              LinkedIn
+            </Link>
           </div>
         </div>
         <div className="size-36 relative mx-16 flex shrink-0 overflow-hidden rounded-full bg-gradient-to-b from-primary to-blue-200 shadow-lg ring-4 ring-primary/80">
@@ -93,23 +116,16 @@ export default async function IndexPage() {
             {"Selected projects from my main areas of interest."}
           </p>
         </div>
-        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-6xl md:grid-cols-2 lg:grid-cols-4">
-          {technologiesTags.map((tag) => {
-            // Special handling for Egyptian AI Lens to link to project page
-            const link =
-              tag.slug === "egyptian-ai-lens"
-                ? "/egyptian-ai-lens"
-                : `/blog/${tag.postSlug}`
-
-            return (
-              <TechCard
-                key={tag.slug}
-                name={tag.title}
-                description={tag.description || ""}
-                link={link}
-              />
-            )
-          })}
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[90rem] lg:grid-cols-3 xl:grid-cols-5">
+          {SPOTLIGHT_PROJECTS.map((project) => (
+            <TechCard
+              key={project.name}
+              name={project.name}
+              description={project.description}
+              link={project.link}
+              tags={project.tags}
+            />
+          ))}
         </div>
       </section>
       <hr className="container" />
@@ -129,57 +145,6 @@ export default async function IndexPage() {
             </Link>
           </div>
         )}
-      </section>
-      <hr className="container" />
-      <section className="space-6 container py-8 md:max-w-4xl md:py-12 lg:py-24">
-        <div className="flex w-full flex-col items-center justify-center gap-6 text-center">
-          <h2 className="text-2xl font-bold leading-[1.1] tracking-tighter sm:text-2xl md:text-5xl">
-            Open Source
-          </h2>
-          <p className="max-w-[85%] leading-normal text-muted-foreground  sm:text-lg sm:leading-7">
-            This website is open source and powered by open source software. It
-            is entirely inspired by the blog of Francisco Moretti, check the
-            code at{" "}
-            <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-4"
-            >
-              GitHub
-            </Link>
-            . Start here and create your own site.
-          </p>
-          <Link
-            href={siteConfig.links.github}
-            target="_blank"
-            rel="noreferrer"
-            className="flex"
-          >
-            <div className="size-10 flex items-center justify-center space-x-2 rounded-md border border-muted bg-muted">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                className="size-5 text-foreground"
-              >
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
-              </svg>
-            </div>
-            <div className="flex items-center">
-              <div className="size-4 border-y-8 border-l-0 border-r-8 border-solid border-muted border-y-transparent"></div>
-              <div className="flex h-10 items-center gap-2 rounded-md border border-muted bg-muted px-4 font-medium">
-                <div title="stars" className="w-4">
-                  <Suspense fallback={<>{"..."}</>}>
-                    {" "}
-                    <GitHubStars />
-                  </Suspense>
-                </div>
-                <p>{" stars on GitHub"}</p>
-              </div>
-            </div>
-          </Link>
-        </div>
       </section>
       <hr className="container" />
       <section className="container space-y-8 py-8 md:max-w-4xl md:py-12 lg:py-16">

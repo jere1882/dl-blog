@@ -9,7 +9,6 @@ import { routepathToSlug } from "@/lib/path"
 import { absoluteUrl, cn, formatDate } from "@/lib/utils"
 import { Icons } from "@/components/icons"
 import { Mdx } from "@/components/mdx"
-import { PostViews } from "@/components/post-views"
 import { upsertPost } from "@/app/(marketing)/actions"
 
 import "@/styles/mdx.css"
@@ -134,14 +133,13 @@ export default async function PostPage({ params }: PostPageProps) {
         See all posts
       </Link>
       <div>
-        <div className="flex space-x-4 text-sm text-muted-foreground">
-          {post.date && (
+        {post.date && (
+          <div className="flex space-x-4 text-sm text-muted-foreground">
             <time dateTime={post.date} className="block">
               Published on {formatDate(post.date)}
             </time>
-          )}
-          <PostViews slug={post.slug} />
-        </div>
+          </div>
+        )}
         <h1 className="mt-2 inline-block text-4xl font-extrabold leading-tight lg:text-5xl">
           {post.title}
         </h1>
