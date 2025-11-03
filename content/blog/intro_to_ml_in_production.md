@@ -5,7 +5,7 @@ tags:
   - Basics
 aliases: 
 publish: true
-slug: mlops-intro
+slug: intro_to_ml_in_production
 title: Review and Summary of the course "Introduction to Machine Learning in Production"
 description: Notes, assignments and review of the course
 date: 2024-07-09

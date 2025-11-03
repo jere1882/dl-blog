@@ -4,7 +4,7 @@ tags:
   - Vision
 aliases: 
 publish: false
-slug: mlops notes
+slug: mlops-notes
 title: Notes on MLOps
 description: Assorted notes and takeaways
 date: 2024-11-26

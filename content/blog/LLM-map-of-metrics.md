@@ -4,7 +4,7 @@ tags:
   - LLM
 aliases: 
 publish: false
-slug: llm-metrics
+slug: llm-map-of-metrics
 title: Metrics used in LLM tasks
 description: A comprehensive summary of metrics used in LLM-Related tasks
 date: 2025-06-06

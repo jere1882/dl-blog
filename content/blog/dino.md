@@ -3,7 +3,7 @@ tags:
   - Foundational-models
 aliases: 
 publish: true
-slug: dino-self-distillation-with-no-labels
+slug: dino
 title: DINO - self-distillation with no labels
 description: Let's go over the paper "Emerging Properties in Self-Supervised Vision Transformers"
 date: 2024-10-27

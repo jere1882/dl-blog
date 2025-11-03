@@ -4,7 +4,7 @@ tags:
   - Vision
 aliases: 
 publish: false
-slug: python-notes
+slug: hydra
 title: python-notes
 description: notes on Python
 date: 2024-11-26

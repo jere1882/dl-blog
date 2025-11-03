@@ -4,7 +4,7 @@ tags:
   - LLM
 aliases: 
 publish: true
-slug: promt-engineering
+slug: prompt-engineering
 title: Prompt Engineering Notes
 description: Notes from my experience working with LLMs
 date: 2025-06-06

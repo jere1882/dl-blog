@@ -52,23 +52,23 @@ const CustomLink = (className, props) => {
 }
 
 const components = {
-  h1: ({ className, ...props }) => (
-    <h1 className={cn(FORMAT_H1, className)} {...props} />
+  h1: ({ className, id, ...props }) => (
+    <h1 id={id} className={cn(FORMAT_H1, className)} {...props} />
   ),
-  h2: ({ className, ...props }) => (
-    <h2 className={cn(FORMAT_H2, className)} {...props} />
+  h2: ({ className, id, ...props }) => (
+    <h2 id={id} className={cn(FORMAT_H2, className)} {...props} />
   ),
-  h3: ({ className, ...props }) => (
-    <h3 className={cn(FORMAT_H3, className)} {...props} />
+  h3: ({ className, id, ...props }) => (
+    <h3 id={id} className={cn(FORMAT_H3, className)} {...props} />
   ),
-  h4: ({ className, ...props }) => (
-    <h4 className={cn(FORMAT_H4, className)} {...props} />
+  h4: ({ className, id, ...props }) => (
+    <h4 id={id} className={cn(FORMAT_H4, className)} {...props} />
   ),
-  h5: ({ className, ...props }) => (
-    <h5 className={cn(FORMAT_H5, className)} {...props} />
+  h5: ({ className, id, ...props }) => (
+    <h5 id={id} className={cn(FORMAT_H5, className)} {...props} />
   ),
-  h6: ({ className, ...props }) => (
-    <h6 className={cn(FORMAT_H6, className)} {...props} />
+  h6: ({ className, id, ...props }) => (
+    <h6 id={id} className={cn(FORMAT_H6, className)} {...props} />
   ),
   a: ({ className, ...props }) => CustomLink(className, props),
   p: ({ className, ...props }) => (

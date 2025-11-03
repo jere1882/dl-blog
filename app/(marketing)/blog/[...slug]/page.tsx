@@ -1,3 +1,4 @@
+import { existsSync, readdirSync, readFileSync } from "fs"
 import path from "path"
 import { Metadata } from "next"
 import Image from "next/image"
@@ -6,14 +7,15 @@ import { notFound } from "next/navigation"
 import { allAuthors, allPosts } from "contentlayer/generated"
 
 import { routepathToSlug } from "@/lib/path"
+import { getTableOfContents, TableOfContents } from "@/lib/toc"
 import { absoluteUrl, cn, formatDate } from "@/lib/utils"
+import { BlogTableOfContents } from "@/components/blog-toc"
 import { Icons } from "@/components/icons"
 import { Mdx } from "@/components/mdx"
 import { upsertPost } from "@/app/(marketing)/actions"
 
 import "@/styles/mdx.css"
 
-import { downloadImage } from "@/lib/image-downloader"
 import { buttonVariants } from "@/components/ui/button"
 
 export const revalidate = 60
@@ -99,9 +101,6 @@ export async function generateStaticParams(): Promise<
     await Promise.all(promises).catch((error) => {
       console.log("Error:", error)
     })
-
-    const projectFolderPath = path.join(process.cwd(), "public", "thumbnails")
-    const url = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002"
   }
 
   return allPosts.map((post) => ({
@@ -119,6 +118,65 @@ export default async function PostPage({ params }: PostPageProps) {
   const authors = post.authors.map((author) =>
     allAuthors.find(({ routepath }) => routepath === `/authors/${author}`)
   )
+
+  // Read the raw markdown file to generate TOC
+  let toc: TableOfContents | null = null
+  try {
+    const contentDir = path.join(process.cwd(), "content")
+    const blogDir = path.join(contentDir, "blog")
+    let filePath: string | undefined
+
+    // Search for file by matching slug in frontmatter (most reliable method)
+    if (existsSync(blogDir)) {
+      const files = readdirSync(blogDir).filter(
+        (f: string) => f.endsWith(".md") || f.endsWith(".mdx")
+      )
+
+      // Try to find file by reading frontmatter and matching slug
+      for (const file of files) {
+        try {
+          const fullPath = path.join(blogDir, file)
+          const content = readFileSync(fullPath, "utf-8")
+          const frontmatterMatch = content.match(/^slug:\s*(.+)$/m)
+          if (frontmatterMatch && frontmatterMatch[1].trim() === post.slug) {
+            filePath = fullPath
+            break
+          }
+        } catch {
+          continue
+        }
+      }
+    }
+
+    if (!filePath) {
+      console.error(
+        `TOC: Could not find markdown file for post with slug: ${post.slug}`
+      )
+    } else {
+      const rawContent = readFileSync(filePath, "utf-8")
+      // Remove frontmatter for TOC generation
+      const contentWithoutFrontmatter = rawContent.replace(
+        /^---\n[\s\S]*?\n---\n/,
+        ""
+      )
+      toc = await getTableOfContents(contentWithoutFrontmatter)
+      // Debug: log TOC generation result
+      if (!toc || !toc.items || toc.items.length === 0) {
+        console.log(
+          `TOC: No items found for post ${post.slug} (file: ${path.basename(
+            filePath
+          )})`
+        )
+      } else {
+        console.log(
+          `TOC: Found ${toc.items.length} top-level items for post ${post.slug}`
+        )
+      }
+    }
+  } catch (error) {
+    console.error(`TOC: Error generating TOC for post ${post.slug}:`, error)
+    // TOC is optional, continue without it
+  }
 
   return (
     <article className="container relative max-w-3xl py-6 lg:py-10">
@@ -182,6 +240,11 @@ export default async function PostPage({ params }: PostPageProps) {
         />
       )}
       <hr className="my-4" />
+      {toc && (
+        <div className="my-8">
+          <BlogTableOfContents toc={toc} />
+        </div>
+      )}
       <Mdx code={post.body.code} />
       <hr className="my-4" />
       <div className="flex justify-center py-6 lg:py-10">

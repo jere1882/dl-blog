@@ -153,7 +153,7 @@ export default function EgyptianAILensPage() {
                   📚 Read Technical Blog Post
                 </a>
                 <a
-                  href="https://github.com/jeremias-rodriguez/dl-blog"
+                  href="https://github.com/jere1882/egyptianArtAnalyzer"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/80"

@@ -4,7 +4,7 @@ tags:
   - Vision
 aliases: 
 publish: true
-slug: k-correction-via-foundation-model
+slug: galaxy-k-correction-estimation-using-astroclip-foundation-model
 title: Galaxy k-correction Estimation using AstroCLIP Foundation Model
 description: Fine tune an astronomical foundation model to tackle a novel task
 date: 2024-11-12

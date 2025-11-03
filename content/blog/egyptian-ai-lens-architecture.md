@@ -1,11 +1,11 @@
 ---
 tag: Machine Learning
-aliases: 
+aliases:
 publish: true
 slug: egyptian-ai-lens-architecture
 title: "Egyptian AI Lens: Architecture and Design of an LLM-Powered Art Analysis System"
 description: Deep dive into the technical architecture, design decisions, and implementation details of the Egyptian AI Lens project, featuring Gemini API integration, structured outputs, and serverless deployment.
-date: 2024-12-15
+date: 2024-10-19
 image: /sample-egyptian-images/VoK.jpg
 ---
 
@@ -13,7 +13,7 @@ image: /sample-egyptian-images/VoK.jpg
 
 The **Egyptian AI Lens** is a web application that leverages Google's Gemini vision model to analyze ancient Egyptian art. Users can upload images of tomb paintings, temple reliefs, or hieroglyphic inscriptions to receive detailed analysis including character identification, historical context, and location insights.
 
-This blog post provides a comprehensive technical overview of the system's architecture, design decisions, and implementation details. From frontend-backend separation to advanced prompt engineering with structured outputs, we'll explore how modern LLM APIs can be effectively integrated into production web applications.
+This blog post provides a technical overview of the system's architecture, design decisions, and implementation details. From frontend-backend separation to advanced prompt engineering with structured outputs, we'll explore how modern LLM APIs can be swiftly integrated into production web applications. 
 
 > 🏺 **Try it live**: [Egyptian AI Lens](https://www.jeremias-rodriguez.com/egyptian-ai-lens)
 
@@ -23,9 +23,9 @@ The Egyptian AI Lens follows a clean **frontend-backend separation** architectur
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Next.js       │    │   Vercel         │    │   Google        │
-│   Frontend      │◄──►│   Python         │◄──►│   Gemini API    │
-│   (TypeScript)  │    │   Serverless     │    │   (Vision)      │
+│   Next.js       │    │   AWS Lambda     │    │   Google        │
+│   Frontend      │◄──►│   + API Gateway  │◄──►│   Gemini API    │
+│   (TypeScript)  │    │   (Python/Docker)│    │   (Vision)      │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
@@ -39,20 +39,20 @@ The frontend is built using **Next.js 14** with TypeScript, providing:
 - **Real-time progress tracking** during analysis
 - **Dark/light mode compatibility**
 
-Key frontend features include:
-- **Sample image gallery** with vacation photos from Egypt
-- **Customizable analysis settings** (model speed, image type hints)
-- **Structured result display** with detailed character information
-- **Error handling** with comprehensive debugging information
+Frontend has never been amongst my interests, and I do admit that the interface is as simple as possible while being functional. I am aware that there are security flaws.
 
-### Backend: Python on Vercel Serverless
+### Backend: AWS Lambda with Docker
 
-The backend runs as a **Vercel Python serverless function**, offering:
+The backend runs as a **Dockerized AWS Lambda function** with API Gateway integration, providing:
 
-- **Zero-cost hosting** for low-traffic personal projects
-- **Automatic scaling** based on demand
-- **Fast cold start times** (~500ms)
-- **Integrated deployment** with the frontend
+- **Scalable serverless infrastructure** with automatic scaling
+- **Docker container deployment** for consistent runtime environment
+- **API Gateway integration** with request throttling and API key authentication
+- **CloudWatch monitoring** for logging and performance tracking
+- **Configurable memory and timeout** (currently 512MB, 30s timeout)
+- **CORS support** for browser-based requests from the Next.js frontend
+
+Below are more details as to why I chose these specific deployment and model options.
 
 ## Deep Dive: Gemini API Integration
 
@@ -101,7 +101,7 @@ This **contextual prompting** significantly improves accuracy by:
 
 ### Structured Output Implementation
 
-A critical innovation in this project is the use of **Pydantic schemas** to constrain Gemini's responses:
+A critical piece in this project is the use of **[parameter schemas](/blog/llm-engineering-2025#structured-output-in-python)** to constrain Gemini's responses. In my current company, which uses Gemini at scale, I reduced the operational error rate from 4% to under 0.5% by adopting structured output via input schema. It strongly constrains the model to respond in the appropriate model.
 
 ```python
 from pydantic import BaseModel
@@ -154,94 +154,73 @@ This handles:
 
 ## Hosting and Deployment
 
-### Current Architecture: Vercel Integration
+### Current Architecture: AWS Lambda with API Gateway
 
-The current deployment leverages **Vercel's integrated Python support**:
+The current deployment leverages **AWS Lambda** with Docker containerization and **API Gateway** for request routing:
 
-**Advantages:**
-- **Zero configuration** deployment from Git
-- **Automatic HTTPS** and CDN distribution
-- **Built-in monitoring** and analytics
-- **Free tier** suitable for personal projects
-- **Seamless frontend-backend integration**
+**Architecture Components:**
 
-**Local Development Setup:**
+1. **Frontend (Vercel)**: Next.js static site hosted on Vercel
+2. **API Gateway**: AWS API Gateway handles CORS, request throttling, and API key authentication
+3. **Lambda Function**: Dockerized Python application running in AWS Lambda
+4. **Google Gemini API**: External AI service for image analysis
+
+**Deployment Process:**
+
+The Lambda function is deployed using a Docker container:
+
 ```bash
-# Frontend and API routes
-npm run dev
+# Build and push Docker image to ECR
+docker build -t egyptian-art-analyzer .
+docker tag egyptian-art-analyzer:latest <ecr-repo>:latest
+docker push <ecr-repo>:latest
 
-# Python functions work automatically
-# No separate backend server needed
+# Create/update Lambda function with container image
+aws lambda create-function \
+  --function-name egyptianArtAnalyzer \
+  --package-type Image \
+  --code ImageUri=<ecr-repo>:latest \
+  --role <execution-role>
 ```
 
-### Performance Characteristics
+**Advantages of AWS Lambda Architecture:**
+
+1. **Better Performance Control**:
+   - **Configurable memory/CPU** allocation (512MB configured)
+   - **Docker containerization** for consistent runtime environment
+   - **Longer timeout limits** (30 seconds) for complex analysis
+
+2. **Advanced Monitoring**:
+   - **CloudWatch Logs** for detailed debugging and request tracing
+   - **CloudWatch Metrics** for performance monitoring
+   - **Error tracking** and alerting capabilities
+
+3. **Security Features**:
+   - **API Gateway API keys** for request authentication
+   - **Usage plans** for rate limiting and quota management
+   - **Environment variables** for secure API key storage
+   - **CORS configuration** for browser security
+
+4. **Scalability**:
+   - **Automatic scaling** based on concurrent requests
+   - **Pay-per-request** pricing model
+   - **No infrastructure management** required
+
+**Performance Characteristics:**
 
 Current system performance metrics:
 
-| Model Speed | Avg Response Time | Cold Start | Cost per Request |
-|-------------|-------------------|------------|------------------|
-| Regular     | 15-30s           | +500ms     | ~$0.02          |
-| Fast        | 5-10s            | +500ms     | ~$0.008         |  
-| Super Fast  | 2-5s             | +500ms     | ~$0.003         |
+| Model Speed | Avg Response Time | Lambda Cold Start | Cost per Request |
+|-------------|-------------------|-------------------|------------------|
+| Regular     | 15-30s           | ~2-3s            | ~$0.02          |
+| Fast        | 5-10s            | ~2-3s            | ~$0.008         |  
+| Super Fast  | 2-5s             | ~2-3s            | ~$0.003         |
 
-## Next Steps: Migration to AWS Lambda
+**Environment Configuration:**
 
-While Vercel provides excellent developer experience for prototyping, **AWS Lambda** offers advantages for production scaling:
-
-### Proposed AWS Architecture
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Vercel        │    │   AWS Lambda     │    │   Google        │
-│   Frontend      │◄──►│   Python         │◄──►│   Gemini API    │
-│   (Static)      │    │   + API Gateway  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-### Benefits of AWS Lambda Migration
-
-1. **Better Performance Control**:
-   - **Configurable memory/CPU** allocation  
-   - **Provisioned concurrency** to eliminate cold starts
-   - **VPC integration** for enhanced security
-
-2. **Advanced Monitoring**:
-   - **CloudWatch Logs** for detailed debugging
-   - **X-Ray tracing** for performance analysis
-   - **Custom metrics** and alerting
-
-3. **Cost Optimization**:
-   - **Pay-per-millisecond** billing
-   - **Reserved capacity** for predictable workloads
-   - **Multi-region deployment** for global users
-
-4. **Enhanced Scalability**:
-   - **Higher timeout limits** (15 minutes vs 10 seconds)
-   - **Larger payload sizes** for high-resolution images
-   - **Concurrent execution** scaling
-
-### Migration Strategy
-
-**Phase 1: Infrastructure Setup**
-```bash
-# Terraform/CDK infrastructure
-aws lambda create-function \
-  --function-name egyptian-ai-lens \
-  --runtime python3.11 \
-  --memory-size 1024 \
-  --timeout 60
-```
-
-**Phase 2: Code Adaptation**
-- **Environment variable migration** for API keys
-- **Response format standardization** 
-- **Error handling enhancement** for AWS-specific errors
-- **Logging integration** with CloudWatch
-
-**Phase 3: Performance Optimization**
-- **Container images** for faster startup times
-- **Connection pooling** for Gemini API calls
-- **Response caching** for repeated analysis requests
+- **Lambda Environment Variables**: `GOOGLE_API_KEY` stored securely in Lambda configuration
+- **Frontend Environment Variables**: `NEXT_PUBLIC_LAMBDA_API_URL` and `NEXT_PUBLIC_API_KEY` for API Gateway endpoint and authentication
+- **API Gateway**: Configured with usage plans and throttling limits
 
 ## Technical Lessons Learned
 
@@ -266,14 +245,23 @@ Robust **retry logic and error recovery** transforms a demo into a production-re
 The Egyptian AI Lens demonstrates how **modern LLM APIs can be effectively integrated** into production web applications. Key architectural decisions include:
 
 - **Clean frontend-backend separation** for maintainability
+- **AWS Lambda + API Gateway** for scalable serverless infrastructure
+- **Docker containerization** for consistent runtime environments
 - **Structured outputs** to reduce hallucinations  
 - **Dynamic model selection** for user control
 - **Context injection** for improved accuracy
 - **Robust error handling** for production reliability
+- **API Gateway authentication** with usage plans for security
 
-The current **Vercel-based architecture** provides excellent developer experience and zero-cost hosting for personal projects. The planned **AWS Lambda migration** will unlock enhanced performance, monitoring, and scalability for production use.
+The current **AWS Lambda architecture** provides production-ready infrastructure with:
+- **Automatic scaling** and pay-per-use pricing
+- **CloudWatch monitoring** for observability
+- **API Gateway** for request management and security
+- **Docker deployment** for consistent runtime environments
+
+This architecture scales from personal projects to production workloads while maintaining cost efficiency and operational simplicity.
 
 > **Try the system**: [Egyptian AI Lens](https://www.jeremias-rodriguez.com/egyptian-ai-lens)  
-> **Source code**: Available in the [blog repository](https://github.com/jeremias-rodriguez/dl-blog)
+> **Source code**: Available in the [Lambda repository](https://github.com/jere1882/egyptianArtAnalyzer)
 
 The intersection of **computer vision, large language models, and archaeology** opens fascinating possibilities for making historical knowledge more accessible. This project serves as a blueprint for similar applications across other domains. 

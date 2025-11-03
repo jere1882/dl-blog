@@ -3,7 +3,7 @@ tags:
   - deep-learning-basics
 aliases: 
 publish: true
-slug: a-comprehensive-introduction-to-transformers
+slug: transformer-architectures
 title: A comprehensive introduction to transformers
 description: Notes and a comprehensive summary of basic concepts in the field of transformers
 date: 2024-07-07

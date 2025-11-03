@@ -81,6 +81,7 @@ interface AnalysisResult {
   error?: string
   interesting_detail?: string
   date?: string
+  date_period?: string
   processing_time?: string
 }
 

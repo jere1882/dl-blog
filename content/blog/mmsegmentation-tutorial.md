@@ -3,7 +3,7 @@ tag: Computer Vision
 alias:
 
 publish: true
-slug: introduction-to-semantic-segmentation-using-mmsegmentation
+slug: mmsegmentation-tutorial
 
 title: Introduction to Semantic Segmentation using MMSegmentation
 description: This article provides a concise introduction to the task of semantic segmentation and demonstrates how to address it using MMSegmentation, a state-of-the-art toolkit.

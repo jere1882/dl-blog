@@ -1,10 +1,9 @@
 ---
 tags:
-  - Transformers
   - LLM
 aliases:
 publish: true
-slug: deploying-aws-lambda
+slug: deploying-your-model-in-aws-lambda
 title: Deploying your ML model in AWS lambda
 description: Step by step guide
 date: 2025-09-14
@@ -804,8 +803,6 @@ Secrets:
 This setup leaves the lambda API url and API key accessible to anyone if they look for it. Therefore, we rely on usage limits for the API key, and we'll update the CORS config so that only requests from the domain jeremiasrodriguez.com are allowed.
 
 NEXT STEPS:
-- vercel add variables
-- Make sure deployment works, and website works
 - CORS make only domain reqs allowed
 - Organize the whole post again
 - improve data science part, new repo!

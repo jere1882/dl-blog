@@ -4,7 +4,7 @@ tags:
   - Vision
 aliases: 
 publish: false
-slug: performance-metrics
+slug: metrics-and-losses
 title: Performance metrics
 description: Assorted notes and takeaways
 date: 2024-11-26

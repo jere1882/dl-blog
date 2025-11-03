@@ -4,7 +4,7 @@ tags:
   - Vision
 aliases: 
 publish: false
-slug: OpenCV - cv2 library
+slug: cv2
 title: cv2
 description: NOtes on cv2
 date: 2024-11-26
