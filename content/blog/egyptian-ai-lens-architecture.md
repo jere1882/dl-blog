@@ -8,12 +8,20 @@ description: Deep dive into the technical architecture, design decisions, and im
 date: 2024-10-19
 image: /sample-egyptian-images/VoK.jpg
 ---
-
 ## Introduction
 
-The **Egyptian AI Lens** is a web application that leverages Google's Gemini vision model to analyze ancient Egyptian art. Users can upload images of tomb paintings, temple reliefs, or hieroglyphic inscriptions to receive detailed analysis including character identification, historical context, and location insights.
+ In 2023 I visited Egypt, and the highlight of my trip was by far the tombs in the Valley of the Kings. I revisited them twice during the same trip, mesmerized by the intricate paintings and carvings of gods and pharaohs, priests and commoners.
 
-This blog post provides a technical overview of the system's architecture, design decisions, and implementation details. From frontend-backend separation to advanced prompt engineering with structured outputs, we'll explore how modern LLM APIs can be swiftly integrated into production web applications. 
+Back then, I remember thinking that these images presented fascinating challenges for applying computer vision. I would have loved to have an app capable of identifying the characters in each illustration, pointing out interesting details, and even live-translating hieroglyphs.
+
+Fast-forward two years, and the advent of powerful multimodal foundation models like Gemini has made it fast and easy to prototype solutions for these kinds of tasks. 
+
+In this blog post, I present **Egyptian AI Lens**, a web application that leverages Google’s Gemini model to analyze ancient Egyptian art. Users can upload images of tomb paintings, temple reliefs, or hieroglyphic inscriptions to receive detailed analyses, including character identification, historical context, and location insights.
+
+![[Pasted image 20251109170928.png]]
+*Demo: Identification of characters in a carving*
+
+I designed this as a simple yet well-rounded project, encompassing model selection, performance evaluation, and full deployment via AWS Lambda and a web front end.
 
 > 🏺 **Try it live**: [Egyptian AI Lens](https://www.jeremias-rodriguez.com/egyptian-ai-lens)
 
@@ -24,37 +32,27 @@ The Egyptian AI Lens follows a clean **frontend-backend separation** architectur
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Next.js       │    │   AWS Lambda     │    │   Google        │
-│   Frontend      │◄──►│   + API Gateway  │◄──►│   Gemini API    │
+│   Frontend      │◄──►│   + API Gateway  │◄──►│   Gemini API    │─► WWW
 │   (TypeScript)  │    │   (Python/Docker)│    │   (Vision)      │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
+*Note: If grounding is enabled, Gemini is going to use Google search to ground its responses*
 
 ### Frontend: Next.js with TypeScript
 
-The frontend is built using **Next.js 14** with TypeScript, providing:
-
-- **Server-side rendering** for optimal SEO and performance
-- **Responsive UI components** built with Tailwind CSS
-- **File upload handling** with drag-and-drop support
-- **Real-time progress tracking** during analysis
-- **Dark/light mode compatibility**
-
-Frontend has never been amongst my interests, and I do admit that the interface is as simple as possible while being functional. I am aware that there are security flaws.
-
+The Next.js+TypeScript frontend has been kept simple on purpose, since the focus of this project is the backend. Its key role is to receive images uploaded by the users and desired settings; and then forward the request to the AWS Lambda ; and then present the response.
 ### Backend: AWS Lambda with Docker
 
 The backend runs as a **Dockerized AWS Lambda function** with API Gateway integration, providing:
 
-- **Scalable serverless infrastructure** with automatic scaling
+- **Serverless infrastructure** with automatic scaling
 - **Docker container deployment** for consistent runtime environment
 - **API Gateway integration** with request throttling and API key authentication
-- **CloudWatch monitoring** for logging and performance tracking
-- **Configurable memory and timeout** (currently 512MB, 30s timeout)
-- **CORS support** for browser-based requests from the Next.js frontend
+- **CloudWatch and Gemini monitoring** for logging and performance tracking
 
-Below are more details as to why I chose these specific deployment and model options.
+The Lambda code is written in Python, and it involves dynamically crafting a prompt where both the image and the user settings are injected, which is sent to Gemini.  More details below.
 
-## Deep Dive: Gemini API Integration
+## Gemini API Integration
 
 ### Model Selection Strategy
 
@@ -126,7 +124,14 @@ This approach provides several key benefits:
 1. **Consistent Response Format**: Eliminates parsing errors from inconsistent JSON
 2. **Reduced Hallucinations**: Structured fields guide the model's responses
 3. **Type Safety**: Automatic validation of response data types
-4. **Better UX**: Predictable data structure enables rich frontend displays
+
+### Grounding
+
+Grounding allows Gemini to browse the web in order to craft a better response, and it's one of the most powerful ways to augment the power of a foundation model. Gemini does not (yet) support both structured output and grounding at once ([check discussion](https://github.com/googleapis/python-genai/issues/665)), which is IMO a critical feature that should be available. 
+
+In order to support grounding as an optional feature, I implemented a second strategy: instead of providing the response schema as a parameter, the desired response schema is injected in the prompt.
+
+Grounding can be enabled using a checkbox in the UI.
 
 ### Retry Logic and Error Handling
 
@@ -151,6 +156,14 @@ This handles:
 - **Rate limiting** during high-traffic periods  
 - **Temporary network issues**
 - **Service unavailability**
+
+### User settings
+
+In order to demo how we can dynamically pick our best model settings, I added the following features:
+
+* Dynamically pick the model (pro, flash or flash lite) based on the user willingness to wait for longer times
+* Dynamically inject user-provided hints about the image location (tomb, temple, etc)
+* Dynamically enable or disable grounding based on the user preferences
 
 ## Hosting and Deployment
 
@@ -183,38 +196,54 @@ aws lambda create-function \
   --role <execution-role>
 ```
 
-**Advantages of AWS Lambda Architecture:**
+A Lambda was perfectly suited for my deployment needs:
 
-1. **Better Performance Control**:
-   - **Configurable memory/CPU** allocation (512MB configured)
-   - **Docker containerization** for consistent runtime environment
-   - **Longer timeout limits** (30 seconds) for complex analysis
+1. This is a personal project, it will receive little traffic. Lambdas only run on demand.
+2. I don't want to spend a lot of money, since this is not profitable. Lambdas are cheap and you pay only for what you use.
+3. There is no need for heavy computing loads or long calculation times. Lambdas are only OK for small tasks like this.
 
-2. **Advanced Monitoring**:
-   - **CloudWatch Logs** for detailed debugging and request tracing
-   - **CloudWatch Metrics** for performance monitoring
-   - **Error tracking** and alerting capabilities
+I wrote a full step-by-step guide on how to deploy a small model in a Lambda [here](blog/deploying-your-model-in-aws-lambda).
 
-3. **Security Features**:
-   - **API Gateway API keys** for request authentication
-   - **Usage plans** for rate limiting and quota management
-   - **Environment variables** for secure API key storage
-   - **CORS configuration** for browser security
+## **Model Selection:**
 
-4. **Scalability**:
-   - **Automatic scaling** based on concurrent requests
-   - **Pay-per-request** pricing model
-   - **No infrastructure management** required
+I annotated a small dataset of 30 images, documenting the name of the most prominent characters that show on each image, as well as the period (old, medium or new kingdom).
 
-**Performance Characteristics:**
+Here is an example of the annotated set:
+
+![[Pasted image 20251109223417.png]]
+characters: Tutankhamun, Osiris
+period: New Kingdom
+
+I calculated stats on how good each model was at predicting the character names and the period across this test set. 
+* The `period` prediction is a traditional multi-label classification problem, so we can use accuracy as a metric. 
+* Comparing the list of identified `characters` is a little more complex, since the labels are variable-length lists of strings. Though I first tried to use straightforward string comparison to measure name matches, I settled for a more flexible **LLM as a Judge** approach. In this setup, `Ra-horakhty` is a match for `Ra` ; and even `Pharaoh` is considered a match for `Ramses II`.
+
+| Variant                     | Period Accuracy | Character Partial Match | Character IoU |
+| --------------------------- | --------------- | ----------------------- | ------------- |
+| 2.5 Flash Lite              | 81.82%          | 63.64%                  |               |
+| 2.5 Flash Lite w/ Grounding | 80.00%          | 40.00%                  |               |
+| 2.5 Flash                   | 81.82%          | 86.00%                  |               |
+| 2.5 Flash w/ Grounding      | 81.82%          | 54.55%                  |               |
+| 2.5 Pro                     | 81.82%          | 86.00%                  |               |
+| 2.5 Pro w/ Grounding        | 81.82%          | 63.64%                  |               |
+
+Take these metrics with a pinch of salt, since they are only meant to give a super high level sense of how these models are performing. Most of the fields are not annotated.
+
+The character match evaluation is particularly incomplete, since the stats are just comparing literal strings for equality (barring lowercase differences). 
+
 
 Current system performance metrics:
 
 | Model Speed | Avg Response Time | Lambda Cold Start | Cost per Request |
-|-------------|-------------------|-------------------|------------------|
-| Regular     | 15-30s           | ~2-3s            | ~$0.02          |
-| Fast        | 5-10s            | ~2-3s            | ~$0.008         |  
-| Super Fast  | 2-5s             | ~2-3s            | ~$0.003         |
+| ----------- | ----------------- | ----------------- | ---------------- |
+| Regular     | 15-30s            | ~2-3s             | ~$0.02           |
+| Fast        | 5-10s             | ~2-3s             | ~$0.008          |
+| Super Fast  | 2-5s              | ~2-3s             | ~$0.003          |
+
+
+
+
+
 
 **Environment Configuration:**
 

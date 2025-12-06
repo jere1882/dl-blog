@@ -802,17 +802,27 @@ Secrets:
 
 This setup leaves the lambda API url and API key accessible to anyone if they look for it. Therefore, we rely on usage limits for the API key, and we'll update the CORS config so that only requests from the domain jeremiasrodriguez.com are allowed.
 
-NEXT STEPS:
-- CORS make only domain reqs allowed
-- Organize the whole post again
-- improve data science part, new repo!
-- write monitoring
-- up next: custom model
+## CloudWatch Monitoring
 
-## AWS Lambda Monitoring
+AWS CloudWatch is a great way to monitor and troubleshoot Lambda functions. 
+
+* To view **logs** we can go to CloudWatch Logs → Log groups → /aws/lambda/egyptianArtAnalyzer. Here we can see print() statements, errors, stack traces, custom logging
+* To view key **metrics**: CloudWatch > Metrics. Here we can plot and display in multiple ways the number of concurrent executions, duration, errors, invocations, etc.
+* **Alarms** can (and should) be set, e.g. when the error rate exceeds a threshold or duration takes too long, or whenever costs exceed a budget.
 
 # Gemini Monitoring
-https://aistudio.google.com/u/0/usage
+Your Gemini API key has very comprehensive built in dashboarding, which can be very insightful. From the [usage](https://aistudio.google.com/u/0/usage) tab, you can see the number of requests, input tokens, and similar metrics over custom periods of time:
+
+![[Pasted image 20251103005443.png]]
+You can also check how close your usage is from the rate limits allowed by your current tier. Bear in mind that Gemini has several rate limits:
+* RPM: How many separate API calls you can make in one minute.
+* TMP: The total number of input tokens you can send per minute.
+* RPD: The maximum total number of API calls you can make in 24 hours.
+As of today, the rate limits look like this for a free tier:
+![[Pasted image 20251103010031.png]]
+The tiers are defined by spending, e.g if you spend > $1000 you are tier 3 and you get even better rate limits.
+
+
 
 # MFA
 
