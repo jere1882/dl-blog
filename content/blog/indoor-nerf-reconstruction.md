@@ -1,4 +1,6 @@
 ---
+has_been_reviewed: false
+tag: View Synthesis, Computer Vision
 tags:
   - Computer
   - Vision

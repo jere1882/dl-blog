@@ -1,4 +1,6 @@
 ---
+has_been_reviewed: false
+tag: Deep Learning Basics
 tags:
   - Computer
   - Vision

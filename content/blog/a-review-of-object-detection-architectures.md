@@ -1,7 +1,6 @@
 ---
-tags:
-  - Computer
-  - Vision
+has_been_reviewed: false
+tag: Computer Vision, Object Detection
 aliases: 
 publish: true
 slug: a-review-of-object-detection-architectures
@@ -156,7 +155,10 @@ Traditional object detection typically involves predicting bounding boxes in 2D 
 6. **Point Cloud Object Detection**: For data obtained from 3D sensors (like LiDAR), models are designed to directly process point clouds, detecting objects based on the 3D coordinates of points.
 7. **Few-Shot and Zero-Shot Object Detection**: These approaches aim to detect objects with very few or no training examples. Few-shot detection learns from a small number of labeled samples, while zero-shot detection attempts to identify unseen classes using semantic information.
 
-Great references:
+## Practical Example: Checkbox Detection
 
-https://viso.ai/deep-learning/object-detection/
+For a hands-on comparison of traditional computer vision vs. YOLO for a real object detection task, check out my post on [Checkbox Detection: OpenCV vs YOLO](/blog/checkbox-detection-opencv-vs-yolo). It demonstrates how YOLO can be trained with just 5 images to detect and classify checkboxes in scanned documents.
 
+## References
+
+- https://viso.ai/deep-learning/object-detection/

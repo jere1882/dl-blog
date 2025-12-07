@@ -1,4 +1,6 @@
 ---
+has_been_reviewed: false
+tag: Python, Deep Learning Basics
 tags:
   - Computer
   - Vision

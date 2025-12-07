@@ -1,5 +1,6 @@
 ---
-tag: Machine Learning
+has_been_reviewed: false
+tag: Large Language Models
 aliases:
 publish: true
 slug: egyptian-ai-lens-architecture
